@@ -1,10 +1,5 @@
 import { Tabs } from 'expo-router';
-import {
-  Ionicons,
-  Entypo,
-  AntDesign,
-  MaterialCommunityIcons,
-} from '@expo/vector-icons';
+import { Entypo, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable, View, Text, Modal, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,7 +28,7 @@ export default function TabLayout() {
           tabBarLabelStyle: {
             marginTop: 4,
             fontSize: 14,
-            fontWeight: '500',
+            fontFamily: 'Pretendard-Medium',
           },
         }}
       >
@@ -145,7 +140,7 @@ const styles = StyleSheet.create({
   },
   addLabel: {
     fontSize: 14,
-    color: '#636366',
+    color: COLORS.textSecondary,
     fontWeight: '500',
   },
   backdrop: {
