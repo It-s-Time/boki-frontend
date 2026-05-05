@@ -1,57 +1,49 @@
 import { COLORS } from '@/shared/constants/colors';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
-import Entypo from '@expo/vector-icons/Entypo';
 import Logo from 'assets/logo.svg';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import TradeCalendar from '@/features/home/components/TradeCalendar';
+import TradeCard from '@/features/home/components/TradeCard';
+import { Trade, TradeType } from '@/features/home/types';
 
-LocaleConfig.locales.kr = {
-  monthNames: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
-  ],
-  monthNamesShort: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
-  ],
-  dayNames: [
-    '일요일',
-    '월요일',
-    '화요일',
-    '수요일',
-    '목요일',
-    '금요일',
-    '토요일',
-  ],
-  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
-  today: '오늘',
-};
-LocaleConfig.defaultLocale = 'kr';
-
-type TradeType = 'buy' | 'sell';
+const trades: Trade[] = [
+  {
+    id: 1,
+    date: '2026-05-29',
+    coinName: '비트코인',
+    amount: 1,
+    symbol: 'BTC',
+    type: 'buy',
+    time: '14:32',
+    price: 103403000,
+    reviewed: false,
+  },
+  {
+    id: 2,
+    date: '2026-05-29',
+    coinName: '리플',
+    amount: 4,
+    symbol: 'XRP',
+    type: 'sell',
+    time: '14:32',
+    price: 103403000,
+    reviewed: false,
+  },
+  {
+    id: 3,
+    date: '2026-05-24',
+    coinName: '이더리움',
+    amount: 1,
+    symbol: 'ETH',
+    type: 'buy',
+    time: '09:12',
+    price: 5200000,
+    reviewed: false,
+  },
+];
 
 const tradeMarks: Record<string, TradeType[]> = {
   '2026-05-18': ['buy'],
@@ -65,102 +57,46 @@ export default function HomeScreen() {
   const [currentDate, setCurrentDate] = useState('2026-05-01');
   const [selectedDate, setSelectedDate] = useState('2026-05-29');
 
-  const moveMonth = (direction: 'prev' | 'next') => {
-    const date = new Date(currentDate);
-    date.setMonth(date.getMonth() + (direction === 'next' ? 1 : -1));
-    setCurrentDate(date.toISOString().slice(0, 10));
-  };
+  const selectedTrades = trades.filter((trade) => trade.date === selectedDate);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Logo width={88} height={56} />
-        <View style={styles.iconRow}>
-          <FontAwesome6 name="bell" size={24} color={COLORS.textPrimary} />
-          <FontAwesome name="refresh" size={24} color={COLORS.textPrimary} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <View style={styles.header}>
+          <Logo width={88} height={56} />
+          <View style={styles.iconRow}>
+            <FontAwesome6 name="bell" size={24} color={COLORS.textPrimary} />
+            <FontAwesome name="refresh" size={24} color={COLORS.textPrimary} />
+          </View>
         </View>
-      </View>
-      {/* 달력 헤더 */}
-      <View style={styles.dayHeader}>
-        <Pressable onPress={() => moveMonth('prev')}>
-          <Entypo name="chevron-thin-left" size={22} color="black" />
-        </Pressable>
 
-        <Text style={styles.title}>
-          {`${currentDate.slice(0, 4)}.${parseInt(currentDate.slice(5, 7))}`}
-        </Text>
-
-        <Pressable onPress={() => moveMonth('next')}>
-          <Entypo name="chevron-thin-right" size={22} color="black" />
-        </Pressable>
-      </View>
-
-      {/* 캘린더 카드 */}
-      <View style={styles.card}>
-        <Calendar
-          renderHeader={() => null}
-          current={currentDate}
-          hideArrows
-          hideExtraDays
-          enableSwipeMonths
-          onMonthChange={(month) => {
-            setCurrentDate(month.dateString);
-          }}
-          dayComponent={({ date, state }) => {
-            if (!date) return null;
-
-            const dateString = date.dateString;
-            const isSelected = dateString === selectedDate;
-            const dots = tradeMarks[dateString] ?? [];
-            const isDisabled = state === 'disabled';
-            const hasDot = dots.length > 0;
-
-            return (
-              <Pressable
-                disabled={isDisabled}
-                onPress={() => setSelectedDate(dateString)}
-                style={[styles.dayBox, isSelected && styles.selectedDayBox]}
-              >
-                <Text
-                  style={[
-                    styles.dayText,
-                    isDisabled && styles.hiddenDayText,
-                    !hasDot && styles.noDotText,
-                    isSelected && styles.selectedDayText,
-                  ]}
-                >
-                  {date.day}
-                </Text>
-
-                <View style={styles.dotRow}>
-                  {!isDisabled &&
-                    dots.map((type, index) => (
-                      <View
-                        key={`${type}-${index}`}
-                        style={[
-                          styles.dot,
-                          {
-                            backgroundColor:
-                              type === 'buy' ? COLORS.buy : COLORS.sell,
-                          },
-                        ]}
-                      />
-                    ))}
-                </View>
-              </Pressable>
-            );
-          }}
-          theme={{
-            backgroundColor: COLORS.box,
-            calendarBackground: COLORS.box,
-
-            textSectionTitleColor: COLORS.textPrimary,
-            textDayHeaderFontSize: 18,
-            textDayHeaderFontFamily: 'Pretendard-SemiBold',
-          }}
-          style={styles.calendar}
+        <TradeCalendar
+          currentDate={currentDate}
+          selectedDate={selectedDate}
+          tradeMarks={tradeMarks}
+          onMonthChange={setCurrentDate}
+          onDateSelect={setSelectedDate}
         />
-      </View>
+
+        <View style={styles.tradeSection}>
+          <Text style={styles.tradeTitle}>
+            {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래`}
+          </Text>
+
+          {selectedTrades.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>거래 내역이 없어요</Text>
+            </View>
+          ) : (
+            selectedTrades.map((trade) => (
+              <TradeCard key={trade.id} trade={trade} />
+            ))
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -186,74 +122,29 @@ const styles = StyleSheet.create({
     gap: 28,
   },
 
-  dayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
+  tradeSection: {
+    marginTop: 20,
   },
 
-  title: {
-    fontSize: 28,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-    marginHorizontal: 16,
-  },
-
-  card: {
-    backgroundColor: COLORS.box,
-    borderRadius: 8,
-    paddingHorizontal: 20,
-  },
-
-  calendar: {
-    borderRadius: 8,
-    paddingVertical: 8,
-  },
-
-  dayBox: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-
-  selectedDayBox: {
-    backgroundColor: COLORS.textPrimary,
-  },
-
-  dayText: {
+  tradeTitle: {
     fontSize: 18,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Medium',
+    marginLeft: 4,
+    marginBottom: 12,
   },
 
-  selectedDayText: {
-    color: '#FFFFFF',
-    fontFamily: 'Pretendard-Medium',
-  },
-
-  hiddenDayText: {
-    color: 'transparent',
-  },
-
-  dotRow: {
-    position: 'absolute',
-    bottom: 2,
-    flexDirection: 'row',
+  emptyCard: {
+    backgroundColor: COLORS.box,
+    borderRadius: 8,
+    paddingVertical: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 999,
-    marginHorizontal: 1,
-  },
-  noDotText: {
-    color: '#99A1AF',
-    fontFamily: 'Pretendard-Light',
+  emptyText: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    fontFamily: 'Pretendard-Regular',
   },
 });
