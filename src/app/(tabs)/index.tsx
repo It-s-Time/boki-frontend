@@ -66,7 +66,7 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View style={styles.header}>
-          <Logo width={88} height={56} />
+          <Logo width={88} height={32} />
           <View style={styles.iconRow}>
             <FontAwesome6 name="bell" size={24} color={COLORS.textPrimary} />
             <FontAwesome name="refresh" size={24} color={COLORS.textPrimary} />

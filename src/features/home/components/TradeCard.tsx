@@ -1,4 +1,5 @@
 import { COLORS } from '@/shared/constants/colors';
+import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Trade } from '../types';
 
@@ -7,6 +8,13 @@ type Props = {
 };
 
 export default function TradeCard({ trade }: Props) {
+  const router = useRouter();
+
+  const handleReview = () => {
+    if (trade.reviewed) return;
+    router.push(`/review/select-principle-set?tradeId=${trade.id}`);
+  };
+
   return (
     <View style={styles.tradeCard}>
       <View>
@@ -33,7 +41,7 @@ export default function TradeCard({ trade }: Props) {
         </Text>
       </View>
 
-      <Pressable style={styles.reviewButton}>
+      <Pressable style={styles.reviewButton} onPress={handleReview}>
         <Text style={styles.reviewButtonText}>
           {trade.reviewed ? '복기완료' : '복기하기'}
         </Text>
