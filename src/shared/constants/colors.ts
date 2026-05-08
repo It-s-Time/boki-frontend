@@ -15,4 +15,8 @@ export const COLORS = {
 
   sell: '#A2CCFF', // 매도 배경
   sellText: '#6098DD', // 매도 텍스트
+
+  // Main Colors
+  primary: '#FFBA43',
+  primaryLight: '#FAD89E',
 };
