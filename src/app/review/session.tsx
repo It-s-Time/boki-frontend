@@ -4,6 +4,10 @@ import {
   PrincipleAnswer,
   PrincipleSet,
 } from '@/features/review/types';
+import ProgressBar from '@/features/review/components/ProgressBar';
+import ScoreSelector from '@/features/review/components/ScoreSelector';
+import TradeInfoCard from '@/features/review/components/TradeInfoCard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useRef } from 'react';
 import {
@@ -13,7 +17,6 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -146,13 +149,22 @@ const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
 
 export default function ReviewSessionScreen() {
   const router = useRouter();
-  const { tradeId, principleSetId } = useLocalSearchParams<{
-    tradeId: string;
-    principleSetId: string;
-  }>();
+  const { principleSetId, coinName, symbol, amount, tradeType, time, price } =
+    useLocalSearchParams<{
+      tradeId: string;
+      principleSetId: string;
+      coinName: string;
+      symbol: string;
+      amount: string;
+      tradeType: string;
+      time: string;
+      price: string;
+    }>();
 
   const principleSet = MOCK_PRINCIPLE_SETS.find((s) => s.id === principleSetId);
-  const principles: Principle[] = principleSet?.principles ?? [];
+  const principles: Principle[] = (principleSet?.principles ?? []).filter(
+    (p) => p.type === tradeType,
+  );
   const total = principles.length;
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -162,7 +174,7 @@ export default function ReviewSessionScreen() {
       score: null,
       reviewContent: '',
       links: [],
-      photos: [],
+      photos: ['1', '2', '3', '4', '5'],
     })),
   );
   const scrollRef = useRef<ScrollView>(null);
@@ -170,6 +182,8 @@ export default function ReviewSessionScreen() {
   const currentPrinciple = principles[currentIndex];
   const currentAnswer = answers[currentIndex];
   const isLast = currentIndex === total - 1;
+  const isNextEnabled = currentAnswer.score !== null;
+  const hasPrev = currentIndex > 0;
 
   const updateAnswer = (patch: Partial<PrincipleAnswer>) => {
     setAnswers((prev) =>
@@ -196,14 +210,12 @@ export default function ReviewSessionScreen() {
     }
   };
 
-  if (!principleSet || !currentPrinciple) {
-    return null;
-  }
+  if (!principleSet || !currentPrinciple) return null;
 
-  const principleLabel =
-    currentPrinciple.type === 'buy'
-      ? `매수 원칙 ${currentPrinciple.order}`
-      : `매도 원칙 ${currentPrinciple.order}`;
+  const isBuy = tradeType === 'buy';
+  const principleLabel = `${isBuy ? '매수' : '매도'} 원칙 ${currentPrinciple.order}`;
+
+  const formattedPrice = price ? Number(price).toLocaleString() + '원' : '';
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -218,213 +230,186 @@ export default function ReviewSessionScreen() {
       {/* 프로그레스 바 */}
       <ProgressBar total={total} current={currentIndex} />
 
-      <ScrollView
-        ref={scrollRef}
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* 원칙 정보 */}
-        <View style={styles.principleSection}>
-          <Text style={styles.principleLabel}>{principleLabel}</Text>
-          <Text style={styles.principleContent}>
-            {currentPrinciple.content}
-          </Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* 원칙 준수 점수 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            원칙 준수 점수 <Text style={styles.required}>*</Text>
-          </Text>
-          <View style={styles.scoreRow}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Pressable
-                key={n}
-                style={[
-                  styles.scoreCircle,
-                  currentAnswer.score === n && styles.scoreCircleSelected,
-                ]}
-                onPress={() => updateAnswer({ score: n })}
-              >
-                <Text
-                  style={[
-                    styles.scoreText,
-                    currentAnswer.score === n && styles.scoreTextSelected,
-                  ]}
-                >
-                  {n}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          <View style={styles.scoreLabels}>
-            <Text style={styles.scoreLabel}>전혀 안 지킴</Text>
-            <Text style={styles.scoreLabel}>완벽히 지킴</Text>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* 복기 내용 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>복기 내용 작성하기</Text>
-          <Text style={styles.sectionDesc}>
-            매매원칙과 관련하여 자유롭게 복기내용을 작성해주세요.
-          </Text>
-          <TextInput
-            style={styles.textInput}
-            multiline
-            placeholder="복기 내용을 작성해주세요."
-            placeholderTextColor={COLORS.iconBox}
-            value={currentAnswer.reviewContent}
-            onChangeText={(text) => updateAnswer({ reviewContent: text })}
-            textAlignVertical="top"
+      <View style={styles.scrollWrapper}>
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <TradeInfoCard
+            isBuy={isBuy}
+            coinName={coinName ?? ''}
+            amount={amount ?? ''}
+            symbol={symbol ?? ''}
+            time={time ?? ''}
+            formattedPrice={formattedPrice}
           />
-        </View>
 
-        <View style={styles.divider} />
-
-        {/* 링크 추가 */}
-        <View style={styles.section}>
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>링크 추가</Text>
-            <Pressable style={styles.addButton}>
-              <Ionicons
-                name="add-circle"
-                size={22}
-                color={COLORS.textSecondary}
-              />
-            </Pressable>
+          {/* 원칙 */}
+          <View style={styles.principleSection}>
+            <View style={styles.principleHeader}>
+              <Text style={styles.principleLabel}>{principleLabel}</Text>
+              <Text style={styles.required}>*는 필수항목 입니다.</Text>
+            </View>
+            <Text style={styles.principleContent}>
+              {currentPrinciple.content}
+            </Text>
           </View>
-          {currentAnswer.links.length > 0 && (
+
+          {/* 원칙 준수 점수 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              원칙 준수 점수 <Text style={styles.requiredStar}>*</Text>
+            </Text>
+            <ScoreSelector
+              value={currentAnswer.score}
+              onChange={(n) => updateAnswer({ score: n })}
+            />
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* 복기 내용 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>복기 내용 작성하기</Text>
+            <TextInput
+              style={styles.textInput}
+              multiline
+              placeholder="매매원칙과 관련하여 자유롭게 복기내용을 작성해주세요."
+              placeholderTextColor={COLORS.textSecondary}
+              value={currentAnswer.reviewContent}
+              onChangeText={(text) => updateAnswer({ reviewContent: text })}
+              textAlignVertical="top"
+            />
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* 링크 추가 */}
+          <View style={styles.section}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>링크 추가</Text>
+              <Pressable style={styles.addButton}>
+                <Ionicons
+                  name="add-circle"
+                  size={18}
+                  color={COLORS.textSecondary}
+                />
+              </Pressable>
+            </View>
             <View style={styles.linkCard}>
               <View style={styles.linkThumb} />
               <View style={styles.linkInfo}>
                 <Text style={styles.linkTitle}>제목</Text>
                 <Text style={styles.linkSummary} numberOfLines={2}>
-                  링크 요약 문장 작성할 곳.
+                  링크 요약 문장 작성할 곳. 링크 요약 문장 작성할 곳.
                 </Text>
                 <Text style={styles.linkGo}>바로가기 →</Text>
               </View>
             </View>
-          )}
-          {currentAnswer.links.length === 0 && (
-            <Text style={styles.emptyHint}>링크를 추가해보세요.</Text>
-          )}
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* 사진 추가 */}
+          <View style={styles.section}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>사진 추가</Text>
+              <Pressable style={styles.addButton}>
+                <Ionicons
+                  name="add-circle"
+                  size={18}
+                  color={COLORS.textSecondary}
+                />
+              </Pressable>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.photoRow}
+            >
+              {currentAnswer.photos.map((_, idx) => (
+                <View key={idx} style={{ position: 'relative' }}>
+                  <View style={styles.photoBoxEmpty} />
+                  <Pressable
+                    style={styles.photoRemove}
+                    onPress={() =>
+                      updateAnswer({
+                        photos: currentAnswer.photos.filter(
+                          (__, i) => i !== idx,
+                        ),
+                      })
+                    }
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </Pressable>
+                </View>
+              ))}
+              {currentAnswer.photos.length === 0 && (
+                <View style={{ position: 'relative' }}>
+                  <View style={styles.photoBoxEmpty} />
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </ScrollView>
+        <View pointerEvents="none" style={styles.gradientBottom}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
+            style={styles.fill}
+          />
         </View>
+      </View>
 
-        <View style={styles.divider} />
-
-        {/* 사진 추가 */}
-        <View style={styles.section}>
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>사진 추가</Text>
-            <Pressable style={styles.addButton}>
-              <Ionicons
-                name="add-circle"
-                size={22}
-                color={COLORS.textSecondary}
-              />
+      {/* 이전 / 다음 버튼 */}
+      <View style={styles.buttonRow}>
+        {hasPrev && (
+          <View style={styles.buttonCell}>
+            <Pressable style={styles.prevButton} onPress={handleBack}>
+              <Text style={styles.buttonText}>이전</Text>
             </Pressable>
           </View>
-          <View style={styles.photoGrid}>
-            {currentAnswer.photos.map((uri, idx) => (
-              <View key={idx} style={styles.photoBox}>
-                <Image source={{ uri }} style={styles.photoImage} />
-                <Pressable
-                  style={styles.photoRemove}
-                  onPress={() =>
-                    updateAnswer({
-                      photos: currentAnswer.photos.filter((_, i) => i !== idx),
-                    })
-                  }
-                >
-                  <Ionicons
-                    name="close-circle"
-                    size={20}
-                    color={COLORS.textSecondary}
-                  />
-                </Pressable>
-              </View>
-            ))}
-            {currentAnswer.photos.length < 4 &&
-              Array.from({ length: 4 - currentAnswer.photos.length }).map(
-                (_, idx) => (
-                  <View key={`empty-${idx}`} style={styles.photoBoxEmpty} />
-                ),
-              )}
-          </View>
+        )}
+        <View style={styles.buttonCell}>
+          <Pressable
+            style={[
+              styles.nextButton,
+              isNextEnabled
+                ? styles.nextButtonEnabled
+                : styles.nextButtonDisabled,
+            ]}
+            onPress={handleNext}
+            disabled={!isNextEnabled}
+          >
+            <Text style={styles.buttonText}>{isLast ? '완료' : '다음'}</Text>
+          </Pressable>
         </View>
-      </ScrollView>
-
-      {/* 다음 / 완료 버튼 */}
-      <Pressable style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.nextButtonText}>{isLast ? '완료' : '다음'}</Text>
-      </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
 
-function ProgressBar({ total, current }: { total: number; current: number }) {
-  return (
-    <View style={progressStyles.container}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            progressStyles.segment,
-            i <= current
-              ? progressStyles.segmentFilled
-              : progressStyles.segmentEmpty,
-            i < total - 1 && progressStyles.segmentGap,
-          ]}
-        />
-      ))}
-    </View>
-  );
-}
-
-const progressStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    marginBottom: 20,
-    gap: 4,
-  },
-  segment: {
-    flex: 1,
-    height: 3,
-    borderRadius: 8,
-  },
-  segmentFilled: {
-    backgroundColor: COLORS.textSecondary,
-  },
-  segmentEmpty: {
-    backgroundColor: COLORS.iconBox,
-  },
-  segmentGap: {},
-});
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    paddingTop: 16,
+    backgroundColor: COLORS.box,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   backButton: {
-    marginLeft: 12,
     marginRight: 14,
     padding: 4,
   },
@@ -435,25 +420,53 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
   },
 
+  scrollWrapper: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+
+  gradientBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+  },
+
+  fill: {
+    flex: 1,
+  },
+
   scroll: {
     flex: 1,
   },
 
   scrollContent: {
-    paddingHorizontal: 24,
     paddingBottom: 16,
+    paddingTop: 4,
   },
 
   principleSection: {
-    paddingVertical: 8,
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+
+  principleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
   },
 
   principleLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
-    marginBottom: 6,
+  },
+
+  required: {
+    fontSize: 12,
+    color: '#EE5A4B',
+    fontFamily: 'Pretendard-Regular',
   },
 
   principleContent: {
@@ -476,7 +489,7 @@ const styles = StyleSheet.create({
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
 
   sectionTitle: {
@@ -485,99 +498,39 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
   },
 
-  required: {
+  requiredStar: {
     color: '#EE5A4B',
-  },
-
-  sectionDesc: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    fontFamily: 'Pretendard-Regular',
-    lineHeight: 20,
   },
 
   addButton: {
     padding: 2,
   },
 
-  scoreRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 4,
-  },
-
-  scoreCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: COLORS.iconBox,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.box,
-  },
-
-  scoreCircleSelected: {
-    borderColor: COLORS.textSecondary,
-    backgroundColor: COLORS.textSecondary,
-  },
-
-  scoreText: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-  },
-
-  scoreTextSelected: {
-    color: '#FFFFFF',
-  },
-
-  scoreLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-
-  scoreLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontFamily: 'Pretendard-Regular',
-  },
-
   textInput: {
     backgroundColor: COLORS.box,
     borderRadius: 8,
-    padding: 14,
     fontSize: 14,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
-    minHeight: 120,
+    minHeight: 80,
     lineHeight: 22,
-  },
-
-  emptyHint: {
-    fontSize: 13,
-    color: COLORS.iconBox,
-    fontFamily: 'Pretendard-Regular',
-    paddingVertical: 4,
   },
 
   linkCard: {
     flexDirection: 'row',
     backgroundColor: COLORS.box,
-    borderRadius: 8,
-    overflow: 'hidden',
   },
 
   linkThumb: {
-    width: 88,
+    width: 96,
     height: 80,
-    backgroundColor: COLORS.iconBox,
+    borderRadius: 8,
+    backgroundColor: COLORS.button,
   },
 
   linkInfo: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 12,
     gap: 4,
   },
 
@@ -596,28 +549,23 @@ const styles = StyleSheet.create({
 
   linkGo: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: COLORS.textPrimary,
+    borderBottomColor: COLORS.textPrimary,
+    borderBottomWidth: 0.5,
     fontFamily: 'Pretendard-Regular',
     alignSelf: 'flex-end',
+    marginTop: 'auto',
   },
 
-  photoGrid: {
-    flexDirection: 'row',
+  photoRow: {
     gap: 8,
-    flexWrap: 'wrap',
   },
 
-  photoBox: {
-    width: 80,
-    height: 80,
+  photoBoxEmpty: {
+    width: 96,
+    height: 96,
     borderRadius: 8,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-
-  photoImage: {
-    width: '100%',
-    height: '100%',
+    backgroundColor: COLORS.button,
   },
 
   photoRemove: {
@@ -626,26 +574,42 @@ const styles = StyleSheet.create({
     right: 4,
   },
 
-  photoBoxEmpty: {
-    width: 80,
-    height: 80,
+  buttonRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    gap: 16,
+  },
+
+  buttonCell: {
+    flex: 1,
+  },
+
+  prevButton: {
     borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.iconBox,
   },
 
   nextButton: {
-    marginHorizontal: 24,
-    marginTop: 8,
     borderRadius: 8,
-    paddingVertical: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.textSecondary,
   },
 
-  nextButtonText: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    fontFamily: 'Pretendard-SemiBold',
+  nextButtonEnabled: {
+    backgroundColor: COLORS.primary,
+  },
+
+  nextButtonDisabled: {
+    backgroundColor: COLORS.iconBox,
+  },
+
+  buttonText: {
+    fontSize: 20,
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-Medium',
   },
 });

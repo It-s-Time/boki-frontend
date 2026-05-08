@@ -16,12 +16,42 @@ const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
     buyCount: 3,
     sellCount: 3,
     principles: [
-      { id: 'b1', type: 'buy', order: 1, content: '기술적 분석 지표 3개 이상 확인하기' },
-      { id: 'b2', type: 'buy', order: 2, content: '거래량이 평균 대비 150% 이상일 때만 진입' },
-      { id: 'b3', type: 'buy', order: 3, content: '손절 라인 설정 후 매수 진행' },
-      { id: 's1', type: 'sell', order: 1, content: '목표 수익률 도달 시 즉시 매도' },
-      { id: 's2', type: 'sell', order: 2, content: '손절 라인 이탈 시 감정 없이 매도' },
-      { id: 's3', type: 'sell', order: 3, content: '거래량 급감 시 분할 매도 검토' },
+      {
+        id: 'b1',
+        type: 'buy',
+        order: 1,
+        content: '기술적 분석 지표 3개 이상 확인하기',
+      },
+      {
+        id: 'b2',
+        type: 'buy',
+        order: 2,
+        content: '거래량이 평균 대비 150% 이상일 때만 진입',
+      },
+      {
+        id: 'b3',
+        type: 'buy',
+        order: 3,
+        content: '손절 라인 설정 후 매수 진행',
+      },
+      {
+        id: 's1',
+        type: 'sell',
+        order: 1,
+        content: '목표 수익률 도달 시 즉시 매도',
+      },
+      {
+        id: 's2',
+        type: 'sell',
+        order: 2,
+        content: '손절 라인 이탈 시 감정 없이 매도',
+      },
+      {
+        id: 's3',
+        type: 'sell',
+        order: 3,
+        content: '거래량 급감 시 분할 매도 검토',
+      },
     ],
   },
   {
@@ -34,10 +64,30 @@ const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
     principles: [
       { id: 'b1', type: 'buy', order: 1, content: '단기 상승 모멘텀 확인' },
       { id: 'b2', type: 'buy', order: 2, content: '저항선 돌파 확인 후 진입' },
-      { id: 'b3', type: 'buy', order: 3, content: '리스크 대비 수익 2:1 이상일 때만 매수' },
-      { id: 's1', type: 'sell', order: 1, content: '고점 대비 5% 하락 시 매도' },
-      { id: 's2', type: 'sell', order: 2, content: '뉴스 이벤트 전 포지션 정리' },
-      { id: 's3', type: 'sell', order: 3, content: '수익 실현 후 재진입 기회 탐색' },
+      {
+        id: 'b3',
+        type: 'buy',
+        order: 3,
+        content: '리스크 대비 수익 2:1 이상일 때만 매수',
+      },
+      {
+        id: 's1',
+        type: 'sell',
+        order: 1,
+        content: '고점 대비 5% 하락 시 매도',
+      },
+      {
+        id: 's2',
+        type: 'sell',
+        order: 2,
+        content: '뉴스 이벤트 전 포지션 정리',
+      },
+      {
+        id: 's3',
+        type: 'sell',
+        order: 3,
+        content: '수익 실현 후 재진입 기회 탐색',
+      },
     ],
   },
   {
@@ -48,26 +98,69 @@ const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
     buyCount: 3,
     sellCount: 3,
     principles: [
-      { id: 'b1', type: 'buy', order: 1, content: '섹터 분산 3개 이상 종목 선택' },
-      { id: 'b2', type: 'buy', order: 2, content: '단일 종목 비중 20% 이하 유지' },
-      { id: 'b3', type: 'buy', order: 3, content: '분할 매수로 평균 단가 관리' },
-      { id: 's1', type: 'sell', order: 1, content: '목표 수익률 20% 도달 시 분할 매도' },
+      {
+        id: 'b1',
+        type: 'buy',
+        order: 1,
+        content: '섹터 분산 3개 이상 종목 선택',
+      },
+      {
+        id: 'b2',
+        type: 'buy',
+        order: 2,
+        content: '단일 종목 비중 20% 이하 유지',
+      },
+      {
+        id: 'b3',
+        type: 'buy',
+        order: 3,
+        content: '분할 매수로 평균 단가 관리',
+      },
+      {
+        id: 's1',
+        type: 'sell',
+        order: 1,
+        content: '목표 수익률 20% 도달 시 분할 매도',
+      },
       { id: 's2', type: 'sell', order: 2, content: '비중 초과 종목 리밸런싱' },
-      { id: 's3', type: 'sell', order: 3, content: '손실 종목 조기 정리로 손실 최소화' },
+      {
+        id: 's3',
+        type: 'sell',
+        order: 3,
+        content: '손실 종목 조기 정리로 손실 최소화',
+      },
     ],
   },
 ];
 
 export default function SelectPrincipleSetScreen() {
   const router = useRouter();
-  const { tradeId } = useLocalSearchParams<{ tradeId: string }>();
+  const { tradeId, coinName, symbol, amount, tradeType, time, price } =
+    useLocalSearchParams<{
+      tradeId: string;
+      coinName: string;
+      symbol: string;
+      amount: string;
+      tradeType: string;
+      time: string;
+      price: string;
+    }>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleStart = () => {
     if (!selectedId) return;
     router.push({
       pathname: '/review/session',
-      params: { tradeId, principleSetId: selectedId },
+      params: {
+        tradeId,
+        principleSetId: selectedId,
+        coinName,
+        symbol,
+        amount,
+        tradeType,
+        time,
+        price,
+      },
     });
   };
 
@@ -120,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
 
   header: {
@@ -155,7 +248,7 @@ const styles = StyleSheet.create({
 
   startButton: {
     borderRadius: 8,
-    paddingVertical: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.iconBox,
@@ -168,9 +261,9 @@ const styles = StyleSheet.create({
   },
 
   startButtonText: {
-    fontSize: 18,
+    fontSize: 20,
     color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
 
   startButtonTextActive: {

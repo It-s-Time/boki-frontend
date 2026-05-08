@@ -12,7 +12,18 @@ export default function TradeCard({ trade }: Props) {
 
   const handleReview = () => {
     if (trade.reviewed) return;
-    router.push(`/review/select-principle-set?tradeId=${trade.id}`);
+    router.push({
+      pathname: '/review/select-principle-set',
+      params: {
+        tradeId: trade.id,
+        coinName: trade.coinName,
+        symbol: trade.symbol,
+        amount: trade.amount,
+        tradeType: trade.type,
+        time: trade.time,
+        price: trade.price,
+      },
+    });
   };
 
   return (

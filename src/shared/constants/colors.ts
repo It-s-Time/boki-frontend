@@ -1,7 +1,7 @@
 export const COLORS = {
   // Gray (기본 UI)
   background: '#F5F6F9', // 배경
-  box: '#FFFFFF', // 박스
+  box: '#FFFFFF', // 완전 흰색
   button: '#EAEDF5', // 버튼
   iconBox: '#D4DAE9', // 아이콘 강조 박스
 
