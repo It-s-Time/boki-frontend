@@ -1,6 +1,10 @@
 import { COLORS } from '@/shared/constants/colors';
+import Entypo from '@expo/vector-icons/Entypo';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { PrincipleSet } from '../types';
+import PrincipleDetailModal from './PrincipleDetailModal';
 
 type Props = {
   set: PrincipleSet;
@@ -9,34 +13,93 @@ type Props = {
 };
 
 export default function PrincipleSetCard({ set, selected, onPress }: Props) {
+  const [modalType, setModalType] = useState<'buy' | 'sell' | null>(null);
+
   return (
-    <Pressable
-      style={[styles.card, selected && styles.cardSelected]}
-      onPress={onPress}
-    >
-      <View style={styles.header}>
-        <Text style={styles.name}>{set.name}</Text>
-      </View>
-      <View style={styles.descRow}>
-        <Text style={styles.description} numberOfLines={1}>
-          {set.description}
-        </Text>
-        <Text style={styles.createdAt}>{set.createdAt} 생성</Text>
-      </View>
+    <>
+      <Pressable
+        style={[styles.card, selected && styles.cardSelected]}
+        onPress={onPress}
+      >
+        <View style={styles.containerRow}>
+          <View style={styles.radioWrapper}>
+            <View style={styles.radio}>
+              {selected && (
+                <Ionicons
+                  name="checkmark"
+                  size={12}
+                  color={COLORS.textPrimary}
+                />
+              )}
+            </View>
+          </View>
+          <View style={{ flex: 1 }}>
+            <View>
+              <Text style={styles.name}>{set.name}</Text>
+              <Text style={styles.description} numberOfLines={1}>
+                {set.description}
+              </Text>
+              <Text style={styles.createdAt}>{set.createdAt}&nbsp;생성</Text>
+            </View>
 
-      <View style={styles.divider} />
+            <View style={styles.divider} />
 
-      <View style={styles.badges}>
-        <View style={styles.buyBadge}>
-          <View style={styles.buyDot} />
-          <Text style={styles.buyBadgeText}>매수 원칙 {set.buyCount}개</Text>
+            <View style={styles.badges}>
+              <Pressable
+                style={styles.badge}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setModalType('buy');
+                }}
+              >
+                <View style={styles.buyIconBox}>
+                  <Ionicons
+                    name="trending-up"
+                    size={14}
+                    color={COLORS.textPrimary}
+                  />
+                </View>
+                <Text style={styles.badgeText}>매수 원칙 {set.buyCount}개</Text>
+                <Entypo
+                  name="chevron-thin-right"
+                  size={16}
+                  color={COLORS.textSecondary}
+                />
+              </Pressable>
+              <Pressable
+                style={styles.badge}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setModalType('sell');
+                }}
+              >
+                <View style={styles.sellIconBox}>
+                  <Ionicons
+                    name="trending-down"
+                    size={14}
+                    color={COLORS.textPrimary}
+                  />
+                </View>
+                <Text style={styles.badgeText}>
+                  매도 원칙 {set.sellCount}개
+                </Text>
+                <Entypo
+                  name="chevron-thin-right"
+                  size={16}
+                  color={COLORS.textSecondary}
+                />
+              </Pressable>
+            </View>
+          </View>
         </View>
-        <View style={styles.sellBadge}>
-          <View style={styles.sellDot} />
-          <Text style={styles.sellBadgeText}>매도 원칙 {set.sellCount}개</Text>
-        </View>
-      </View>
-    </Pressable>
+      </Pressable>
+
+      <PrincipleDetailModal
+        set={set}
+        type={modalType}
+        onClose={() => setModalType(null)}
+      />
+    </>
   );
 }
 
@@ -44,105 +107,103 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.box,
     borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-
   cardSelected: {
-    backgroundColor: '#E4EBFB',
+    backgroundColor: COLORS.primaryLight,
   },
 
-  header: {
-    marginBottom: 4,
+  containerRow: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'flex-start',
+  },
+
+  radioWrapper: {
+    marginTop: 4,
+  },
+
+  radio: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.textSecondary,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   name: {
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
-  },
-
-  descRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 4,
   },
 
   description: {
-    flex: 1,
-    fontSize: 13,
-    color: COLORS.textSecondary,
+    fontSize: 14,
+    color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
-    marginRight: 8,
+    marginBottom: 16,
   },
 
   createdAt: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
-    flexShrink: 0,
+    marginBottom: 16,
   },
 
   divider: {
-    height: 0.5,
+    height: 1,
     backgroundColor: '#D0D0D1',
-    marginBottom: 12,
   },
 
   badges: {
+    marginTop: 16,
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
 
-  buyBadge: {
+  badge: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: COLORS.box,
+    borderWidth: 1,
     borderColor: '#D0D0D1',
-    backgroundColor: '#FFF',
-    borderWidth: 0.5,
     borderRadius: 8,
     paddingVertical: 4,
     paddingHorizontal: 4,
-    gap: 6,
+    gap: 10,
   },
 
-  buyDot: {
+  buyIconBox: {
     width: 24,
     height: 24,
     borderRadius: 8,
     backgroundColor: COLORS.buy,
-  },
-
-  buyBadgeText: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Regular',
-  },
-
-  sellBadge: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderColor: '#D0D0D1',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-    gap: 6,
   },
 
-  sellDot: {
+  sellIconBox: {
     width: 24,
     height: 24,
     borderRadius: 8,
     backgroundColor: COLORS.sell,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  sellBadgeText: {
+  badgeText: {
+    flex: 1,
     fontSize: 14,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
+
 });

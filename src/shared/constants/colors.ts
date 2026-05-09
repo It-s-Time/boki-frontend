@@ -19,4 +19,7 @@ export const COLORS = {
   // Main Colors
   primary: '#FFBA43',
   primaryLight: '#FAD89E',
+
+  // 테두리
+  border: '#D0D0D1', // 흐린 회색
 };

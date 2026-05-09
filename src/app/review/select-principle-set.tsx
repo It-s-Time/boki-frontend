@@ -195,14 +195,7 @@ export default function SelectPrincipleSetScreen() {
         onPress={handleStart}
         disabled={!selectedId}
       >
-        <Text
-          style={[
-            styles.startButtonText,
-            selectedId && styles.startButtonTextActive,
-          ]}
-        >
-          복기 시작하기
-        </Text>
+        <Text style={[styles.startButtonText]}>복기 시작하기</Text>
       </Pressable>
     </SafeAreaView>
   );
@@ -256,17 +249,12 @@ const styles = StyleSheet.create({
   },
 
   startButtonActive: {
-    backgroundColor: COLORS.textSecondary,
-    color: '#FFFFFF',
+    backgroundColor: COLORS.primary,
   },
 
   startButtonText: {
     fontSize: 20,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Medium',
-  },
-
-  startButtonTextActive: {
-    color: '#FFFFFF',
   },
 });

@@ -19,9 +19,7 @@ export default function TradeInfoCard({
   formattedPrice,
 }: Props) {
   return (
-    <View
-      style={[styles.card, isBuy ? styles.cardBuy : styles.cardSell]}
-    >
+    <View style={[styles.card, isBuy ? styles.cardBuy : styles.cardSell]}>
       <View style={styles.nameRow}>
         <Text style={styles.coinName}>{coinName}</Text>
         <Text style={styles.amount}>
@@ -51,10 +49,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardBuy: {
-    backgroundColor: '#FFEAEA',
+    backgroundColor: COLORS.primaryLight,
   },
   cardSell: {
-    backgroundColor: '#EAF3FF',
+    backgroundColor: COLORS.primaryLight,
   },
   nameRow: {
     flexDirection: 'row',

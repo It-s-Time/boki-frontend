@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   },
 
   divider: {
-    height: 0.5,
+    height: 1,
     backgroundColor: '#D0D0D1',
     marginVertical: 20,
   },
@@ -507,7 +507,6 @@ const styles = StyleSheet.create({
   },
 
   textInput: {
-    backgroundColor: COLORS.box,
     borderRadius: 8,
     fontSize: 14,
     color: COLORS.textPrimary,
