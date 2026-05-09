@@ -1,7 +1,7 @@
 export const COLORS = {
   // Gray (기본 UI)
   background: '#F5F6F9', // 배경
-  box: '#FFFFFF', // 박스
+  box: '#FFFFFF', // 완전 흰색
   button: '#EAEDF5', // 버튼
   iconBox: '#D4DAE9', // 아이콘 강조 박스
 
@@ -15,4 +15,11 @@ export const COLORS = {
 
   sell: '#A2CCFF', // 매도 배경
   sellText: '#6098DD', // 매도 텍스트
+
+  // Main Colors
+  primary: '#FFBA43',
+  primaryLight: '#FAD89E',
+
+  // 테두리
+  border: '#D0D0D1', // 흐린 회색
 };

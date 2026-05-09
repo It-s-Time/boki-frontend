@@ -30,14 +30,17 @@ export default function ApiKeyScreen() {
           <View style={styles.topRow}>
             <Text style={styles.title}>
               원활한 매매일지 기록을 위해{'\n'}
-              <Text style={styles.titleMuted}>업비트 API 키</Text>를 등록해주세요!
+              <Text style={styles.titleMuted}>업비트 API 키</Text>를
+              등록해주세요!
             </Text>
-            <Pressable onPress={() => router.replace('/principles')} hitSlop={10}>
+            <Pressable onPress={() => router.replace('/(tabs)')} hitSlop={10}>
               <Text style={styles.skipText}>나중에하기</Text>
             </Pressable>
           </View>
 
-          <Text style={styles.question}>Q. 업비트 API 키 어떻게 발급받나요?</Text>
+          <Text style={styles.question}>
+            Q. 업비트 API 키 어떻게 발급받나요?
+          </Text>
 
           <View style={styles.guideBox}>
             <Text style={styles.guideArrow}>{'>'}</Text>
