@@ -8,6 +8,7 @@ import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
 import TradeInfoCard from '@/features/review/components/TradeInfoCard';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useRef } from 'react';
 import {
@@ -17,6 +18,7 @@ import {
   ScrollView,
   Pressable,
   TextInput,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -174,9 +176,25 @@ export default function ReviewSessionScreen() {
       score: null,
       reviewContent: '',
       links: [],
-      photos: ['1', '2', '3', '4', '5'],
+      photos: [],
     })),
   );
+
+  const handleAddPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const newUris = result.assets.map((a) => a.uri);
+      updateAnswer({ photos: [...currentAnswer.photos, ...newUris] });
+    }
+  };
   const scrollRef = useRef<ScrollView>(null);
 
   const currentPrinciple = principles[currentIndex];
@@ -193,8 +211,19 @@ export default function ReviewSessionScreen() {
 
   const handleNext = () => {
     if (isLast) {
-      // TODO: 복기 제출 API 호출
-      router.back();
+      router.push({
+        pathname: '/review/result',
+        params: {
+          principleSetId: principleSetId ?? '',
+          tradeType: tradeType ?? '',
+          coinName: coinName ?? '',
+          symbol: symbol ?? '',
+          amount: amount ?? '',
+          time: time ?? '',
+          price: price ?? '',
+          answers: JSON.stringify(answers),
+        },
+      });
       return;
     }
     setCurrentIndex((i) => i + 1);
@@ -317,7 +346,7 @@ export default function ReviewSessionScreen() {
           <View style={styles.section}>
             <View style={styles.sectionRow}>
               <Text style={styles.sectionTitle}>사진 추가</Text>
-              <Pressable style={styles.addButton}>
+              <Pressable style={styles.addButton} onPress={handleAddPhoto}>
                 <Ionicons
                   name="add-circle"
                   size={18}
@@ -330,15 +359,15 @@ export default function ReviewSessionScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.photoRow}
             >
-              {currentAnswer.photos.map((_, idx) => (
+              {currentAnswer.photos.map((uri, idx) => (
                 <View key={idx} style={{ position: 'relative' }}>
-                  <View style={styles.photoBoxEmpty} />
+                  <Image source={{ uri }} style={styles.photoBox} />
                   <Pressable
                     style={styles.photoRemove}
                     onPress={() =>
                       updateAnswer({
                         photos: currentAnswer.photos.filter(
-                          (__, i) => i !== idx,
+                          (_, i) => i !== idx,
                         ),
                       })
                     }
@@ -351,11 +380,15 @@ export default function ReviewSessionScreen() {
                   </Pressable>
                 </View>
               ))}
-              {currentAnswer.photos.length === 0 && (
-                <View style={{ position: 'relative' }}>
-                  <View style={styles.photoBoxEmpty} />
+              <Pressable onPress={handleAddPhoto}>
+                <View style={styles.photoBoxEmpty}>
+                  <Ionicons
+                    name="camera-outline"
+                    size={24}
+                    color={COLORS.textSecondary}
+                  />
                 </View>
-              )}
+              </Pressable>
             </ScrollView>
           </View>
         </ScrollView>
@@ -399,8 +432,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.box,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    padding: 24,
+    paddingBottom: 48,
   },
 
   header: {
@@ -560,11 +593,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
+  photoBox: {
+    width: 96,
+    height: 96,
+    borderRadius: 8,
+  },
+
   photoBoxEmpty: {
     width: 96,
     height: 96,
     borderRadius: 8,
     backgroundColor: COLORS.button,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   photoRemove: {
