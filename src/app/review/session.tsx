@@ -7,6 +7,8 @@ import {
 import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
 import TradeInfoCard from '@/features/review/components/TradeInfoCard';
+import LoadingScreen from '@/shared/components/LoadingScreen';
+import ScreenHeader from '@/shared/components/ScreenHeader';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -170,6 +172,7 @@ export default function ReviewSessionScreen() {
   const total = principles.length;
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [answers, setAnswers] = useState<PrincipleAnswer[]>(
     principles.map((p) => ({
       principleId: p.id,
@@ -211,19 +214,22 @@ export default function ReviewSessionScreen() {
 
   const handleNext = () => {
     if (isLast) {
-      router.push({
-        pathname: '/review/result',
-        params: {
-          principleSetId: principleSetId ?? '',
-          tradeType: tradeType ?? '',
-          coinName: coinName ?? '',
-          symbol: symbol ?? '',
-          amount: amount ?? '',
-          time: time ?? '',
-          price: price ?? '',
-          answers: JSON.stringify(answers),
-        },
-      });
+      setIsLoading(true);
+      setTimeout(() => {
+        router.push({
+          pathname: '/review/result',
+          params: {
+            principleSetId: principleSetId ?? '',
+            tradeType: tradeType ?? '',
+            coinName: coinName ?? '',
+            symbol: symbol ?? '',
+            amount: amount ?? '',
+            time: time ?? '',
+            price: price ?? '',
+            answers: JSON.stringify(answers),
+          },
+        });
+      }, 2000);
       return;
     }
     setCurrentIndex((i) => i + 1);
@@ -241,6 +247,8 @@ export default function ReviewSessionScreen() {
 
   if (!principleSet || !currentPrinciple) return null;
 
+  if (isLoading) return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
+
   const isBuy = tradeType === 'buy';
   const principleLabel = `${isBuy ? '매수' : '매도'} 원칙 ${currentPrinciple.order}`;
 
@@ -249,13 +257,12 @@ export default function ReviewSessionScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* 헤더 */}
-      <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-        </Pressable>
-        <Text style={styles.title}>{principleSet.name}</Text>
-      </View>
-
+      <ScreenHeader
+        title={principleSet.name}
+        onBack={handleBack}
+        style={{ marginBottom: 20 }}
+      />
+      <View style={{ height: 8 }} />
       {/* 프로그레스 바 */}
       <ProgressBar total={total} current={currentIndex} />
 
@@ -333,7 +340,7 @@ export default function ReviewSessionScreen() {
               <View style={styles.linkInfo}>
                 <Text style={styles.linkTitle}>제목</Text>
                 <Text style={styles.linkSummary} numberOfLines={2}>
-                  링크 요약 문장 작성할 곳. 링크 요약 문장 작성할 곳.
+                  링크 요약 문장 작성할 곳.
                 </Text>
                 <Text style={styles.linkGo}>바로가기 →</Text>
               </View>
@@ -434,23 +441,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.box,
     padding: 24,
     paddingBottom: 48,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  backButton: {
-    marginRight: 14,
-    padding: 4,
-  },
-
-  title: {
-    fontSize: 24,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
   },
 
   scrollWrapper: {

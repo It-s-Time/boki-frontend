@@ -1,11 +1,11 @@
 import { COLORS } from '@/shared/constants/colors';
 import PrincipleSetCard from '@/features/review/components/PrincipleSetCard';
 import { PrincipleSet } from '@/features/review/types';
+import ScreenHeader from '@/shared/components/ScreenHeader';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
   {
@@ -166,12 +166,7 @@ export default function SelectPrincipleSetScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-        </Pressable>
-        <Text style={styles.title}>복기할 매매원칙 세트 선택</Text>
-      </View>
+      <ScreenHeader title="복기할 매매원칙 세트 선택" />
 
       <Text style={styles.subtitle}>어떤 원칙으로 복기할 지 선택해보세요.</Text>
 
@@ -206,33 +201,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-
-  backButton: {
-    marginLeft: 12,
-    marginRight: 14,
-    padding: 4,
-  },
-
-  title: {
-    fontSize: 24,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
+    paddingTop: 24,
+    paddingBottom: 16,
   },
 
   subtitle: {
     fontSize: 16,
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
+    marginTop: 4,
     marginBottom: 24,
-    marginLeft: 60,
+    marginLeft: 44,
   },
 
   list: {
