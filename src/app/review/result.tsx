@@ -1,5 +1,6 @@
 import { COLORS } from '@/shared/constants/colors';
 import { PrincipleAnswer, PrincipleSet } from '@/features/review/types';
+import ScreenHeader from '@/shared/components/ScreenHeader';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -14,7 +15,6 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_GAP = 12;
@@ -190,12 +190,10 @@ export default function ReviewResultScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-        </Pressable>
-        <Text style={styles.title}>{principleSet.name}</Text>
-      </View>
+      <ScreenHeader
+        title={principleSet.name}
+        style={{ paddingHorizontal: 24 }}
+      />
 
       <View style={styles.dotsRow}>
         {principles.map((_, i) => (
@@ -312,7 +310,10 @@ export default function ReviewResultScreen() {
       </View>
 
       <View style={styles.bottomArea}>
-        <Pressable style={styles.aiButton} onPress={() => {}}>
+        <Pressable
+          style={styles.aiButton}
+          onPress={() => router.push('/review/ai-report')}
+        >
           <Text style={styles.aiButtonText}>AI 분석 리포트 보기</Text>
         </Pressable>
       </View>
@@ -323,25 +324,8 @@ export default function ReviewResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.box,
     paddingVertical: 24,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-
-  backButton: {
-    marginRight: 14,
-    padding: 4,
-  },
-
-  title: {
-    fontSize: 24,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
   },
 
   dotsRow: {
@@ -378,6 +362,8 @@ const styles = StyleSheet.create({
 
   card: {
     width: CARD_WIDTH,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     borderRadius: 8,
     backgroundColor: COLORS.box,
     overflow: 'hidden',
@@ -391,7 +377,7 @@ const styles = StyleSheet.create({
 
   cardPrincipleLabel: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
 
