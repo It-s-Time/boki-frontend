@@ -2,9 +2,10 @@ import { COLORS } from '@/shared/constants/colors';
 import PrincipleSetCard from '@/features/review/components/PrincipleSetCard';
 import { PrincipleSet } from '@/features/review/types';
 import ScreenHeader from '@/shared/components/ScreenHeader';
+import Button from '@/shared/components/Button';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MOCK_PRINCIPLE_SETS: PrincipleSet[] = [
@@ -185,13 +186,11 @@ export default function SelectPrincipleSetScreen() {
         ))}
       </ScrollView>
 
-      <Pressable
-        style={[styles.startButton, selectedId && styles.startButtonActive]}
+      <Button
+        label="복기 시작하기"
         onPress={handleStart}
         disabled={!selectedId}
-      >
-        <Text style={[styles.startButtonText]}>복기 시작하기</Text>
-      </Pressable>
+      />
     </SafeAreaView>
   );
 }
@@ -218,22 +217,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  startButton: {
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.iconBox,
-    marginTop: 8,
-  },
-
-  startButtonActive: {
-    backgroundColor: COLORS.primary,
-  },
-
-  startButtonText: {
-    fontSize: 20,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Medium',
-  },
 });

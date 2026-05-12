@@ -1,6 +1,7 @@
 import { COLORS } from '@/shared/constants/colors';
 import { PrincipleAnswer, PrincipleSet } from '@/features/review/types';
 import ScreenHeader from '@/shared/components/ScreenHeader';
+import Button from '@/shared/components/Button';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -8,7 +9,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -310,12 +310,7 @@ export default function ReviewResultScreen() {
       </View>
 
       <View style={styles.bottomArea}>
-        <Pressable
-          style={styles.aiButton}
-          onPress={() => router.push('/review/ai-report')}
-        >
-          <Text style={styles.aiButtonText}>AI 분석 리포트 보기</Text>
-        </Pressable>
+        <Button label="AI 분석 리포트 보기" onPress={() => router.push('/review/ai-report')} />
       </View>
     </SafeAreaView>
   );
@@ -497,17 +492,4 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
 
-  aiButton: {
-    borderRadius: 8,
-    paddingVertical: 16,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  aiButtonText: {
-    fontSize: 20,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Medium',
-  },
 });
