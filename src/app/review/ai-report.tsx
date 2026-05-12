@@ -1,12 +1,13 @@
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Dimensions } from 'react-native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 import { COLORS } from '@/shared/constants/colors';
 import ScreenHeader from '@/shared/components/ScreenHeader';
 
 const DONUT_SIZE = 200;
-const DONUT_STROKE = 22;
+const DONUT_STROKE = 36;
 const DONUT_RADIUS = (DONUT_SIZE - DONUT_STROKE) / 2;
 const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 
@@ -24,14 +25,30 @@ const MOCK_REPORT = {
     '거래 횟수 제한을 초과하여 수수료 부담이 증가했습니다.',
   ],
   recommendedPrinciples: [
-    '섹터 분산 투자 원칙 추가 (단일 종목 20% 이하)',
-    '주간 거래 횟수 5회 이하 제한',
-    '진입 전 포트폴리오 비중 확인',
+    {
+      title: '거래 시간대 제한',
+      description:
+        '해당 시간대 거래의 손실률이 평균 대비 2배 높아서 오후 2-4시에는 거래를 자제하여 감정적 매매를 방지하는 것을 추천드립니다.',
+    },
+    {
+      title: '섹터 분산 투자',
+      description:
+        '단일 종목 비중을 20% 이하로 유지하여 리스크를 분산하고 안정적인 수익을 추구하는 것을 추천드립니다.',
+    },
+    {
+      title: '주간 거래 횟수 제한',
+      description:
+        '주간 거래 횟수를 5회 이하로 제한하여 충동적인 매매를 방지하는 것을 추천드립니다.',
+    },
+    {
+      title: '진입 전 비중 확인',
+      description:
+        '포트폴리오 비중을 진입 전에 반드시 확인하여 과도한 집중 투자를 방지하는 것을 추천드립니다.',
+    },
   ],
 };
 
 export default function AiReportScreen() {
-  const router = useRouter();
   const { score } = MOCK_REPORT;
 
   const arcLength = DONUT_CIRCUMFERENCE * (score / 100);
@@ -69,7 +86,7 @@ export default function AiReportScreen() {
               strokeWidth={DONUT_STROKE}
               fill="none"
               strokeDasharray={`${arcLength} ${gapLength}`}
-              strokeLinecap="round"
+              strokeLinecap="butt"
               transform={`rotate(-90 ${DONUT_SIZE / 2} ${DONUT_SIZE / 2})`}
             />
           </Svg>
@@ -112,14 +129,21 @@ export default function AiReportScreen() {
           ))}
         </View>
 
+        <View style={styles.sectionDivider} />
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>추천 매매 원칙</Text>
-          {MOCK_REPORT.recommendedPrinciples.map((principle, i) => (
-            <View key={i} style={styles.listItem}>
-              <View style={styles.numberCircle}>
-                <Text style={styles.numberText}>{i + 1}</Text>
+        </View>
+        <View style={styles.recommendGrid}>
+          {MOCK_REPORT.recommendedPrinciples.map((item, i) => (
+            <View key={i} style={styles.recommendCard}>
+              <View style={styles.recommendCardHeader}>
+                <View style={styles.numberCircle}>
+                  <Text style={styles.numberText}>{i + 1}</Text>
+                </View>
+                <Text style={styles.recommendTitle}>{item.title}</Text>
               </View>
-              <Text style={styles.listText}>{principle}</Text>
+              <Text style={styles.recommendDesc}>{item.description}</Text>
             </View>
           ))}
         </View>
@@ -183,12 +207,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 16,
     marginBottom: 8,
+    width: SCREEN_WIDTH * 0.6,
   },
   tag: {
     paddingHorizontal: 12,
     paddingVertical: 2,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.iconBox,
     borderRadius: 14,
   },
   tagText: {
@@ -196,16 +221,61 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Medium',
     color: COLORS.textSecondary,
   },
+  sectionDivider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginTop: 16,
+  },
+
   card: {
     width: '100%',
     backgroundColor: COLORS.background,
     borderRadius: 8,
-    padding: 20,
+    padding: 18,
     gap: 12,
     marginTop: 16,
   },
+
+  recommendGrid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+
+  recommendCard: {
+    width: '48%',
+    backgroundColor: COLORS.background,
+    borderRadius: 8,
+    padding: 16,
+    gap: 10,
+    marginBottom: 16,
+  },
+
+  recommendCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  recommendTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'Pretendard-Regular',
+    color: COLORS.textPrimary,
+  },
+
+  recommendDesc: {
+    fontSize: 14,
+    fontFamily: 'Pretendard-Regular',
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Pretendard-SemiBold',
     color: COLORS.textPrimary,
   },
@@ -215,23 +285,23 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   numberCircle: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderRadius: 12,
-    backgroundColor: COLORS.textPrimary,
+    backgroundColor: COLORS.textSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
     marginTop: 1,
   },
   numberText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Pretendard-SemiBold',
     color: COLORS.box,
   },
   listText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: 'Pretendard-Regular',
     color: COLORS.textPrimary,
     lineHeight: 22,
