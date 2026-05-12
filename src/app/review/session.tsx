@@ -9,6 +9,7 @@ import ScoreSelector from '@/features/review/components/ScoreSelector';
 import TradeInfoCard from '@/features/review/components/TradeInfoCard';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import ScreenHeader from '@/shared/components/ScreenHeader';
+import Button from '@/shared/components/Button';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -411,24 +412,15 @@ export default function ReviewSessionScreen() {
       <View style={styles.buttonRow}>
         {hasPrev && (
           <View style={styles.buttonCell}>
-            <Pressable style={styles.prevButton} onPress={handleBack}>
-              <Text style={styles.buttonText}>이전</Text>
-            </Pressable>
+            <Button label="이전" onPress={handleBack} variant="secondary" />
           </View>
         )}
         <View style={styles.buttonCell}>
-          <Pressable
-            style={[
-              styles.nextButton,
-              isNextEnabled
-                ? styles.nextButtonEnabled
-                : styles.nextButtonDisabled,
-            ]}
+          <Button
+            label={isLast ? '완료' : '다음'}
             onPress={handleNext}
             disabled={!isNextEnabled}
-          >
-            <Text style={styles.buttonText}>{isLast ? '완료' : '다음'}</Text>
-          </Pressable>
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -440,7 +432,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.box,
     padding: 24,
-    paddingBottom: 48,
+    paddingBottom: 16,
   },
 
   scrollWrapper: {
@@ -612,34 +604,5 @@ const styles = StyleSheet.create({
 
   buttonCell: {
     flex: 1,
-  },
-
-  prevButton: {
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.iconBox,
-  },
-
-  nextButton: {
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  nextButtonEnabled: {
-    backgroundColor: COLORS.primary,
-  },
-
-  nextButtonDisabled: {
-    backgroundColor: COLORS.iconBox,
-  },
-
-  buttonText: {
-    fontSize: 20,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Medium',
   },
 });
