@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#D0D0D1',
+    marginHorizontal: -24,
   },
 
   principleList: {
@@ -141,11 +142,12 @@ const styles = StyleSheet.create({
   principleItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    gap: 10,
   },
 
   orderCircle: {
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
 
   principleContent: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },

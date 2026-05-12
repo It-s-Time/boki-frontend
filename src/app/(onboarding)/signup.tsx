@@ -19,20 +19,27 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Pressable style={styles.socialButton} onPress={() => router.push('/login-processing')}>
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => router.push('/login-processing')}
+          >
             <Text style={styles.socialButtonText}>카카오로 계속하기</Text>
           </Pressable>
 
           <Text style={styles.dividerText}>또는</Text>
 
-          <Pressable style={styles.socialButton} onPress={() => router.push('/login-processing')}>
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => router.replace('/(tabs)')}
+          >
             <Text style={styles.socialButtonText}>구글로 계속하기</Text>
           </Pressable>
 
           <Text style={styles.termsText}>
-            계속 진행하면 잇심동체의 <Text style={styles.termsLink}>이용약관</Text> 및{' '}
-            <Text style={styles.termsLink}>개인정보처리방침</Text>에{'\n'}동의하는 것으로
-            간주됩니다.
+            계속 진행하면 잇심동체의{' '}
+            <Text style={styles.termsLink}>이용약관</Text> 및{' '}
+            <Text style={styles.termsLink}>개인정보처리방침</Text>에{'\n'}
+            동의하는 것으로 간주됩니다.
           </Text>
         </View>
       </View>
