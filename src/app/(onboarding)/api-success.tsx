@@ -1,24 +1,28 @@
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-
-const GRAY = '#D9D9D9';
+import { router } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS } from '@/shared/constants/colors';
+import Button from '@/shared/components/Button';
+import Logo from '../../../assets/logo.svg';
 
 export default function ApiSuccessScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>
-          업비트 API 연동이{'\n'}성공적으로 마무리되었습니다!
-        </Text>
-
-        <View style={styles.logoParent}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>logo</Text>
-          </View>
+        <View style={styles.logoSection}>
+          <Logo width={204} height={80} />
+          <Text style={styles.title}>
+            업비트 API 연동이{'\n'}성공적으로 마무리되었어요!
+          </Text>
         </View>
 
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>매매원칙 설정하기</Text>
-        </Pressable>
+        <View style={styles.footer}>
+          <Text style={styles.subtitle}>이제 매매원칙을 설정해볼까요?</Text>
+          <Button
+            label="매매원칙 설정하기"
+            onPress={() => router.replace('/principles')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -27,60 +31,38 @@ export default function ApiSuccessScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+  },
+  logoSection: {
+    flex: 1,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    gap: 28,
+    paddingBottom: 100,
   },
   title: {
-    alignSelf: 'flex-start',
-    marginTop: 99,
-    marginLeft: 30,
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 26,
-    fontWeight: '400',
-    lineHeight: 34,
+    color: COLORS.textSecondary,
+    fontFamily: 'Pretendard-SemiBold',
+    textAlign: 'center',
+    fontSize: 20,
+    lineHeight: 32,
   },
-  logoParent: {
-    width: '100%',
-    height: 200,
-    marginTop: 138,
-    alignItems: 'center',
-    justifyContent: 'center',
+  footer: {
+    position: 'absolute',
+    bottom: 200,
+    left: 24,
+    right: 24,
+    gap: 16,
   },
-  logoCircle: {
-    width: 200,
-    height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 100,
-    backgroundColor: GRAY,
-  },
-  logoText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 40,
-    fontWeight: '800',
-    lineHeight: 54,
-  },
-  button: {
-    width: 215,
-    marginTop: 121,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 7,
-    backgroundColor: '#BDBDBD',
-  },
-  buttonText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    fontWeight: '400',
-    textAlign: 'left',
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontFamily: 'Pretendard-Mediuim',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
