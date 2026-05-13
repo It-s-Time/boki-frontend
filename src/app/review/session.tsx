@@ -12,8 +12,8 @@ import ScreenHeader from '@/shared/components/ScreenHeader';
 import Button from '@/shared/components/Button';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -174,6 +174,10 @@ export default function ReviewSessionScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  useFocusEffect(useCallback(() => {
+    setIsLoading(false);
+  }, []));
   const [answers, setAnswers] = useState<PrincipleAnswer[]>(
     principles.map((p) => ({
       principleId: p.id,

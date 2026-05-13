@@ -1,61 +1,98 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS } from '@/shared/constants/colors';
+import ScreenHeader from '@/shared/components/ScreenHeader';
+import Button from '@/shared/components/Button';
+import LoadingScreen from '@/shared/components/LoadingScreen';
 
 export default function ApiKeyScreen() {
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(false);
+    }, []),
+  );
+
+  const handleSubmit = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push('/api-success');
+    }, 2000);
+  };
+
+  if (isLoading) return <LoadingScreen message="API가 연동되고 있어요" />;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        style={styles.keyboardArea}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        {/* 스크롤 영역: 헤더 + 가이드 카드 + IP */}
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.topRow}>
-            <Text style={styles.title}>
-              원활한 매매일지 기록을 위해{'\n'}
-              <Text style={styles.titleMuted}>업비트 API 키</Text>를
-              등록해주세요!
-            </Text>
-            <Pressable onPress={() => router.replace('/(tabs)')} hitSlop={10}>
-              <Text style={styles.skipText}>나중에하기</Text>
-            </Pressable>
-          </View>
-
-          <Text style={styles.question}>
-            Q. 업비트 API 키 어떻게 발급받나요?
+          <ScreenHeader
+            title="업비트 API 키 등록하기"
+            onBack={() => router.back()}
+          />
+          <Text style={styles.subtitle}>
+            원활한 매매일지 기록을 위해 등록해주세요
           </Text>
 
-          <View style={styles.guideBox}>
-            <Text style={styles.guideArrow}>{'>'}</Text>
-            <View style={styles.guideCaption}>
-              <Text style={styles.guideCaptionText}>설명</Text>
+          {/* Q1 가이드 카드 */}
+          <View style={styles.guideCard}>
+            <View style={styles.guideHeader}>
+              <Text style={styles.questionLabel}>Q1.</Text>
+              <Text style={styles.questionText}>
+                업비트 API 키 어떻게 발급받나요?
+              </Text>
+            </View>
+            <View style={styles.guideBody}>
+              <View style={styles.guideContent}>
+                <Text style={styles.guideContentPlaceholder}>
+                  설명하는 페이지
+                </Text>
+              </View>
+              <Text style={styles.guideNote}>
+                API 키는 서버 내부에 철저한 암호화를 통해 저장됩니다.
+              </Text>
             </View>
           </View>
 
+          {/* IP 주소 */}
           <View style={styles.ipRow}>
-            <Text style={styles.ipText}>사용 IP주소: 1123.123.3123.13</Text>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+            >
+              <Text style={styles.ipText}>사용 IP 주소:</Text>
+              <Text style={styles.ipValue}>1123.123.3123.13</Text>
+            </View>
             <Pressable style={styles.copyButton}>
               <Text style={styles.copyText}>복사</Text>
             </Pressable>
           </View>
+        </ScrollView>
 
+        {/* 하단 고정: 입력 폼 + 등록하기 버튼 */}
+        <View style={styles.bottom}>
           <View style={styles.form}>
             <View style={styles.field}>
               <View style={styles.labelBox}>
@@ -67,7 +104,7 @@ export default function ApiKeyScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholder="Access key를 입력해주세요."
-                placeholderTextColor="#B3B3B3"
+                placeholderTextColor={COLORS.border}
                 style={styles.input}
               />
             </View>
@@ -83,26 +120,17 @@ export default function ApiKeyScreen() {
                 autoCorrect={false}
                 secureTextEntry
                 placeholder="Secret key를 입력해주세요."
-                placeholderTextColor="#B3B3B3"
+                placeholderTextColor={COLORS.border}
                 style={styles.input}
               />
             </View>
           </View>
 
-          <Pressable
-            style={styles.submitButton}
-            onPress={() => router.replace('/design-preview')}
-          >
-            <Text style={styles.submitText}>등록하기</Text>
-          </Pressable>
-
-          <View style={styles.note}>
-            <Text style={styles.noteTitle}>{'<참고>'}</Text>
-            <Text style={styles.noteText}>
-              API 키는 서버 내부에{'\n'}철저한 암호화를 통해 저장됩니다.
-            </Text>
-          </View>
-        </ScrollView>
+          <Button
+            label="등록하기"
+            onPress={handleSubmit}
+          />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -111,188 +139,129 @@ export default function ApiKeyScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background,
   },
-  keyboardArea: {
+  flex: {
     flex: 1,
   },
   content: {
-    flexGrow: 1,
-    paddingHorizontal: 27,
-    paddingTop: 102,
-    paddingBottom: 48,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+    gap: 8,
   },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  title: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Light',
-    fontSize: 19,
-    fontWeight: '400',
-    lineHeight: 27,
-  },
-  titleMuted: {
-    color: '#8A8A8A',
-  },
-  skipText: {
-    marginTop: 30,
-    transform: [{ translateX: -5 }],
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 19,
-    fontWeight: '400',
-  },
-  question: {
-    marginTop: 40,
-    alignSelf: 'center',
-    color: '#8A8A8A',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 22,
-    fontWeight: '400',
-    lineHeight: 30,
-  },
-  guideBox: {
-    height: 288,
-    marginTop: 15,
-    backgroundColor: '#D9D9D9',
-  },
-  guideArrow: {
-    position: 'absolute',
-    right: 20,
-    top: 132,
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 42,
-    fontWeight: '200',
-    lineHeight: 42,
-  },
-  guideCaption: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#AEACAC',
-  },
-  guideCaptionText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Light',
-    fontSize: 32,
-    fontWeight: '300',
-  },
-  ipRow: {
-    marginTop: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 14,
-  },
-  ipText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 17,
-    fontWeight: '400',
-  },
-  copyButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: '#E2E2E2',
-  },
-  copyText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 11,
-    fontWeight: '400',
-  },
-  form: {
-    width: 346,
-    maxWidth: '100%',
-    marginTop: 16,
-    alignSelf: 'center',
-    gap: 24,
-  },
-  field: {
-    position: 'relative',
-    paddingTop: 31,
-    alignItems: 'flex-start',
-    transform: [{ translateX: 40 }],
-  },
-  labelBox: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 1,
-    minWidth: 119,
-    height: 37,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8F8F8F',
-    elevation: 1,
-  },
-  labelText: {
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  input: {
-    width: 276,
-    maxWidth: '100%',
-    alignSelf: 'flex-start',
-    height: 42,
-    paddingHorizontal: 31,
-    color: '#000000',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 18,
-    fontWeight: '400',
-    lineHeight: 18,
-    paddingTop: 0,
-    paddingBottom: 0,
-    textAlignVertical: 'center',
-    letterSpacing: 0.2,
-    backgroundColor: '#E9E9E9',
-  },
-  submitButton: {
-    width: 145,
-    height: 36,
-    marginTop: 15,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#C7C7C7',
-  },
-  submitText: {
-    color: '#000000',
+  subtitle: {
+    color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
-    fontWeight: '400',
+    marginLeft: 44,
+    marginBottom: 16,
   },
-  note: {
-    marginTop: 40,
+  guideCard: {
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  guideHeader: {
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 4,
+  },
+  questionLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+  },
+  questionText: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 18,
+  },
+  guideBody: {
+    backgroundColor: COLORS.box,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  guideContent: {
+    height: 300,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  noteTitle: {
-    color: '#8A8A8A',
+  guideContentPlaceholder: {
+    color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 20,
-    fontWeight: '400',
-    opacity: 0.8,
+    fontSize: 16,
   },
-  noteText: {
-    marginTop: 2,
-    color: '#A7A7A7',
+  guideNote: {
+    color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 17,
-    fontWeight: '400',
-    lineHeight: 21,
+    fontSize: 12,
     textAlign: 'center',
-    opacity: 0.8,
+  },
+  ipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.box,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  ipText: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 16,
+  },
+  ipValue: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 16,
+  },
+  copyButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: COLORS.iconBox,
+  },
+  copyText: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 12,
+  },
+  bottom: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 12,
+    gap: 12,
+  },
+  form: {
+    gap: 12,
+    marginBottom: 40,
+  },
+  field: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    height: 50,
+  },
+  labelBox: {
+    width: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primaryLight,
+  },
+  labelText: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 16,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.box,
+    color: COLORS.textPrimary,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 16,
   },
 });
