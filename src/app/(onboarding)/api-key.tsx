@@ -31,7 +31,7 @@ export default function ApiKeyScreen() {
   const handleSubmit = () => {
     setIsLoading(true);
     setTimeout(() => {
-      router.push('/api-success');
+      router.push('/api-fail');
     }, 2000);
   };
 
@@ -126,10 +126,7 @@ export default function ApiKeyScreen() {
             </View>
           </View>
 
-          <Button
-            label="등록하기"
-            onPress={handleSubmit}
-          />
+          <Button label="등록하기" onPress={handleSubmit} />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

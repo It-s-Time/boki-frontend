@@ -4,6 +4,7 @@ export const COLORS = {
   box: '#FFFFFF', // 완전 흰색
   button: '#EAEDF5', // 버튼
   iconBox: '#D4DAE9', // 아이콘 강조 박스
+  selectedBox: '#B6BCC9', // 선택된 아이템 배경
 
   // Text
   textPrimary: '#101828', // 강조 텍스트
@@ -22,4 +23,5 @@ export const COLORS = {
 
   // 테두리
   border: '#D0D0D1', // 흐린 회색
+  divider: '#E8EAF0', // 구분선
 };
