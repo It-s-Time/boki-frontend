@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 26,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
