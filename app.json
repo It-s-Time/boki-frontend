@@ -26,7 +26,9 @@
         {
           "photosPermission": "사진을 첨부하려면 갤러리 접근 권한이 필요합니다."
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-secure-store"
     ]
   }
 }
