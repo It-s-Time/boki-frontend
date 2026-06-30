@@ -1,27 +1,21 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
-import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import Logo from '../../../assets/logo.svg';
 import { COLORS } from '@/shared/constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '@/shared/components/Button';
 import LoadingScreen from '@/shared/components/LoadingScreen';
+import { useSocialLogin } from '@/features/auth/hooks/useSocialLogin';
 
 export default function SignupScreen() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading, reset } = useSocialLogin();
 
   useFocusEffect(
     useCallback(() => {
-      setIsLoading(false);
+      reset();
     }, []),
   );
-
-  const handleKakaoLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      router.push('/api-key');
-    }, 2000);
-  };
 
   if (isLoading) return <LoadingScreen message="로그인 처리 중이에요" />;
 
@@ -39,7 +33,7 @@ export default function SignupScreen() {
           <Button
             label="카카오로 계속하기"
             variant="secondary"
-            onPress={handleKakaoLogin}
+            onPress={() => login('kakao')}
           />
 
           <Text style={styles.divider}>또는</Text>
@@ -47,7 +41,7 @@ export default function SignupScreen() {
           <Button
             label="구글로 계속하기"
             variant="secondary"
-            onPress={() => router.replace('/(tabs)')}
+            onPress={() => login('google')}
           />
 
           <Text style={styles.termsText}>
