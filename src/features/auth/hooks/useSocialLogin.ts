@@ -18,6 +18,7 @@ export function useSocialLogin() {
       const loginUrl = `${process.env.EXPO_PUBLIC_API_URL}/auth/oauth2/${provider}?redirectUri=${encodeURIComponent(REDIRECT_URI)}`;
 
       const result = await WebBrowser.openAuthSessionAsync(loginUrl, REDIRECT_URI);
+      console.log('WebBrowser result:', result);
 
       if (result.type !== 'success') return;
 
@@ -26,8 +27,11 @@ export function useSocialLogin() {
       if (!loginCode) return;
 
       const authData = await exchangeLoginCode(loginCode);
-      await setAuth(authData);
+      console.log('memberId:', authData.memberId);
+      console.log('email:', authData.email);
+      console.log('provider:', authData.provider);
 
+      await setAuth(authData);
       router.replace('/(tabs)');
     } catch (e) {
       console.error('소셜 로그인 실패:', e);

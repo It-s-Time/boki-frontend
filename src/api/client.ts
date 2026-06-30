@@ -7,9 +7,12 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const isAuthEndpoint = config.url?.startsWith('/auth/');
+  if (!isAuthEndpoint) {
+    const token = await SecureStore.getItemAsync('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });

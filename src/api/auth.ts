@@ -12,3 +12,7 @@ export const exchangeLoginCode = async (loginCode: string): Promise<ExchangeResu
   const { data } = await apiClient.post('/auth/oauth2/exchange', { loginCode });
   return data.result;
 };
+
+export const logoutApi = async (refreshToken: string): Promise<void> => {
+  await apiClient.post('/auth/logout', { refreshToken });
+};

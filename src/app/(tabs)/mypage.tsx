@@ -11,14 +11,31 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
+import { useAuthStore } from '@/store/authStore';
+import { logoutApi } from '@/api/auth';
 
 type ConfirmType = 'logout' | 'withdraw' | null;
 
 export default function MyPageScreen() {
   const [confirmType, setConfirmType] = useState<ConfirmType>(null);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
+  const user = useAuthStore((state) => state.user);
 
   const closeModal = () => setConfirmType(null);
   const isWithdraw = confirmType === 'withdraw';
+
+  const handleConfirm = async () => {
+    if (confirmType === 'logout') {
+      if (refreshToken) {
+        await logoutApi(refreshToken).catch(() => {});
+      }
+      await clearAuth();
+      router.replace('/(auth)/signup');
+    } else {
+      closeModal();
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -31,8 +48,10 @@ export default function MyPageScreen() {
 
         <View style={styles.profile}>
           <View style={styles.avatar} />
-          <Text style={styles.name}>김보키</Text>
-          <Text style={styles.email}>bokikim@email.com</Text>
+          <Text style={styles.name}>
+            {user?.email ? user.email.split('@')[0] : user?.provider?.toLowerCase() ?? '-'}
+          </Text>
+          <Text style={styles.email}>{user?.email ?? '이메일 정보 없음'}</Text>
           <Pressable style={styles.editButton}>
             <Text style={styles.editText}>내 정보 수정</Text>
           </Pressable>
@@ -82,7 +101,7 @@ export default function MyPageScreen() {
               <Pressable style={styles.cancelButton} onPress={closeModal}>
                 <Text style={styles.modalButtonText}>취소</Text>
               </Pressable>
-              <Pressable style={styles.confirmButton} onPress={closeModal}>
+              <Pressable style={styles.confirmButton} onPress={handleConfirm}>
                 <Text style={styles.modalButtonText}>
                   {isWithdraw ? '탈퇴하기' : '로그아웃'}
                 </Text>

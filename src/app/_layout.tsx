@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/authStore';
 
 const queryClient = new QueryClient();
 
@@ -12,8 +14,24 @@ export default function RootLayout() {
     'Pretendard-SemiBold': require('../../assets/fonts/Pretendard-SemiBold.ttf'),
     'Pretendard-Bold': require('../../assets/fonts/Pretendard-Bold.ttf'),
   });
+  const [authReady, setAuthReady] = useState(false);
+  const loadAuth = useAuthStore((state) => state.loadAuth);
+  const accessToken = useAuthStore((state) => state.accessToken);
 
-  if (!loaded) return null;
+  useEffect(() => {
+    loadAuth().finally(() => setAuthReady(true));
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+    if (accessToken) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(auth)/signup');
+    }
+  }, [authReady, accessToken]);
+
+  if (!loaded || !authReady) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
