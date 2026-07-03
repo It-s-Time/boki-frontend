@@ -25,3 +25,19 @@ export const COLORS = {
   border: '#D0D0D1', // 흐린 회색
   divider: '#E8EAF0', // 구분선
 };
+
+// zdesign 리디자인 팔레트 (zdesign/colors.png 기준)
+export const COLORS_NEW = {
+  background: '#FFFFFF', // 배경
+  textPrimary: '#14151F', // 기본 글자
+  fab: '#272727', // fab
+
+  border: '#5E5E61', // 선 / 연한 글자 / 아이콘
+  lightGray: '#F2F2F5', // 연한 회색 (박스, 버튼, fab 글씨)
+
+  point: '#F79474', // 포인트색 / 상승
+  down: '#78D1D3', // 하강
+
+  upStrong: '#C76F53', // 상승 진하게
+  downStrong: '#5DA4A6', // 하강 진하게
+};
