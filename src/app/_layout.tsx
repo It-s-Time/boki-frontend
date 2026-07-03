@@ -29,7 +29,7 @@ export default function RootLayout() {
     } else {
       router.replace('/(auth)/signup');
     }
-  }, [authReady, accessToken]);
+  }, [authReady]); // accessToken 제거: 로그인 중 이중 navigation 방지
 
   if (!loaded || !authReady) return null;
 

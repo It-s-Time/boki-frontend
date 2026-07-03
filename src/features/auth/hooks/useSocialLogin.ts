@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { exchangeLoginCode } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
@@ -14,23 +15,50 @@ export function useSocialLogin() {
 
   const login = async (provider: Provider) => {
     setIsLoading(true);
+    const loginUrl = `${process.env.EXPO_PUBLIC_API_URL}/auth/oauth2/${provider}?redirectUri=${encodeURIComponent(REDIRECT_URI)}`;
+
     try {
-      const loginUrl = `${process.env.EXPO_PUBLIC_API_URL}/auth/oauth2/${provider}?redirectUri=${encodeURIComponent(REDIRECT_URI)}`;
+      // Linking listener와 openAuthSessionAsync 중 먼저 오는 URL을 사용
+      const callbackUrl = await new Promise<string | null>((resolve) => {
+        let settled = false;
 
-      const result = await WebBrowser.openAuthSessionAsync(loginUrl, REDIRECT_URI);
-      console.log('WebBrowser result:', result);
+        const finish = (url: string | null, cleanup?: () => void) => {
+          if (settled) return;
+          settled = true;
+          cleanup?.();
+          resolve(url);
+        };
 
-      if (result.type !== 'success') return;
+        // Android 딥링크 직접 수신
+        const sub = Linking.addEventListener('url', ({ url }) => {
+          if (url.startsWith(REDIRECT_URI)) {
+            finish(url, () => sub.remove());
+          }
+        });
 
-      const url = new URL(result.url);
+        // Custom Tab에서 URL 인터셉트
+        WebBrowser.openAuthSessionAsync(loginUrl, REDIRECT_URI)
+          .then((result) => {
+            if (result.type === 'success') {
+              finish(result.url, () => sub.remove());
+            } else {
+              // 딥링크 이벤트가 dismiss 직후에 올 수 있으므로 잠깐 대기
+              setTimeout(() => finish(null, () => sub.remove()), 500);
+            }
+          })
+          .catch(() => finish(null, () => sub.remove()));
+      });
+
+      // 혹시 Custom Tab이 아직 열려있으면 닫기
+      WebBrowser.dismissBrowser?.()?.catch(() => {});
+
+      if (!callbackUrl) return;
+
+      const url = new URL(callbackUrl);
       const loginCode = url.searchParams.get('loginCode');
       if (!loginCode) return;
 
       const authData = await exchangeLoginCode(loginCode);
-      console.log('memberId:', authData.memberId);
-      console.log('email:', authData.email);
-      console.log('provider:', authData.provider);
-
       await setAuth(authData);
       router.replace('/(tabs)');
     } catch (e) {
