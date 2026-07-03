@@ -1,12 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import Logo from '../../../assets/logo.svg';
-import { COLORS } from '@/shared/constants/colors';
+import Symbol from '../../../assets/symbol.svg';
+import LogoText from '../../../assets/logo2.svg';
+import GoogleIcon from '../../../assets/icons/google.svg';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from '@/shared/components/Button';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useSocialLogin } from '@/features/auth/hooks/useSocialLogin';
+
+const KAKAO_YELLOW = '#FFDC00';
 
 export default function SignupScreen() {
   const { login, isLoading, reset } = useSocialLogin();
@@ -23,26 +26,23 @@ export default function SignupScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.logoSection}>
-          <Logo width={204} height={80} />
+          <View style={styles.logoRow}>
+            <Symbol width={48} height={48} />
+            <LogoText width={128} height={48} />
+          </View>
           <Text style={styles.tagline}>코인 투자를 위한 한 걸음</Text>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.subtitle}>회원가입을 진행해주세요</Text>
+          <Pressable style={styles.googleButton} onPress={() => login('google')}>
+            <GoogleIcon width={18} height={18} />
+            <Text style={styles.googleLabel}>구글로 시작하기</Text>
+          </Pressable>
 
-          <Button
-            label="카카오로 계속하기"
-            variant="secondary"
-            onPress={() => login('kakao')}
-          />
-
-          <Text style={styles.divider}>또는</Text>
-
-          <Button
-            label="구글로 계속하기"
-            variant="secondary"
-            onPress={() => login('google')}
-          />
+          <Pressable style={styles.kakaoButton} onPress={() => login('kakao')}>
+            <Text style={styles.kakaoIcon}>k</Text>
+            <Text style={styles.kakaoLabel}>카카오로 시작하기</Text>
+          </Pressable>
 
           <Text style={styles.termsText}>
             계속 진행하면 잇심동체의{' '}
@@ -59,7 +59,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   container: {
     flex: 1,
@@ -70,14 +70,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
     paddingBottom: 120,
   },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   tagline: {
-    color: COLORS.textSecondary,
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 20,
-    marginTop: 12,
+    color: COLORS_NEW.border,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    marginTop: 20,
   },
   footer: {
     position: 'absolute',
@@ -85,23 +89,43 @@ const styles = StyleSheet.create({
     left: 24,
     right: 24,
   },
-  subtitle: {
-    color: COLORS.textSecondary,
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: COLORS_NEW.lightGray,
+    borderRadius: 999,
+    paddingVertical: 16,
+  },
+  googleLabel: {
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 16,
-    marginBottom: 16,
-    textAlign: 'center',
   },
-  divider: {
-    color: COLORS.textSecondary,
-    fontFamily: 'Pretendard-Regular',
+  kakaoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: KAKAO_YELLOW,
+    borderRadius: 999,
+    paddingVertical: 16,
+    marginTop: 12,
+  },
+  kakaoIcon: {
+    color: COLORS_NEW.textPrimary,
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 18,
+  },
+  kakaoLabel: {
+    color: COLORS_NEW.textPrimary,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 16,
-    marginVertical: 16,
-    textAlign: 'center',
   },
   termsText: {
     marginTop: 24,
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 12,
     lineHeight: 16,
