@@ -2,7 +2,7 @@ import { COLORS } from '@/shared/constants/colors';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Logo from 'assets/logo.svg';
+import Logo from 'assets/icons/logo.svg';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import TradeCalendar from '@/features/home/components/TradeCalendar';
