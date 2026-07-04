@@ -2,7 +2,7 @@ import { COLORS } from '@/shared/constants/colors';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
-import Logo from 'assets/logo.svg';
+import Logo from 'assets/icons/logo.svg';
 
 const gradeData = [
   { grade: 'S', count: 2, height: 18, active: false },

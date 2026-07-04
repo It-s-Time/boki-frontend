@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack, router } from 'expo-router';
+import { Stack, router, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
@@ -17,6 +17,7 @@ export default function RootLayout() {
   const [authReady, setAuthReady] = useState(false);
   const loadAuth = useAuthStore((state) => state.loadAuth);
   const accessToken = useAuthStore((state) => state.accessToken);
+  const pathname = usePathname();
 
   useEffect(() => {
     loadAuth().finally(() => setAuthReady(true));
@@ -24,12 +25,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!authReady) return;
+    if (pathname === '/auth/callback') return;
+
     if (accessToken) {
       router.replace('/(tabs)');
     } else {
       router.replace('/(auth)/signup');
     }
-  }, [authReady]); // accessToken 제거: 로그인 중 이중 navigation 방지
+  }, [authReady, accessToken]); // pathname 변경 때 탭 이동을 덮어쓰지 않도록 제외
 
   if (!loaded || !authReady) return null;
 

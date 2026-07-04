@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import Symbol from '../../../assets/symbol.svg';
-import LogoText from '../../../assets/logo2.svg';
+import Symbol from '../../../assets/icons/symbol.svg';
+import LogoText from '../../../assets/icons/logo2.svg';
 import GoogleIcon from '../../../assets/icons/google.svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
 import Button from '@/shared/components/Button';
-import Logo from '../../../assets/logo.svg';
+import Logo from '../../../assets/icons/logo.svg';
 
 export default function ApiSuccessScreen() {
   return (
