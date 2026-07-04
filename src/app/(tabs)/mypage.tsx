@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 44,
     paddingHorizontal: 24,
-    paddingBottom: 120,
+    paddingBottom: 130,
   },
   title: {
     marginBottom: 26,

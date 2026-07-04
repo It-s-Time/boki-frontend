@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import Symbol from '../../../assets/symbol.svg';
 import LogoText from '../../../assets/logo2.svg';
 import GoogleIcon from '../../../assets/icons/google.svg';
@@ -13,29 +13,44 @@ const KAKAO_YELLOW = '#FFDC00';
 
 export default function SignupScreen() {
   const { login, isLoading, reset } = useSocialLogin();
+  const [navigating, setNavigating] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       reset();
+      setNavigating(false);
     }, []),
   );
 
+  const handleTaglinePress = () => {
+    setNavigating(true);
+    setTimeout(() => {
+      router.push('/(onboarding)/setup-principles');
+    }, 1500);
+  };
+
   if (isLoading) return <LoadingScreen message="로그인 처리 중이에요" />;
+  if (navigating) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.logoSection}>
           <View style={styles.logoRow}>
-            <Symbol width={48} height={48} />
-            <LogoText width={128} height={48} />
+            <Symbol width={60} height={60} />
+            <LogoText width={140} height={60} />
           </View>
-          <Text style={styles.tagline}>코인 투자를 위한 한 걸음</Text>
+          <Pressable onPress={handleTaglinePress}>
+            <Text style={styles.tagline}>코인 투자를 위한 한 걸음</Text>
+          </Pressable>
         </View>
 
         <View style={styles.footer}>
-          <Pressable style={styles.googleButton} onPress={() => login('google')}>
-            <GoogleIcon width={18} height={18} />
+          <Pressable
+            style={styles.googleButton}
+            onPress={() => login('google')}
+          >
+            <GoogleIcon width={20} height={20} />
             <Text style={styles.googleLabel}>구글로 시작하기</Text>
           </Pressable>
 
@@ -70,18 +85,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 120,
+    paddingBottom: 60,
   },
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 24,
   },
   tagline: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
-    fontSize: 18,
-    marginTop: 20,
+    fontSize: 20,
+    marginTop: 32,
   },
   footer: {
     position: 'absolute',
@@ -93,10 +108,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 12,
     backgroundColor: COLORS_NEW.lightGray,
-    borderRadius: 999,
-    paddingVertical: 16,
+    borderRadius: 20,
+    paddingVertical: 17,
+    borderWidth: 1,
+    borderColor: '#D0D0D1',
   },
   googleLabel: {
     color: COLORS_NEW.textPrimary,
@@ -107,16 +124,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 12,
     backgroundColor: KAKAO_YELLOW,
-    borderRadius: 999,
-    paddingVertical: 16,
-    marginTop: 12,
+    borderRadius: 20,
+    paddingVertical: 18,
+    marginTop: 20,
   },
   kakaoIcon: {
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 18,
+    fontSize: 16,
   },
   kakaoLabel: {
     color: COLORS_NEW.textPrimary,
@@ -130,6 +147,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     textAlign: 'center',
+    marginBottom: 64,
   },
   termsLink: {
     textDecorationLine: 'underline',

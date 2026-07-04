@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   listContent: {
-    paddingBottom: 24,
+    paddingBottom: 130,
   },
   listTop: {
     paddingHorizontal: 28,
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   detailContent: {
-    paddingBottom: 28,
+    paddingBottom: 130,
   },
   detailHeader: {
     minHeight: 132,
