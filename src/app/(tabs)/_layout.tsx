@@ -1,24 +1,119 @@
-import { Tabs, router, usePathname } from 'expo-router';
-import { Entypo, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable, View, Text, StyleSheet, Modal } from 'react-native';
-import { type ReactNode } from 'react';
-import { useState } from 'react';
+import { Tabs } from 'expo-router';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { Pressable, View, StyleSheet } from 'react-native';
+import { type ComponentType, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
-import Button from '@/shared/components/Button';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import InputOptionsModal from '@/features/input/components/InputOptionsModal';
+import HomeIcon from '../../../assets/icons/home.svg';
+import LogIcon from '../../../assets/icons/log2.svg';
+import PrincipleIcon from '../../../assets/icons/principle.svg';
+import MyIcon from '../../../assets/icons/my.svg';
+import AddIcon from '../../../assets/icons/add.svg';
 
-const IS_API_CONNECTED = false;
+const TAB_BAR_HEIGHT = 52;
+const ICON_SIZE = 16;
 
-function TabIcon({
-  focused,
-  children,
-}: {
-  focused: boolean;
-  children: ReactNode;
-}) {
+interface TabIconConfig {
+  name: string;
+  Icon: ComponentType<{ width?: number; height?: number; color?: string }>;
+  width: number;
+  height: number;
+}
+
+const LEFT_TABS: TabIconConfig[] = [
+  { name: 'index', Icon: HomeIcon, width: ICON_SIZE, height: ICON_SIZE },
+  { name: 'stats', Icon: LogIcon, width: ICON_SIZE * 0.75, height: ICON_SIZE },
+];
+
+const RIGHT_TABS: TabIconConfig[] = [
+  {
+    name: 'principles',
+    Icon: PrincipleIcon,
+    width: ICON_SIZE,
+    height: ICON_SIZE,
+  },
+  { name: 'mypage', Icon: MyIcon, width: ICON_SIZE, height: ICON_SIZE },
+];
+
+function CustomTabBar({
+  state,
+  navigation,
+  onAddPress,
+}: BottomTabBarProps & { onAddPress: () => void }) {
+  const insets = useSafeAreaInsets();
+
+  const renderGroupItem = ({ name, Icon, width, height }: TabIconConfig) => {
+    const route = state.routes.find((r) => r.name === name);
+    if (!route) return null;
+    const isFocused = state.index === state.routes.indexOf(route);
+
+    return (
+      <Pressable
+        key={route.key}
+        style={styles.groupItem}
+        onPress={() => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        }}
+      >
+        <View
+          style={[
+            styles.itemHighlight,
+            isFocused && styles.itemHighlightFocused,
+          ]}
+        >
+          <Icon width={width} height={height} />
+        </View>
+      </Pressable>
+    );
+  };
+
   return (
-    <View style={[styles.iconBg, focused && styles.iconBgFocused]}>
-      {children}
+    <View
+      style={[
+        styles.barContainer,
+        {
+          height: TAB_BAR_HEIGHT + insets.bottom,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
+      <View style={styles.row}>
+        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            locations={[0, 0.6]}
+            style={styles.glassSheen}
+          />
+          {LEFT_TABS.map((tab) => renderGroupItem(tab))}
+        </BlurView>
+
+        <Pressable style={styles.fabWrapper} onPress={onAddPress}>
+          <View style={styles.fab}>
+            <AddIcon width={18} height={18} color="#FFFFFF" />
+          </View>
+        </Pressable>
+
+        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            locations={[0, 0.6]}
+            style={styles.glassSheen}
+          />
+          {RIGHT_TABS.map((tab) => renderGroupItem(tab))}
+        </BlurView>
+      </View>
     </View>
   );
 }
@@ -26,289 +121,92 @@ function TabIcon({
 export default function TabLayout() {
   const [modalVisible, setModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
-  const close = () => setModalVisible(false);
-  const pathname = usePathname();
-
-  const isActiveTab = (name: string) => {
-    if (name === 'index') {
-      return pathname === '/' || pathname.endsWith('/index');
-    }
-
-    return pathname === `/${name}` || pathname.endsWith(`/${name}`);
-  };
 
   return (
     <>
       <Tabs
         initialRouteName="index"
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: {
-            backgroundColor: COLORS.button,
-            borderTopWidth: 0,
-            height: 72 + insets.bottom,
-            paddingBottom: insets.bottom,
-          },
-          tabBarActiveTintColor: COLORS.textPrimary,
-          tabBarInactiveTintColor: COLORS.textSecondary,
-          tabBarItemStyle: {
-            paddingTop: 4,
-          },
-          tabBarLabelStyle: {
-            marginTop: 4,
-            fontSize: 14,
-            fontFamily: 'Pretendard-Medium',
-          },
-        }}
+        screenOptions={{ headerShown: false }}
+        tabBar={(props) => (
+          <CustomTabBar {...props} onAddPress={() => setModalVisible(true)} />
+        )}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: '홈',
-            tabBarIcon: () => (
-              <TabIcon focused={isActiveTab('index')}>
-                <Entypo
-                  name="calendar"
-                  size={24}
-                  color={
-                    isActiveTab('index')
-                      ? COLORS.textPrimary
-                      : COLORS.textSecondary
-                  }
-                />
-              </TabIcon>
-            ),
-          }}
-        />
-
-        <Tabs.Screen
-          name="stats"
-          options={{
-            title: '통계',
-            tabBarIcon: () => (
-              <TabIcon focused={isActiveTab('stats')}>
-                <MaterialCommunityIcons
-                  name="google-analytics"
-                  size={24}
-                  color={
-                    isActiveTab('stats')
-                      ? COLORS.textPrimary
-                      : COLORS.textSecondary
-                  }
-                />
-              </TabIcon>
-            ),
-          }}
-        />
-
-        <Tabs.Screen
-          name="input"
-          options={{
-            title: '입력',
-            tabBarButton: () => {
-              const focused = isActiveTab('input');
-
-              return (
-                <Pressable style={styles.addButtonWrapper} onPress={() => setModalVisible(true)}>
-                  <TabIcon focused={focused}>
-                    <Entypo
-                      name="plus"
-                      size={24}
-                      color={
-                        focused ? COLORS.textPrimary : COLORS.textSecondary
-                      }
-                    />
-                  </TabIcon>
-                  <Text
-                    style={[styles.addLabel, focused && styles.addLabelFocused]}
-                  >
-                    입력
-                  </Text>
-                </Pressable>
-              );
-            },
-          }}
-        />
-
-        <Tabs.Screen
-          name="principles"
-          options={{
-            title: '원칙',
-            tabBarIcon: () => (
-              <TabIcon focused={isActiveTab('principles')}>
-                <MaterialCommunityIcons
-                  name="star-circle-outline"
-                  size={28}
-                  color={
-                    isActiveTab('principles')
-                      ? COLORS.textPrimary
-                      : COLORS.textSecondary
-                  }
-                />
-              </TabIcon>
-            ),
-          }}
-        />
-
-        <Tabs.Screen
-          name="mypage"
-          options={{
-            title: '마이',
-            tabBarIcon: () => (
-              <TabIcon focused={isActiveTab('mypage')}>
-                <AntDesign
-                  name="setting"
-                  size={24}
-                  color={
-                    isActiveTab('mypage')
-                      ? COLORS.textPrimary
-                      : COLORS.textSecondary
-                  }
-                />
-              </TabIcon>
-            ),
-          }}
-        />
+        <Tabs.Screen name="index" />
+        <Tabs.Screen name="stats" />
+        <Tabs.Screen name="input" />
+        <Tabs.Screen name="principles" />
+        <Tabs.Screen name="mypage" />
       </Tabs>
 
-      <Modal
+      <InputOptionsModal
         visible={modalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={close}
-      >
-        <Pressable style={styles.backdrop} onPress={close}>
-          <Pressable style={[styles.sheet, { paddingBottom: insets.bottom }]}>
-            <Text style={styles.title}>거래 내역 입력</Text>
-
-            <View style={styles.optionGroup}>
-              {/* 수동 입력 */}
-              <Pressable
-                style={styles.option}
-                onPress={() => {
-                  close();
-                  router.push('/input/manual');
-                }}
-              >
-                <Text style={styles.optionTitle}>수동 입력</Text>
-                <Text style={styles.optionDesc}>
-                  거래 내역을 직접 입력합니다
-                </Text>
-              </Pressable>
-
-              {/* API 연동 */}
-              <Pressable
-                style={[
-                  styles.option,
-                  IS_API_CONNECTED && styles.optionDisabled,
-                ]}
-                disabled={IS_API_CONNECTED}
-                onPress={() => {
-                  close();
-                  router.push('/api-key');
-                }}
-              >
-                <Text style={[styles.optionTitle]}>
-                  {IS_API_CONNECTED
-                    ? '업비트 API가 이미 연동되어 있습니다.'
-                    : 'API 연동'}
-                </Text>
-                <Text style={styles.optionDesc}>
-                  {IS_API_CONNECTED
-                    ? '거래 내역을 자동으로 불러옵니다.'
-                    : '업비트 API로 자동 동기합니다.'}
-                </Text>
-              </Pressable>
-            </View>
-            <Button label="취소" onPress={close} variant="secondary" />
-          </Pressable>
-        </Pressable>
-      </Modal>
+        onClose={() => setModalVisible(false)}
+        bottomInset={insets.bottom}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  addButtonWrapper: {
+  barContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 12,
+  },
+  row: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 3,
-    gap: 2,
-  },
-  iconBg: {
-    width: 56,
-    height: 32,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  iconBgFocused: {
-    backgroundColor: COLORS.iconBox,
-  },
-  addLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontFamily: 'Pretendard-Medium',
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
-  sheet: {
-    backgroundColor: COLORS.box,
-    padding: 24,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    paddingHorizontal: 20,
     gap: 20,
   },
-  title: {
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 22,
-  },
-  optionGroup: {
-    overflow: 'hidden',
-    gap: 12,
-  },
-  option: {
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
-    padding: 16,
-    gap: 4,
-  },
-  optionDisabled: {
-    backgroundColor: COLORS.selectedBox,
-  },
-  optionTitle: {
-    color: '#000000',
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 18,
-  },
-  optionDesc: {
-    color: '#6A7282',
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 14,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginHorizontal: 16,
-  },
-  cancelButton: {
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
-    paddingVertical: 16,
+  groupPill: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-evenly',
+    flex: 1,
+    height: 52,
+    borderRadius: 32,
+    padding: 4,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(235, 235, 235, 0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
   },
-  cancelText: {
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Medium',
-    fontSize: 16,
+  glassSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '65%',
   },
-  addLabelFocused: {
-    color: COLORS.textPrimary,
+  groupItem: {
+    flex: 1,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemHighlight: {
+    width: 70,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemHighlightFocused: {
+    backgroundColor: '#FFF',
+    borderRadius: 32,
+  },
+  fabWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fab: {
+    width: 52,
+    height: 52,
+    borderRadius: 30,
+    backgroundColor: COLORS_NEW.fab,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

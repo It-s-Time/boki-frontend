@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 4,
     paddingHorizontal: 24,
-    paddingBottom: 120,
+    paddingBottom: 130,
   },
   profile: {
     alignItems: 'center',
