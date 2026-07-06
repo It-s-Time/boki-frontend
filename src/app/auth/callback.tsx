@@ -1,33 +1,48 @@
 import { useEffect } from 'react';
-import { useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { router } from 'expo-router';
-import { exchangeLoginCode } from '@/api/auth';
-import { useAuthStore } from '@/store/authStore';
+import * as Linking from 'expo-linking';
+import { router, useLocalSearchParams } from 'expo-router';
+import LoadingScreen from '@/shared/components/LoadingScreen';
+import {
+  completeLoginWithCode,
+  getLoginCodeFromCallbackUrl,
+} from '@/features/auth/utils/socialLoginCallback';
 
 export default function AuthCallback() {
-  const { loginCode } = useLocalSearchParams<{ loginCode: string }>();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const params = useLocalSearchParams<{ loginCode?: string | string[] }>();
 
   useEffect(() => {
-    WebBrowser.dismissBrowser?.()?.catch(() => {});
+    let isMounted = true;
 
-    const code = Array.isArray(loginCode) ? loginCode[0] : loginCode;
-    if (!code) {
-      router.replace('/(auth)/signup');
-      return;
-    }
+    const finishLogin = async () => {
+      WebBrowser.dismissBrowser?.()?.catch(() => {});
 
-    exchangeLoginCode(code)
-      .then(async (authData) => {
-        await setAuth(authData);
-        router.replace('/(tabs)');
-      })
-      .catch((e) => {
-        console.error('토큰 교환 실패:', e);
-        router.replace('/(auth)/signup');
-      });
-  }, []);
+      const paramLoginCode = Array.isArray(params.loginCode)
+        ? params.loginCode[0]
+        : params.loginCode;
+      const initialUrl = await Linking.getInitialURL();
+      const initialLoginCode = initialUrl
+        ? getLoginCodeFromCallbackUrl(initialUrl)
+        : null;
+      const loginCode = paramLoginCode ?? initialLoginCode;
 
-  return null;
+      if (!loginCode) {
+        if (isMounted) router.replace('/(auth)/signup');
+        return;
+      }
+
+      await completeLoginWithCode(loginCode);
+    };
+
+    finishLogin().catch((error) => {
+      console.error('소셜 로그인 콜백 처리 실패:', error);
+      if (isMounted) router.replace('/(auth)/signup');
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [params.loginCode]);
+
+  return <LoadingScreen message="로그인 처리 중이에요" />;
 }
