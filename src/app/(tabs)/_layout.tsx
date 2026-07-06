@@ -3,6 +3,8 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Pressable, View, StyleSheet } from 'react-native';
 import { type ComponentType, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import InputOptionsModal from '@/features/input/components/InputOptionsModal';
 import HomeIcon from '../../../assets/icons/home.svg';
@@ -86,9 +88,15 @@ function CustomTabBar({
       ]}
     >
       <View style={styles.row}>
-        <View style={styles.groupPill}>
+        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            locations={[0, 0.6]}
+            style={styles.glassSheen}
+          />
           {LEFT_TABS.map((tab) => renderGroupItem(tab))}
-        </View>
+        </BlurView>
 
         <Pressable style={styles.fabWrapper} onPress={onAddPress}>
           <View style={styles.fab}>
@@ -96,9 +104,15 @@ function CustomTabBar({
           </View>
         </Pressable>
 
-        <View style={styles.groupPill}>
+        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            locations={[0, 0.6]}
+            style={styles.glassSheen}
+          />
           {RIGHT_TABS.map((tab) => renderGroupItem(tab))}
-        </View>
+        </BlurView>
       </View>
     </View>
   );
@@ -151,27 +165,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    backgroundColor: COLORS_NEW.lightGray,
     flex: 1,
     height: 52,
     borderRadius: 32,
-    padding: 2,
+    padding: 4,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(235, 235, 235, 0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+  },
+  glassSheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '65%',
   },
   groupItem: {
-    width: 56,
-    height: 48,
+    flex: 1,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   itemHighlight: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 32,
+    width: 70,
+    height: 42,
     alignItems: 'center',
     justifyContent: 'center',
   },
   itemHighlightFocused: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF',
+    borderRadius: 32,
   },
   fabWrapper: {
     alignItems: 'center',
