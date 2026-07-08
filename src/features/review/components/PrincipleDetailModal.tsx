@@ -1,5 +1,4 @@
-import { COLORS } from '@/shared/constants/colors';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import {
   Modal,
   Pressable,
@@ -29,27 +28,28 @@ export default function PrincipleDetailModal({ set, type, onClose }: Props) {
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.sheet} onPress={() => {}}>
+          <View style={styles.handle} />
+
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>{set.name}</Text>
-            <Pressable onPress={onClose}>
-              <Ionicons name="close" size={22} color={COLORS.textPrimary} />
-            </Pressable>
-          </View>
-
-          <View style={styles.typeBadge}>
-            <View style={isBuy ? styles.buyIconBox : styles.sellIconBox}>
-              <Ionicons
-                name={isBuy ? 'trending-up' : 'trending-down'}
-                size={14}
-                color={COLORS.textPrimary}
-              />
+            <View
+              style={[
+                styles.typeBadge,
+                isBuy ? styles.buyBadge : styles.sellBadge,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.typeBadgeText,
+                  {
+                    color: isBuy ? COLORS_NEW.buy : COLORS_NEW.sell,
+                  },
+                ]}
+              >
+                {isBuy ? '매수' : '매도'}
+              </Text>
             </View>
-            <Text style={styles.typeBadgeText}>
-              {isBuy ? '매수' : '매도'} 원칙 {principles.length}개
-            </Text>
           </View>
-
-          <View style={styles.divider} />
 
           <ScrollView
             style={styles.principleList}
@@ -58,18 +58,13 @@ export default function PrincipleDetailModal({ set, type, onClose }: Props) {
           >
             {principles.map((p) => (
               <View key={p.id} style={styles.principleItem}>
-                <View style={styles.orderCircle}>
-                  <Text style={styles.orderText}>{p.order}</Text>
-                </View>
                 <Text style={styles.principleContent}>{p.content}</Text>
               </View>
             ))}
           </ScrollView>
 
-          <View style={styles.divider} />
-
           <Pressable style={styles.confirmButton} onPress={onClose}>
-            <Text style={styles.confirmText}>확인</Text>
+            <Text style={styles.confirmText}>닫기</Text>
           </Pressable>
         </Pressable>
       </Pressable>
@@ -85,122 +80,91 @@ const styles = StyleSheet.create({
   },
 
   sheet: {
-    backgroundColor: COLORS.box,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: COLORS_NEW.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 12,
     paddingBottom: 32,
     maxHeight: '75%',
+  },
+
+  handle: {
+    alignSelf: 'center',
+    width: 64,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: COLORS_NEW.handle,
+    marginBottom: 16,
   },
 
   sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
   },
 
   sheetTitle: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
+    fontSize: 24,
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
 
   typeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 4,
-    borderRadius: 8,
-    gap: 8,
-    marginBottom: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+
+  buyBadge: {
+    backgroundColor: COLORS_NEW.lightRed,
+  },
+
+  sellBadge: {
+    backgroundColor: COLORS_NEW.lightBlue,
   },
 
   typeBadgeText: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
+    fontSize: 16,
     fontFamily: 'Pretendard-SemiBold',
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: '#D0D0D1',
-    marginHorizontal: -24,
   },
 
   principleList: {
-    marginVertical: 16,
+    marginBottom: 24,
   },
 
   principleListContent: {
-    gap: 8,
+    gap: 16,
   },
 
   principleItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    gap: 10,
-  },
-
-  orderCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.textSecondary,
-    justifyContent: 'center',
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
-  },
-
-  orderText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    fontFamily: 'Pretendard-SemiBold',
   },
 
   principleContent: {
-    flex: 1,
-    fontSize: 16,
-    color: COLORS.textPrimary,
+    fontSize: 18,
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
-  },
-
-  buyIconBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: COLORS.buy,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  sellIconBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: COLORS.sell,
-    justifyContent: 'center',
-    alignItems: 'center',
+    textAlign: 'center',
   },
 
   confirmButton: {
     marginTop: 16,
-    backgroundColor: COLORS.iconBox,
-    borderRadius: 8,
-    paddingVertical: 16,
+    backgroundColor: COLORS_NEW.fab,
+    borderRadius: 20,
+    paddingVertical: 18,
     alignItems: 'center',
   },
 
   confirmText: {
     fontSize: 18,
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },
 });

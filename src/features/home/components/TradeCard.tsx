@@ -1,7 +1,13 @@
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import Entypo from '@expo/vector-icons/Entypo';
 import { Trade } from '../types';
+
+const COIN_ICONS: Record<string, number> = {
+  BTC: require('../../../../assets/icons/main/bitcoin.png'),
+  XRP: require('../../../../assets/icons/main/ripple.png'),
+};
 
 type Props = {
   trade: Trade;
@@ -26,36 +32,47 @@ export default function TradeCard({ trade }: Props) {
     });
   };
 
+  const icon = COIN_ICONS[trade.symbol];
+
   return (
     <View style={styles.tradeCard}>
-      <View>
-        <View style={styles.tradeNameRow}>
+      <View style={styles.iconBadge}>
+        {icon ? (
+          <Image source={icon} style={styles.iconImage} resizeMode="contain" />
+        ) : (
+          <Text style={styles.iconFallbackText}>{trade.symbol}</Text>
+        )}
+      </View>
+
+      <View style={styles.infoColumn}>
+        <Text style={styles.tradeNameRow}>
           <Text style={styles.coinName}>{trade.coinName}</Text>
           <Text style={styles.coinAmount}>
-            {trade.amount}&nbsp;{trade.symbol}
+            {' '}
+            · {trade.amount}
+            {trade.symbol}
           </Text>
+        </Text>
+
+        <Text style={styles.tradeInfo}>
+          {trade.time} · {trade.price.toLocaleString()}원 ·{' '}
           <Text
-            style={[
-              styles.tradeType,
-              {
-                color:
-                  trade.type === 'buy' ? COLORS.buyText : COLORS.sellText,
-              },
-            ]}
+            style={{
+              color: trade.type === 'buy' ? COLORS_NEW.buy : COLORS_NEW.sell,
+              fontFamily: 'Pretendard-Medium',
+            }}
           >
             {trade.type === 'buy' ? '매수' : '매도'}
           </Text>
-        </View>
-
-        <Text style={styles.tradeInfo}>
-          {trade.time} · {trade.price.toLocaleString()}원
         </Text>
       </View>
 
       <Pressable style={styles.reviewButton} onPress={handleReview}>
-        <Text style={styles.reviewButtonText}>
-          {trade.reviewed ? '복기완료' : '복기하기'}
-        </Text>
+        <Entypo
+          name="chevron-thin-right"
+          size={18}
+          color={COLORS_NEW.textPrimary}
+        />
       </Pressable>
     </View>
   );
@@ -63,60 +80,68 @@ export default function TradeCard({ trade }: Props) {
 
 const styles = StyleSheet.create({
   tradeCard: {
-    backgroundColor: COLORS.box,
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    backgroundColor: COLORS_NEW.lightGray,
+    borderRadius: 20,
+    padding: 8,
     marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+
+  iconBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: COLORS_NEW.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  iconImage: {
+    width: 40,
+    height: 16,
+  },
+
+  iconFallbackText: {
+    fontSize: 12,
+    color: COLORS_NEW.border,
+    fontFamily: 'Pretendard-Medium',
+  },
+
+  infoColumn: {
+    flex: 1,
   },
 
   tradeNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 6,
   },
 
   coinName: {
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
-    marginRight: 8,
   },
 
   coinAmount: {
     fontSize: 16,
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
-    marginRight: 8,
-  },
-
-  tradeType: {
-    fontSize: 14,
-    fontFamily: 'Pretendard-Medium',
   },
 
   tradeInfo: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     letterSpacing: -0.5,
   },
 
   reviewButton: {
-    width: 72,
+    width: 44,
     height: 44,
-    borderRadius: 8,
-    backgroundColor: '#E9EDF5',
+    borderRadius: 22,
+    backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-
-  reviewButtonText: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-Medium',
   },
 });
