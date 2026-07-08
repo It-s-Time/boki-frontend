@@ -164,7 +164,7 @@ export default function TradeCalendar({
                   width: DAY_SIZE,
                   textAlign: 'center',
                   fontSize: 16,
-                  fontFamily: 'Pretendard-Medium',
+                  fontFamily: 'Pretendard-SemiBold',
                   color: COLORS_NEW.textPrimary,
                 },
               },
@@ -190,16 +190,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     borderWidth: 1,
-    borderColor: COLORS_NEW.border,
+    borderColor: COLORS_NEW.lightBorder,
     borderRadius: 999,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 8,
   },
 
   monthPillText: {
-    fontSize: 16,
+    fontSize: 20,
     color: COLORS_NEW.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Regular',
   },
 
   card: {

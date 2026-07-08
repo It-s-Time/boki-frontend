@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import ManualInputIcon from '../../../../assets/icons/input/input.svg';
 import ApiInputIcon from '../../../../assets/icons/input/api.svg';
 
@@ -20,83 +21,57 @@ export default function InputOptionsModal({
   bottomInset,
 }: Props) {
   return (
-    <Modal
+    <BottomSheetModal
       visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
+      onClose={onClose}
+      sheetStyle={{ paddingBottom: bottomInset + 24 }}
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={[styles.sheet, { paddingBottom: bottomInset + 24 }]}>
-          <View style={styles.handle} />
+      <View style={styles.header}>
+        <Text style={styles.title}>어떻게 거래내역을 추가할까요?</Text>
+        <View style={styles.headerIcon}>
+          <Feather name="calendar" size={20} color={COLORS_NEW.border} />
+        </View>
+      </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>어떻게 거래내역을 추가할까요?</Text>
-            <View style={styles.headerIcon}>
-              <Feather name="calendar" size={20} color={COLORS_NEW.border} />
-            </View>
+      <View style={styles.optionGroup}>
+        {/* 수동 입력 */}
+        <Pressable
+          style={styles.option}
+          onPress={() => {
+            onClose();
+            router.push('/input/manual');
+          }}
+        >
+          <View style={styles.iconWrapper}>
+            <ManualInputIcon width={127} height={120} />
           </View>
-
-          <View style={styles.optionGroup}>
-            {/* 수동 입력 */}
-            <Pressable
-              style={styles.option}
-              onPress={() => {
-                onClose();
-                router.push('/input/manual');
-              }}
-            >
-              <ManualInputIcon width={100} height={89} />
-              <Text style={styles.optionTitle}>수동 입력</Text>
-            </Pressable>
-
-            {/* API 연동 */}
-            <Pressable
-              style={[styles.option, IS_API_CONNECTED && styles.optionDisabled]}
-              disabled={IS_API_CONNECTED}
-              onPress={() => {
-                onClose();
-                router.push('/api-key');
-              }}
-            >
-              <ApiInputIcon width={100} height={97} />
-              <Text style={styles.optionTitle}>
-                {IS_API_CONNECTED ? '연동 완료' : 'API 연동'}
-              </Text>
-            </Pressable>
-          </View>
-
-          <PrimaryButton label="취소" onPress={onClose} />
+          <Text style={styles.optionTitle}>수동 입력</Text>
         </Pressable>
-      </Pressable>
-    </Modal>
+
+        {/* API 연동 */}
+        <Pressable
+          style={[styles.option, IS_API_CONNECTED && styles.optionDisabled]}
+          disabled={IS_API_CONNECTED}
+          onPress={() => {
+            onClose();
+            router.push('/api-key');
+          }}
+        >
+          <View style={styles.iconWrapper}>
+            <ApiInputIcon width={127} height={104} />
+          </View>
+          <Text style={styles.optionTitle}>
+            {IS_API_CONNECTED ? '연동 완료' : 'API 연동'}
+          </Text>
+        </Pressable>
+      </View>
+
+      <PrimaryButton label="취소" onPress={onClose} />
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
-
-  sheet: {
-    backgroundColor: COLORS_NEW.background,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-  },
-
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 999,
-    backgroundColor: COLORS_NEW.lightGray,
-    marginBottom: 20,
-  },
-
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -108,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 20,
+    fontSize: 22,
   },
 
   headerIcon: {
@@ -123,7 +98,7 @@ const styles = StyleSheet.create({
 
   optionGroup: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
     marginBottom: 24,
   },
 
@@ -140,6 +115,12 @@ const styles = StyleSheet.create({
 
   optionDisabled: {
     opacity: 0.5,
+  },
+
+  iconWrapper: {
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   optionTitle: {

@@ -1,12 +1,6 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import { PrincipleSet } from '../types';
 
 interface Props {
@@ -20,82 +14,55 @@ export default function PrincipleDetailModal({ set, type, onClose }: Props) {
   const principles = set.principles.filter((p) => p.type === type);
 
   return (
-    <Modal
+    <BottomSheetModal
       visible={type !== null}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      sheetStyle={styles.sheet}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={() => {}}>
-          <View style={styles.handle} />
-
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>{set.name}</Text>
-            <View
-              style={[
-                styles.typeBadge,
-                isBuy ? styles.buyBadge : styles.sellBadge,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.typeBadgeText,
-                  {
-                    color: isBuy ? COLORS_NEW.buy : COLORS_NEW.sell,
-                  },
-                ]}
-              >
-                {isBuy ? '매수' : '매도'}
-              </Text>
-            </View>
-          </View>
-
-          <ScrollView
-            style={styles.principleList}
-            contentContainerStyle={styles.principleListContent}
-            showsVerticalScrollIndicator={false}
+      <View style={styles.sheetHeader}>
+        <Text style={styles.sheetTitle}>{set.name}</Text>
+        <View
+          style={[
+            styles.typeBadge,
+            isBuy ? styles.buyBadge : styles.sellBadge,
+          ]}
+        >
+          <Text
+            style={[
+              styles.typeBadgeText,
+              {
+                color: isBuy ? COLORS_NEW.buy : COLORS_NEW.sell,
+              },
+            ]}
           >
-            {principles.map((p) => (
-              <View key={p.id} style={styles.principleItem}>
-                <Text style={styles.principleContent}>{p.content}</Text>
-              </View>
-            ))}
-          </ScrollView>
+            {isBuy ? '매수' : '매도'}
+          </Text>
+        </View>
+      </View>
 
-          <Pressable style={styles.confirmButton} onPress={onClose}>
-            <Text style={styles.confirmText}>닫기</Text>
-          </Pressable>
-        </Pressable>
+      <ScrollView
+        style={styles.principleList}
+        contentContainerStyle={styles.principleListContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {principles.map((p) => (
+          <View key={p.id} style={styles.principleItem}>
+            <Text style={styles.principleContent}>{p.content}</Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <Pressable style={styles.confirmButton} onPress={onClose}>
+        <Text style={styles.confirmText}>닫기</Text>
       </Pressable>
-    </Modal>
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-
   sheet: {
-    backgroundColor: COLORS_NEW.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingTop: 12,
     paddingBottom: 32,
     maxHeight: '75%',
-  },
-
-  handle: {
-    alignSelf: 'center',
-    width: 64,
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: COLORS_NEW.handle,
-    marginBottom: 16,
   },
 
   sheetHeader: {

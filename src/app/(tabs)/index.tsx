@@ -1,56 +1,15 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TradeCalendar from '@/features/home/components/TradeCalendar';
 import TradeCard from '@/features/home/components/TradeCard';
-import { Trade, TradeType } from '@/features/home/types';
-
-const trades: Trade[] = [
-  {
-    id: 1,
-    date: '2026-05-29',
-    coinName: '비트코인',
-    amount: 1,
-    symbol: 'BTC',
-    type: 'buy',
-    time: '14:32',
-    price: 103403000,
-    reviewed: false,
-  },
-  {
-    id: 2,
-    date: '2026-05-29',
-    coinName: '리플',
-    amount: 4,
-    symbol: 'XRP',
-    type: 'sell',
-    time: '14:32',
-    price: 103403000,
-    reviewed: false,
-  },
-  {
-    id: 3,
-    date: '2026-05-24',
-    coinName: '이더리움',
-    amount: 1,
-    symbol: 'ETH',
-    type: 'buy',
-    time: '09:12',
-    price: 5200000,
-    reviewed: false,
-  },
-];
-
-const tradeMarks: Record<string, TradeType[]> = {
-  '2026-05-18': ['buy'],
-  '2026-05-19': ['buy'],
-  '2026-05-23': ['sell'],
-  '2026-05-24': ['buy', 'sell'],
-  '2026-05-28': ['buy', 'sell'],
-};
+import { useTradeStore, getTradeMarks } from '@/store/tradeStore';
 
 export default function HomeScreen() {
+  const trades = useTradeStore((state) => state.trades);
+  const tradeMarks = useMemo(() => getTradeMarks(trades), [trades]);
+
   const [currentDate, setCurrentDate] = useState('2026-05-01');
   const [selectedDate, setSelectedDate] = useState('2026-05-29');
 
@@ -72,7 +31,7 @@ export default function HomeScreen() {
 
         <View style={styles.tradeSection}>
           <Text style={styles.tradeTitle}>
-            {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래를 복기해보세요`}
+            {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래 내역`}
           </Text>
 
           {selectedTrades.length === 0 ? (
@@ -103,7 +62,7 @@ const styles = StyleSheet.create({
   },
 
   tradeTitle: {
-    fontSize: 20,
+    fontSize: 22,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 16,
