@@ -6,8 +6,9 @@ import PrimaryButton from '@/shared/components/PrimaryButton';
 import FinishIcon from '../../../assets/finish.svg';
 
 export default function InputDoneScreen() {
-  const { coinName, symbol, amount, tradeType, price, time } =
+  const { tradeId, coinName, symbol, amount, tradeType, price, time } =
     useLocalSearchParams<{
+      tradeId: string;
       coinName: string;
       symbol: string;
       amount: string;
@@ -24,7 +25,7 @@ export default function InputDoneScreen() {
     router.replace({
       pathname: '/review/select-principle-set',
       params: {
-        tradeId: Date.now().toString(),
+        tradeId,
         coinName,
         symbol,
         amount,

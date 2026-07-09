@@ -5,13 +5,18 @@ import { type ComponentType, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import InputOptionsModal from '@/features/input/components/InputOptionsModal';
+import SyncSuccessModal from '@/features/input/components/SyncSuccessModal';
+import { useApiStore } from '@/store/apiStore';
 import HomeIcon from '../../../assets/icons/home.svg';
 import LogIcon from '../../../assets/icons/log2.svg';
 import PrincipleIcon from '../../../assets/icons/principle.svg';
 import MyIcon from '../../../assets/icons/my.svg';
 import AddIcon from '../../../assets/icons/add.svg';
+
+const SYNC_DURATION_MS = 1200;
 
 const TAB_BAR_HEIGHT = 52;
 const ICON_SIZE = 16;
@@ -41,8 +46,14 @@ const RIGHT_TABS: TabIconConfig[] = [
 function CustomTabBar({
   state,
   navigation,
-  onAddPress,
-}: BottomTabBarProps & { onAddPress: () => void }) {
+  onFabPress,
+  isApiConnected,
+  isSyncing,
+}: BottomTabBarProps & {
+  onFabPress: () => void;
+  isApiConnected: boolean;
+  isSyncing: boolean;
+}) {
   const insets = useSafeAreaInsets();
 
   const renderGroupItem = ({ name, Icon, width, height }: TabIconConfig) => {
@@ -88,31 +99,53 @@ function CustomTabBar({
       ]}
     >
       <View style={styles.row}>
-        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+        <View style={styles.groupPill}>
+          <BlurView
+            intensity={35}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
           <LinearGradient
             pointerEvents="none"
-            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0)']}
             locations={[0, 0.6]}
             style={styles.glassSheen}
           />
-          {LEFT_TABS.map((tab) => renderGroupItem(tab))}
-        </BlurView>
+          <View style={styles.groupContent}>
+            {LEFT_TABS.map((tab) => renderGroupItem(tab))}
+          </View>
+        </View>
 
-        <Pressable style={styles.fabWrapper} onPress={onAddPress}>
-          <View style={styles.fab}>
-            <AddIcon width={18} height={18} color="#FFFFFF" />
+        <Pressable
+          style={styles.fabWrapper}
+          onPress={onFabPress}
+          disabled={isSyncing}
+        >
+          <View style={[styles.fab, isSyncing && styles.fabDisabled]}>
+            {isApiConnected ? (
+              <Ionicons name="refresh" size={18} color="#FFFFFF" />
+            ) : (
+              <AddIcon width={18} height={18} color="#FFFFFF" />
+            )}
           </View>
         </Pressable>
 
-        <BlurView intensity={35} tint="light" style={styles.groupPill}>
+        <View style={styles.groupPill}>
+          <BlurView
+            intensity={35}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
           <LinearGradient
             pointerEvents="none"
-            colors={['rgba(255,255,255,0.4)', 'rgba(255,255,255,0)']}
+            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0)']}
             locations={[0, 0.6]}
             style={styles.glassSheen}
           />
-          {RIGHT_TABS.map((tab) => renderGroupItem(tab))}
-        </BlurView>
+          <View style={styles.groupContent}>
+            {RIGHT_TABS.map((tab) => renderGroupItem(tab))}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -120,7 +153,24 @@ function CustomTabBar({
 
 export default function TabLayout() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccessVisible, setSyncSuccessVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const isApiConnected = useApiStore((s) => s.isApiConnected);
+
+  const handleFabPress = () => {
+    if (!isApiConnected) {
+      setModalVisible(true);
+      return;
+    }
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+      setSyncSuccessVisible(true);
+    }, SYNC_DURATION_MS);
+  };
 
   return (
     <>
@@ -128,7 +178,12 @@ export default function TabLayout() {
         initialRouteName="index"
         screenOptions={{ headerShown: false }}
         tabBar={(props) => (
-          <CustomTabBar {...props} onAddPress={() => setModalVisible(true)} />
+          <CustomTabBar
+            {...props}
+            onFabPress={handleFabPress}
+            isApiConnected={isApiConnected}
+            isSyncing={isSyncing}
+          />
         )}
       >
         <Tabs.Screen name="index" />
@@ -142,6 +197,11 @@ export default function TabLayout() {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         bottomInset={insets.bottom}
+      />
+
+      <SyncSuccessModal
+        visible={syncSuccessVisible}
+        onClose={() => setSyncSuccessVisible(false)}
       />
     </>
   );
@@ -162,17 +222,19 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   groupPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
     flex: 1,
     height: 52,
     borderRadius: 32,
     padding: 4,
     overflow: 'hidden',
-    backgroundColor: 'rgba(235, 235, 235, 0.45)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(200, 200, 203, 0.55)',
+  },
+  groupContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    flex: 1,
+    alignSelf: 'stretch',
   },
   glassSheen: {
     position: 'absolute',
@@ -208,5 +270,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS_NEW.fab,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fabDisabled: {
+    opacity: 0.5,
   },
 });

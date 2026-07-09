@@ -4,10 +4,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
+import { useApiStore } from '@/store/apiStore';
 import ManualInputIcon from '../../../../assets/icons/input/input.svg';
 import ApiInputIcon from '../../../../assets/icons/input/api.svg';
-
-const IS_API_CONNECTED = false;
 
 interface Props {
   visible: boolean;
@@ -20,6 +19,8 @@ export default function InputOptionsModal({
   onClose,
   bottomInset,
 }: Props) {
+  const isApiConnected = useApiStore((s) => s.isApiConnected);
+
   return (
     <BottomSheetModal
       visible={visible}
@@ -50,8 +51,8 @@ export default function InputOptionsModal({
 
         {/* API 연동 */}
         <Pressable
-          style={[styles.option, IS_API_CONNECTED && styles.optionDisabled]}
-          disabled={IS_API_CONNECTED}
+          style={[styles.option, isApiConnected && styles.optionDisabled]}
+          disabled={isApiConnected}
           onPress={() => {
             onClose();
             router.push('/api-key');
@@ -61,7 +62,7 @@ export default function InputOptionsModal({
             <ApiInputIcon width={127} height={104} />
           </View>
           <Text style={styles.optionTitle}>
-            {IS_API_CONNECTED ? '연동 완료' : 'API 연동'}
+            {isApiConnected ? '연동 완료' : 'API 연동'}
           </Text>
         </Pressable>
       </View>

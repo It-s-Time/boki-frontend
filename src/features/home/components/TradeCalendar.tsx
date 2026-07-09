@@ -1,11 +1,15 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import DateWheelPicker from '@/shared/components/DateWheelPicker';
 import { TradeType } from '../types';
 
 const DAY_SIZE = 44;
+const MIN_YEAR = new Date().getFullYear() - 5;
+const MAX_YEAR = new Date().getFullYear() + 1;
 
 LocaleConfig.locales.kr = {
   monthNames: [
@@ -65,15 +69,37 @@ export default function TradeCalendar({
   onMonthChange,
   onDateSelect,
 }: Props) {
+  const currentYear = parseInt(currentDate.slice(0, 4));
+  const currentMonth = parseInt(currentDate.slice(5, 7));
+
+  const [showPicker, setShowPicker] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  const handlePickerChange = (date: Date) => {
+    onMonthChange(
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`,
+    );
+  };
+
   return (
-    <>
-      <View style={styles.dayHeader}>
-        <View style={styles.monthPill}>
+    <View style={styles.wrapper}>
+      <View
+        style={styles.dayHeader}
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+      >
+        <Pressable
+          style={styles.monthPill}
+          onPress={() => setShowPicker((v) => !v)}
+        >
           <Text style={styles.monthPillText}>
-            {`${parseInt(currentDate.slice(5, 7))}월 ${currentDate.slice(0, 4)}`}
+            {`${currentMonth}월 ${currentYear}`}
           </Text>
-          <Entypo name="chevron-down" size={16} color={COLORS_NEW.border} />
-        </View>
+          <AntDesign
+            name={showPicker ? 'caret-up' : 'caret-down'}
+            size={12}
+            color={COLORS_NEW.border}
+          />
+        </Pressable>
       </View>
 
       <View style={styles.card}>
@@ -127,6 +153,7 @@ export default function TradeCalendar({
                         r="50%"
                       >
                         <Stop offset="0%" stopColor={COLORS_NEW.lightRed} />
+                        <Stop offset="40%" stopColor={COLORS_NEW.lightRed} />
                         <Stop offset="100%" stopColor={COLORS_NEW.lightBlue} />
                       </RadialGradient>
                     </Defs>
@@ -173,11 +200,29 @@ export default function TradeCalendar({
           style={styles.calendar}
         />
       </View>
-    </>
+
+      {showPicker && (
+        <View style={[styles.datePickerOverlay, { top: headerHeight + 8 }]}>
+          <View style={styles.datePickerPanel}>
+            <DateWheelPicker
+              value={new Date(currentYear, currentMonth - 1, 1)}
+              onChange={handlePickerChange}
+              minYear={MIN_YEAR}
+              maxYear={MAX_YEAR}
+              showDay={false}
+            />
+          </View>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    position: 'relative',
+  },
+
   dayHeader: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -188,12 +233,34 @@ const styles = StyleSheet.create({
   monthPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
     borderRadius: 999,
     paddingHorizontal: 20,
     paddingVertical: 8,
+  },
+
+  datePickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+
+  datePickerPanel: {
+    backgroundColor: COLORS_NEW.background,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 0.7,
   },
 
   monthPillText: {

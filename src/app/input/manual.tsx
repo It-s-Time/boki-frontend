@@ -10,10 +10,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import ProgressBar from '@/features/review/components/ProgressBar';
+import DateWheelPicker from '@/shared/components/DateWheelPicker';
 import { useTradeStore } from '@/store/tradeStore';
 
 const COINS = [
@@ -38,9 +40,9 @@ const BADGE_COLORS: Record<string, string> = {
 
 type TradeType = 'buy' | 'sell';
 type Coin = (typeof COINS)[number];
-type Step = 'coin' | 'tradeType' | 'price';
+type Step = 'date' | 'coin' | 'tradeType' | 'price';
 
-const STEPS: Step[] = ['coin', 'tradeType', 'price'];
+const STEPS: Step[] = ['date', 'coin', 'tradeType', 'price'];
 
 const onlyDigits = (text: string) => text.replace(/[^0-9]/g, '');
 const onlyDecimal = (text: string) => text.replace(/[^0-9.]/g, '');
@@ -48,11 +50,17 @@ const formatNumber = (digits: string) =>
   digits ? Number(digits).toLocaleString() : '';
 const roundDecimal = (n: number, digits = 8) =>
   isFinite(n) ? String(Number(n.toFixed(digits))) : '';
+const formatDate = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(
+    d.getDate(),
+  ).padStart(2, '0')}`;
 
 export default function ManualInputScreen() {
   const [stepIndex, setStepIndex] = useState(0);
   const step = STEPS[stepIndex];
 
+  const [tradeDate, setTradeDate] = useState(() => new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [coinSearch, setCoinSearch] = useState('');
   const [showCoinList, setShowCoinList] = useState(false);
@@ -106,11 +114,13 @@ export default function ManualInputScreen() {
   };
 
   const canProceed =
-    step === 'coin'
-      ? !!selectedCoin
-      : step === 'tradeType'
-        ? !!tradeType
-        : !!price && !!totalAmount && !!quantity;
+    step === 'date'
+      ? true
+      : step === 'coin'
+        ? !!selectedCoin
+        : step === 'tradeType'
+          ? !!tradeType
+          : !!price && !!totalAmount && !!quantity;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -119,7 +129,7 @@ export default function ManualInputScreen() {
       const time = `${String(now.getHours()).padStart(2, '0')}:${String(
         now.getMinutes(),
       ).padStart(2, '0')}`;
-      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const date = `${tradeDate.getFullYear()}-${String(tradeDate.getMonth() + 1).padStart(2, '0')}-${String(tradeDate.getDate()).padStart(2, '0')}`;
 
       const tradeId = useTradeStore.getState().addTrade({
         date,
@@ -248,10 +258,48 @@ export default function ManualInputScreen() {
 
         {step !== 'coin' && (
           <ScrollView
+            style={styles.stepScroll}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
           >
+            {step === 'date' && (
+              <View style={styles.section}>
+                <Text style={styles.label}>언제 거래하셨나요?</Text>
+                <Pressable
+                  style={styles.inputBox}
+                  onPress={() => setShowDatePicker((v) => !v)}
+                >
+                  <Text style={styles.input}>{formatDate(tradeDate)}</Text>
+                  <View
+                    style={[
+                      styles.calendarButton,
+                      showDatePicker && styles.calendarButtonActive,
+                    ]}
+                  >
+                    <Feather
+                      name="calendar"
+                      size={20}
+                      color={
+                        showDatePicker
+                          ? COLORS_NEW.background
+                          : COLORS_NEW.border
+                      }
+                    />
+                  </View>
+                </Pressable>
+
+                {showDatePicker && (
+                  <View style={styles.datePickerPanel}>
+                    <DateWheelPicker
+                      value={tradeDate}
+                      onChange={setTradeDate}
+                    />
+                  </View>
+                )}
+              </View>
+            )}
+
             {step === 'tradeType' && (
               <View style={styles.section}>
                 <Text style={styles.label}>거래 유형</Text>
@@ -389,11 +437,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 24,
   },
+  stepScroll: {
+    overflow: 'visible',
+  },
   content: {
     paddingBottom: 16,
     gap: 24,
   },
   section: {
+    marginTop: 24,
     gap: 16,
   },
   coinSection: {
@@ -404,8 +456,8 @@ const styles = StyleSheet.create({
   },
   label: {
     color: COLORS_NEW.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 20,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 26,
   },
   inputBox: {
     flexDirection: 'row',
@@ -415,14 +467,14 @@ const styles = StyleSheet.create({
     borderColor: COLORS_NEW.lightBorder,
     borderRadius: 20,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   input: {
     flex: 1,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     padding: 0,
-    fontSize: 18,
+    fontSize: 22,
   },
   quantityInput: {
     paddingRight: 50,
@@ -437,6 +489,31 @@ const styles = StyleSheet.create({
   inputBoxOpen: {
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+  },
+  calendarButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarButtonActive: {
+    backgroundColor: COLORS_NEW.border,
+  },
+  datePickerPanel: {
+    alignSelf: 'flex-end',
+    width: '70%',
+    backgroundColor: COLORS_NEW.background,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 0.7,
   },
   coinListPanel: {
     flex: 1,

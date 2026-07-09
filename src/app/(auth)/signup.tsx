@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import Symbol from '../../../assets/symbol.svg';
 import LogoText from '../../../assets/logo2.svg';
 import GoogleIcon from '../../../assets/icons/google.svg';
+import KakaoIcon from '../../../assets/icons/kakao.svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LoadingScreen from '@/shared/components/LoadingScreen';
@@ -55,7 +56,7 @@ export default function SignupScreen() {
           </Pressable>
 
           <Pressable style={styles.kakaoButton} onPress={() => login('kakao')}>
-            <Text style={styles.kakaoIcon}>k</Text>
+            <KakaoIcon width={20} height={20} />
             <Text style={styles.kakaoLabel}>카카오로 시작하기</Text>
           </Pressable>
 
@@ -129,11 +130,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 18,
     marginTop: 20,
-  },
-  kakaoIcon: {
-    color: COLORS_NEW.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 16,
   },
   kakaoLabel: {
     color: COLORS_NEW.textPrimary,

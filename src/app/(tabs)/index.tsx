@@ -6,12 +6,15 @@ import TradeCalendar from '@/features/home/components/TradeCalendar';
 import TradeCard from '@/features/home/components/TradeCard';
 import { useTradeStore, getTradeMarks } from '@/store/tradeStore';
 
+const toDateString = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
 export default function HomeScreen() {
   const trades = useTradeStore((state) => state.trades);
   const tradeMarks = useMemo(() => getTradeMarks(trades), [trades]);
 
-  const [currentDate, setCurrentDate] = useState('2026-05-01');
-  const [selectedDate, setSelectedDate] = useState('2026-05-29');
+  const [currentDate, setCurrentDate] = useState(() => toDateString(new Date()));
+  const [selectedDate, setSelectedDate] = useState(() => toDateString(new Date()));
 
   const selectedTrades = trades.filter((trade) => trade.date === selectedDate);
 

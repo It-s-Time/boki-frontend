@@ -1,11 +1,19 @@
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
 import Button from '@/shared/components/Button';
+import { useApiStore } from '@/store/apiStore';
 import Logo from '../../../assets/icons/logo.svg';
 
 export default function ApiSuccessScreen() {
+  const setApiConnected = useApiStore((s) => s.setApiConnected);
+
+  useEffect(() => {
+    setApiConnected(true);
+  }, [setApiConnected]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>

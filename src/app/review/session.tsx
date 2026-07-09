@@ -9,6 +9,7 @@ import ScoreSelector from '@/features/review/components/ScoreSelector';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import LoadingScreen from '@/shared/components/LoadingScreen';
+import { useTradeStore } from '@/store/tradeStore';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -16,17 +17,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ReviewSessionScreen() {
   const router = useRouter();
-  const { principleSetId, coinName, symbol, amount, tradeType, time, price } =
-    useLocalSearchParams<{
-      tradeId: string;
-      principleSetId: string;
-      coinName: string;
-      symbol: string;
-      amount: string;
-      tradeType: string;
-      time: string;
-      price: string;
-    }>();
+  const {
+    tradeId,
+    principleSetId,
+    coinName,
+    symbol,
+    amount,
+    tradeType,
+    time,
+    price,
+  } = useLocalSearchParams<{
+    tradeId: string;
+    principleSetId: string;
+    coinName: string;
+    symbol: string;
+    amount: string;
+    tradeType: string;
+    time: string;
+    price: string;
+  }>();
 
   const principleSet = PRINCIPLE_SETS.find((s) => s.id === principleSetId);
   const principles: Principle[] = (principleSet?.principles ?? []).filter(
@@ -67,6 +76,9 @@ export default function ReviewSessionScreen() {
     if (!isNextEnabled) return;
     if (isLast) {
       setIsLoading(true);
+      if (tradeId) {
+        useTradeStore.getState().setReviewed(Number(tradeId), true);
+      }
       setTimeout(() => {
         router.push({
           pathname: '/review/result',
