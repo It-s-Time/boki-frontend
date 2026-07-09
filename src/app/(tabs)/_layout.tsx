@@ -31,7 +31,7 @@ interface TabIconConfig {
 
 const LEFT_TABS: TabIconConfig[] = [
   { name: 'index', Icon: HomeIcon, width: ICON_SIZE, height: ICON_SIZE },
-  { name: 'stats', Icon: LogIcon, width: ICON_SIZE * 0.75, height: ICON_SIZE },
+  { name: 'journal', Icon: LogIcon, width: ICON_SIZE * 0.75, height: ICON_SIZE },
 ];
 
 const RIGHT_TABS: TabIconConfig[] = [
@@ -188,7 +188,7 @@ export default function TabLayout() {
         )}
       >
         <Tabs.Screen name="index" />
-        <Tabs.Screen name="stats" />
+        <Tabs.Screen name="journal" />
         <Tabs.Screen name="input" />
         <Tabs.Screen name="principles" />
         <Tabs.Screen name="mypage" />
