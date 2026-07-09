@@ -32,7 +32,7 @@ type JournalEntry = {
 const FILTERS: GradeFilter[] = ['전체', 'S', 'A', 'B', 'C', 'F'];
 const SCORE_HORIZONTAL = require('../../../assets/icons/Frame 550.png');
 const SCORE_VERTICAL = require('../../../assets/icons/Frame 549.png');
-const MEMO_ICON = require('../../../assets/icons/_레이어_1.png');
+const MEMO_ICON = require('../../../assets/icons/_레이어_1.png');
 const MEMO_CHART_IMAGE = require('../../../assets/icons/Rectangle 1430106783.png');
 const MEMO_COIN_IMAGE = require('../../../assets/icons/Rectangle 1430106784.png');
 
