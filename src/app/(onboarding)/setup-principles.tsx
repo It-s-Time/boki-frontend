@@ -4,6 +4,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
+import PrimaryButton from '@/shared/components/PrimaryButton';
 import ShortTermIcon from '../../../assets/icons/onboarding/event_note.svg';
 import MidTermIcon from '../../../assets/icons/onboarding/android_cell.svg';
 import LongTermIcon from '../../../assets/icons/onboarding/nature.svg';
@@ -79,10 +81,8 @@ export default function SetupPrinciplesScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color={COLORS_NEW.border} />
-        </Pressable>
+      <View style={styles.headerWrap}>
+        <BackHeader onBack={() => router.back()} />
       </View>
       <View style={styles.headerDivider} />
 
@@ -91,7 +91,7 @@ export default function SetupPrinciplesScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>매매원칙을 골라주세요</Text>
+        <Text style={styles.title}>보키가 제공하는 매매원칙이에요</Text>
 
         {PRINCIPLE_TYPES.map((item) => {
           const isSelected = selected === item.type;
@@ -142,13 +142,7 @@ export default function SetupPrinciplesScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Pressable
-          style={[styles.nextButton, !selected && styles.nextButtonDisabled]}
-          onPress={handleNext}
-          disabled={!selected}
-        >
-          <Text style={styles.nextButtonText}>다음</Text>
-        </Pressable>
+        <PrimaryButton label="다음" onPress={handleNext} disabled={!selected} />
       </View>
     </SafeAreaView>
   );
@@ -160,19 +154,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS_NEW.background,
     paddingHorizontal: 24,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  headerWrap: {
     paddingTop: 20,
-  },
-  backButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: COLORS_NEW.lightGray,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerDivider: {
     height: 4,
@@ -264,19 +247,5 @@ const styles = StyleSheet.create({
   footer: {
     paddingBottom: 24,
     paddingTop: 8,
-  },
-  nextButton: {
-    backgroundColor: COLORS_NEW.fab,
-    borderRadius: 20,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  nextButtonDisabled: {
-    opacity: 0.9,
-  },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'Pretendard-Medium',
-    fontSize: 20,
   },
 });

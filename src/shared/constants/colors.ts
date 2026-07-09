@@ -40,4 +40,13 @@ export const COLORS_NEW = {
 
   upStrong: '#C76F53', // 상승 진하게
   downStrong: '#5DA4A6', // 하강 진하게
+
+  lightRed: '#FFE0DD', // 연한 빨강 (상승)
+  lightBlue: '#D7E8FC', // 연한 파랑 (하강)
+
+  buy: '#FF6E3F', // 매수
+  sell: '#6580E4', // 매도
+
+  lightBorder: '#EFEFEF', // 연한 테두리
+  handle: '#D6D6D8',
 };

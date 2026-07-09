@@ -1,4 +1,4 @@
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { View, StyleSheet } from 'react-native';
 
 interface Props {
@@ -15,10 +15,10 @@ export default function ProgressBar({ total, current }: Props) {
           style={[
             styles.segment,
             i <= current ? styles.segmentFilled : styles.segmentEmpty,
-            i === 0 && { borderTopLeftRadius: 8, borderBottomLeftRadius: 8 },
+            i === 0 && { borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
             (i === current || i === total - 1) && {
-              borderTopRightRadius: 8,
-              borderBottomRightRadius: 8,
+              borderTopRightRadius: 999,
+              borderBottomRightRadius: 999,
             },
           ]}
         />
@@ -30,16 +30,15 @@ export default function ProgressBar({ total, current }: Props) {
 const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
-    marginBottom: 20,
   },
   segment: {
     flex: 1,
     height: 4,
   },
   segmentFilled: {
-    backgroundColor: COLORS.textSecondary,
+    backgroundColor: COLORS_NEW.fab,
   },
   segmentEmpty: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS_NEW.lightGray,
   },
 });

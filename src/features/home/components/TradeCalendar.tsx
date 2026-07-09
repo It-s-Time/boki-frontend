@@ -1,8 +1,15 @@
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import DateWheelPicker from '@/shared/components/DateWheelPicker';
 import { TradeType } from '../types';
+
+const DAY_SIZE = 44;
+const MIN_YEAR = new Date().getFullYear() - 5;
+const MAX_YEAR = new Date().getFullYear() + 1;
 
 LocaleConfig.locales.kr = {
   monthNames: [
@@ -34,15 +41,15 @@ LocaleConfig.locales.kr = {
     '12월',
   ],
   dayNames: [
-    '일요일',
-    '월요일',
-    '화요일',
-    '수요일',
-    '목요일',
-    '금요일',
-    '토요일',
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
   ],
-  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+  dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   today: '오늘',
 };
 LocaleConfig.defaultLocale = 'kr';
@@ -62,28 +69,36 @@ export default function TradeCalendar({
   onMonthChange,
   onDateSelect,
 }: Props) {
-  const moveMonth = (direction: 'prev' | 'next') => {
-    const [year, month] = currentDate.split('-').map(Number);
-    const date = new Date(year, month - 1, 1);
-    date.setMonth(date.getMonth() + (direction === 'next' ? 1 : -1));
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    onMonthChange(`${y}-${m}-01`);
+  const currentYear = parseInt(currentDate.slice(0, 4));
+  const currentMonth = parseInt(currentDate.slice(5, 7));
+
+  const [showPicker, setShowPicker] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  const handlePickerChange = (date: Date) => {
+    onMonthChange(
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`,
+    );
   };
 
   return (
-    <>
-      <View style={styles.dayHeader}>
-        <Pressable onPress={() => moveMonth('prev')}>
-          <Entypo name="chevron-thin-left" size={22} color="black" />
-        </Pressable>
-
-        <Text style={styles.title}>
-          {`${currentDate.slice(0, 4)}.${parseInt(currentDate.slice(5, 7))}`}
-        </Text>
-
-        <Pressable onPress={() => moveMonth('next')}>
-          <Entypo name="chevron-thin-right" size={22} color="black" />
+    <View style={styles.wrapper}>
+      <View
+        style={styles.dayHeader}
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+      >
+        <Pressable
+          style={styles.monthPill}
+          onPress={() => setShowPicker((v) => !v)}
+        >
+          <Text style={styles.monthPillText}>
+            {`${currentMonth}월 ${currentYear}`}
+          </Text>
+          <AntDesign
+            name={showPicker ? 'caret-up' : 'caret-down'}
+            size={12}
+            color={COLORS_NEW.border}
+          />
         </Pressable>
       </View>
 
@@ -103,14 +118,54 @@ export default function TradeCalendar({
             const isSelected = dateString === selectedDate;
             const dots = tradeMarks[dateString] ?? [];
             const isDisabled = state === 'disabled';
+            const hasBuy = dots.includes('buy');
+            const hasSell = dots.includes('sell');
+            const isMixed = hasBuy && hasSell;
             const hasDot = dots.length > 0;
+
+            const dayBoxColorStyle = isSelected
+              ? styles.selectedDayBox
+              : isMixed
+                ? null
+                : hasBuy
+                  ? { backgroundColor: COLORS_NEW.lightRed }
+                  : hasSell
+                    ? { backgroundColor: COLORS_NEW.lightBlue }
+                    : styles.emptyDayBox;
 
             return (
               <Pressable
                 disabled={isDisabled}
                 onPress={() => onDateSelect(dateString)}
-                style={[styles.dayBox, isSelected && styles.selectedDayBox]}
+                style={[styles.dayBox, dayBoxColorStyle]}
               >
+                {isMixed && !isSelected && !isDisabled && (
+                  <Svg
+                    width={DAY_SIZE}
+                    height={DAY_SIZE}
+                    style={StyleSheet.absoluteFillObject}
+                  >
+                    <Defs>
+                      <RadialGradient
+                        id={`mixedGradient-${dateString}`}
+                        cx="50%"
+                        cy="50%"
+                        r="50%"
+                      >
+                        <Stop offset="0%" stopColor={COLORS_NEW.lightRed} />
+                        <Stop offset="40%" stopColor={COLORS_NEW.lightRed} />
+                        <Stop offset="100%" stopColor={COLORS_NEW.lightBlue} />
+                      </RadialGradient>
+                    </Defs>
+                    <Circle
+                      cx={DAY_SIZE / 2}
+                      cy={DAY_SIZE / 2}
+                      r={DAY_SIZE / 2}
+                      fill={`url(#mixedGradient-${dateString})`}
+                    />
+                  </Svg>
+                )}
+
                 <Text
                   style={[
                     styles.dayText,
@@ -121,58 +176,102 @@ export default function TradeCalendar({
                 >
                   {date.day}
                 </Text>
-
-                <View style={styles.dotRow}>
-                  {!isDisabled &&
-                    dots.map((type, index) => (
-                      <View
-                        key={`${type}-${index}`}
-                        style={[
-                          styles.dot,
-                          {
-                            backgroundColor:
-                              type === 'buy' ? COLORS.buy : COLORS.sell,
-                          },
-                        ]}
-                      />
-                    ))}
-                </View>
               </Pressable>
             );
           }}
           theme={{
-            backgroundColor: COLORS.box,
-            calendarBackground: COLORS.box,
-            textSectionTitleColor: COLORS.textPrimary,
-            textDayHeaderFontSize: 18,
-            textDayHeaderFontFamily: 'Pretendard-SemiBold',
+            backgroundColor: COLORS_NEW.background,
+            calendarBackground: COLORS_NEW.background,
+            textSectionTitleColor: COLORS_NEW.textPrimary,
+            ...({
+              'stylesheet.calendar.header': {
+                dayHeader: {
+                  marginTop: 2,
+                  marginBottom: 7,
+                  width: DAY_SIZE,
+                  textAlign: 'center',
+                  fontSize: 16,
+                  fontFamily: 'Pretendard-SemiBold',
+                  color: COLORS_NEW.textPrimary,
+                },
+              },
+            } as object),
           }}
           style={styles.calendar}
         />
       </View>
-    </>
+
+      {showPicker && (
+        <View style={[styles.datePickerOverlay, { top: headerHeight + 8 }]}>
+          <View style={styles.datePickerPanel}>
+            <DateWheelPicker
+              value={new Date(currentYear, currentMonth - 1, 1)}
+              onChange={handlePickerChange}
+              minYear={MIN_YEAR}
+              maxYear={MAX_YEAR}
+              showDay={false}
+            />
+          </View>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    position: 'relative',
+  },
+
   dayHeader: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 12,
   },
 
-  title: {
-    fontSize: 28,
-    color: COLORS.textPrimary,
-    fontFamily: 'Pretendard-SemiBold',
-    marginHorizontal: 16,
+  monthPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 999,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+
+  datePickerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+
+  datePickerPanel: {
+    backgroundColor: COLORS_NEW.background,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 0.7,
+  },
+
+  monthPillText: {
+    fontSize: 20,
+    color: COLORS_NEW.textPrimary,
+    fontFamily: 'Pretendard-Regular',
   },
 
   card: {
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     borderRadius: 8,
-    paddingHorizontal: 20,
   },
 
   calendar: {
@@ -181,20 +280,25 @@ const styles = StyleSheet.create({
   },
 
   dayBox: {
-    width: 44,
-    height: 44,
+    width: DAY_SIZE,
+    height: DAY_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: DAY_SIZE / 2,
+    overflow: 'hidden',
+  },
+
+  emptyDayBox: {
+    backgroundColor: COLORS_NEW.lightGray,
   },
 
   selectedDayBox: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#000000',
   },
 
   dayText: {
     fontSize: 18,
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },
 
@@ -205,21 +309,6 @@ const styles = StyleSheet.create({
 
   hiddenDayText: {
     color: 'transparent',
-  },
-
-  dotRow: {
-    position: 'absolute',
-    bottom: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 999,
-    marginHorizontal: 1,
   },
 
   noDotText: {
