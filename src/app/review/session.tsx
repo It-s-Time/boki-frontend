@@ -1,9 +1,8 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { Principle, PrincipleAnswer } from '@/features/review/types';
-import {
-  PRINCIPLE_SETS,
-  PRINCIPLE_ILLUSTRATIONS,
-} from '@/features/review/data';
+import { PRINCIPLE_ILLUSTRATIONS, PRINCIPLE_SETS } from '@/features/review/data';
+import { useRuleSets } from '@/features/review/hooks/useRuleSets';
+import { useCreateAiReport } from '@/features/review/hooks/useAiReport';
 import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
 import ReviewMemoModal, {
@@ -39,11 +38,16 @@ export default function ReviewSessionScreen() {
     price: string;
   }>();
 
-  const principleSet = PRINCIPLE_SETS.find((s) => s.id === principleSetId);
+  const { data, isLoading: isPrincipleSetsLoading } = useRuleSets('template');
+  // Fall back to the local template set until the backend has TEMPLATE rule sets seeded.
+  const principleSets = data && data.length > 0 ? data : PRINCIPLE_SETS;
+  const principleSet = principleSets.find((s) => s.id === principleSetId);
   const principles: Principle[] = (principleSet?.principles ?? []).filter(
     (p) => p.type === tradeType,
   );
   const total = principles.length;
+
+  const createAiReport = useCreateAiReport();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMemoModal, setShowMemoModal] = useState(false);
@@ -81,13 +85,15 @@ export default function ReviewSessionScreen() {
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
     setIsSubmitting(true);
-    // TODO: replace this artificial delay with the real AI analysis API call.
-    // TODO: once the review-create API is wired up, invalidate tradeKeys.all
-    // (or the specific trade's query) here so reviewStatus/reviewId refresh from the server.
     // TODO: persist memo.content / memo.photos once the review result flow is wired back up
-    setTimeout(() => {
-      router.replace({ pathname: '/review/ai-report', params: { tradeId } });
-    }, 1800);
+    createAiReport.mutate(Number(tradeId), {
+      onSuccess: () => {
+        router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+      },
+      onError: () => {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleBack = () => {
@@ -100,6 +106,10 @@ export default function ReviewSessionScreen() {
 
   if (isSubmitting) {
     return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
+  }
+
+  if (isPrincipleSetsLoading) {
+    return <LoadingScreen message="매매원칙을 불러오고 있어요" />;
   }
 
   if (!principleSet || !currentPrinciple) return null;
@@ -133,6 +143,12 @@ export default function ReviewSessionScreen() {
           onChange={(n) => updateAnswer({ score: n })}
         />
       </View>
+
+      {createAiReport.isError && (
+        <Text style={styles.submitError}>
+          리포트 생성에 실패했어요, 다시 시도해주세요
+        </Text>
+      )}
 
       <PrimaryButton
         label={isLast ? '완료' : '다음'}
@@ -186,5 +202,13 @@ const styles = StyleSheet.create({
 
   button: {
     marginTop: 24,
+  },
+
+  submitError: {
+    color: COLORS_NEW.downStrong,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });

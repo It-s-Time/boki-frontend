@@ -5,7 +5,7 @@ import Svg, { Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackwardIcon from 'assets/icons/backward.svg';
-import { TradeGrade } from '../types';
+import { AiReport } from '../types';
 
 const SCORE_HORIZONTAL = require('../../../../assets/icons/Frame 550.png');
 const SCORE_VERTICAL = require('../../../../assets/icons/Frame 549.png');
@@ -14,11 +14,11 @@ const MEMO_CHART_IMAGE = require('../../../../assets/icons/Rectangle 1430106783.
 const MEMO_COIN_IMAGE = require('../../../../assets/icons/Rectangle 1430106784.png');
 
 interface Props {
-  grade: TradeGrade;
+  report: AiReport;
   onBack: () => void;
 }
 
-export default function ReportDetail({ grade, onBack }: Props) {
+export default function ReportDetail({ report, onBack }: Props) {
   const [memoVisible, setMemoVisible] = useState(false);
 
   return (
@@ -41,37 +41,24 @@ export default function ReportDetail({ grade, onBack }: Props) {
         <View style={styles.detailCard}>
           <TicketDetailNotch side="left" />
           <TicketDetailNotch side="right" />
-          <ScoreBurst />
+          <ScoreBurst percent={Math.round(report.complianceRate * 100)} />
           <Text style={styles.rankText}>
-            Rank <Text style={styles.rankGrade}>{grade}</Text>
+            Rank <Text style={styles.rankGrade}>{report.grade}</Text>
           </Text>
 
           <View style={styles.tagWrap}>
-            {['# 원칙준수율 A급', '# 이성적인', '# 꼼꼼한', '# 엄격한', '# 우직한'].map(
-              (tag) => (
-                <View key={tag} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag}</Text>
-                </View>
-              ),
-            )}
+            {report.hashtags.map((tag) => (
+              <View key={tag} style={styles.tag}>
+                <Text style={styles.tagText}># {tag}</Text>
+              </View>
+            ))}
           </View>
 
           <View style={styles.dashedLine} />
 
-          <ReviewSection
-            title="잘한 점"
-            items={[
-              '정해둔 손실 한도를 지켜서 큰 손해를 막았어요',
-              '구매 시점을 아주 잘 잡았어요',
-            ]}
-          />
-          <ReviewSection
-            title="아쉬운 점"
-            items={[
-              '돈을 나누어 투자하지 않아 위험 부담이 커요',
-              '너무 자주 사고팔아서 수수료가 많이 나왔어요',
-            ]}
-          />
+          <ReviewSection title="잘한 점" items={report.goodPoints} />
+          <ReviewSection title="아쉬운 점" items={report.badPoints} />
+          <RecommendedRuleSection rule={report.recommendedRule} />
         </View>
       </ScrollView>
 
@@ -109,7 +96,7 @@ function TicketDetailNotch({ side }: { side: 'left' | 'right' }) {
   );
 }
 
-function ScoreBurst() {
+function ScoreBurst({ percent }: { percent: number }) {
   return (
     <View style={styles.scoreBox}>
       <View style={styles.scoreArtwork}>
@@ -134,7 +121,7 @@ function ScoreBurst() {
           resizeMode="contain"
         />
         <View style={styles.scoreTextRow}>
-          <Text style={styles.scorePercent}>75</Text>
+          <Text style={styles.scorePercent}>{percent}</Text>
           <Text style={styles.scoreUnit}>%</Text>
         </View>
       </View>
@@ -154,6 +141,22 @@ function ReviewSection({ title, items }: { title: string; items: string[] }) {
           <Text style={styles.reviewText}>{item}</Text>
         </View>
       ))}
+    </View>
+  );
+}
+
+function RecommendedRuleSection({
+  rule,
+}: {
+  rule: { type: string; content: string };
+}) {
+  return (
+    <View style={styles.reviewSection}>
+      <Text style={styles.reviewTitle}>추천 원칙</Text>
+      <View style={styles.recommendedTag}>
+        <Text style={styles.recommendedTagText}>{rule.type}</Text>
+      </View>
+      <Text style={styles.recommendedContent}>{rule.content}</Text>
     </View>
   );
 }
@@ -426,6 +429,28 @@ const styles = StyleSheet.create({
     lineHeight: 25,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'left',
+  },
+  recommendedTag: {
+    alignSelf: 'flex-start',
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F2F2F5',
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  recommendedTagText: {
+    color: '#5E5E61',
+    fontSize: 14,
+    fontFamily: 'Pretendard-Medium',
+  },
+  recommendedContent: {
+    color: '#5E5E61',
+    fontSize: 17,
+    letterSpacing: -0.6,
+    lineHeight: 25,
+    fontFamily: 'Pretendard-Regular',
   },
   modalBackdrop: {
     flex: 1,

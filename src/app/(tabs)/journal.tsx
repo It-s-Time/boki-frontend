@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
-import { TradeGrade } from '@/features/review/types';
+import { AiReport, TradeGrade } from '@/features/review/types';
 import ReportDetail from '@/features/review/components/ReportDetail';
 
 type GradeFilter = '전체' | TradeGrade;
@@ -61,6 +61,29 @@ const JOURNAL_ENTRIES: JournalEntry[] = [
   },
 ];
 
+function buildMockAiReport(entry: JournalEntry): AiReport {
+  return {
+    aiReportId: 0,
+    tradeId: 0,
+    status: 'COMPLETED',
+    grade: entry.grade,
+    complianceRate: 0.75,
+    hashtags: ['원칙준수율 A급', '이성적인', '꼼꼼한', '엄격한', '우직한'],
+    goodPoints: [
+      '정해둔 손실 한도를 지켜서 큰 손해를 막았어요',
+      '구매 시점을 아주 잘 잡았어요',
+    ],
+    badPoints: [
+      '돈을 나누어 투자하지 않아 위험 부담이 커요',
+      '너무 자주 사고팔아서 수수료가 많이 나왔어요',
+    ],
+    recommendedRule: {
+      type: '분할 매수',
+      content: '한 번에 몰빵하지 않고 정해둔 금액만큼 나눠서 매수해보세요.',
+    },
+  };
+}
+
 const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
   S: { bg: '#FFD23F', text: '#14151F' },
   A: { bg: '#636366', text: '#FFFFFF' },
@@ -91,7 +114,7 @@ export default function JournalScreen() {
   if (selectedEntry) {
     return (
       <ReportDetail
-        grade={selectedEntry.grade}
+        report={buildMockAiReport(selectedEntry)}
         onBack={() => setSelectedEntry(null)}
       />
     );

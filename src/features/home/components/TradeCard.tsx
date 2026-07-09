@@ -29,7 +29,13 @@ export default function TradeCard({ trade }: Props) {
   const time = formatTime(trade.tradedAt);
 
   const handleReview = () => {
-    if (isReviewed) return;
+    if (isReviewed) {
+      router.push({
+        pathname: '/review/ai-report',
+        params: { tradeId: trade.tradeId },
+      });
+      return;
+    }
     router.push({
       pathname: '/review/select-principle-set',
       params: {
