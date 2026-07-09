@@ -11,7 +11,7 @@ import ReviewMemoModal, {
 } from '@/features/review/components/ReviewMemoModal';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
-import { useTradeStore } from '@/store/tradeStore';
+import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -47,6 +47,7 @@ export default function ReviewSessionScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMemoModal, setShowMemoModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [answers, setAnswers] = useState<PrincipleAnswer[]>(
     principles.map((p) => ({
       principleId: p.id,
@@ -79,11 +80,14 @@ export default function ReviewSessionScreen() {
 
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
-    if (tradeId) {
-      useTradeStore.getState().setReviewed(Number(tradeId), true);
-    }
+    setIsSubmitting(true);
+    // TODO: replace this artificial delay with the real AI analysis API call.
+    // TODO: once the review-create API is wired up, invalidate tradeKeys.all
+    // (or the specific trade's query) here so reviewStatus/reviewId refresh from the server.
     // TODO: persist memo.content / memo.photos once the review result flow is wired back up
-    router.replace('/(tabs)');
+    setTimeout(() => {
+      router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+    }, 1800);
   };
 
   const handleBack = () => {
@@ -93,6 +97,10 @@ export default function ReviewSessionScreen() {
       router.back();
     }
   };
+
+  if (isSubmitting) {
+    return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
+  }
 
   if (!principleSet || !currentPrinciple) return null;
 

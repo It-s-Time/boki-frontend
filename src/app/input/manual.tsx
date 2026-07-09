@@ -16,7 +16,8 @@ import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import ProgressBar from '@/features/review/components/ProgressBar';
 import DateWheelPicker from '@/shared/components/DateWheelPicker';
-import { useTradeStore } from '@/store/tradeStore';
+import LoadingScreen from '@/shared/components/LoadingScreen';
+import { useCreateManualTrade } from '@/features/trade/hooks/useTrades';
 
 const COINS = [
   { symbol: 'BTC', market: 'KRW', name: '비트코인' },
@@ -45,17 +46,16 @@ type Step = 'date' | 'coin' | 'tradeType' | 'price';
 const STEPS: Step[] = ['date', 'coin', 'tradeType', 'price'];
 
 const onlyDigits = (text: string) => text.replace(/[^0-9]/g, '');
-const onlyDecimal = (text: string) => text.replace(/[^0-9.]/g, '');
 const formatNumber = (digits: string) =>
   digits ? Number(digits).toLocaleString() : '';
-const roundDecimal = (n: number, digits = 8) =>
-  isFinite(n) ? String(Number(n.toFixed(digits))) : '';
 const formatDate = (d: Date) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(
     d.getDate(),
   ).padStart(2, '0')}`;
 
 export default function ManualInputScreen() {
+  const createManualTrade = useCreateManualTrade();
+
   const [stepIndex, setStepIndex] = useState(0);
   const step = STEPS[stepIndex];
 
@@ -67,7 +67,6 @@ export default function ManualInputScreen() {
   const [tradeType, setTradeType] = useState<TradeType | null>(null);
   const [price, setPrice] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
-  const [quantity, setQuantity] = useState('');
 
   const filteredCoins = COINS.filter(
     (c) =>
@@ -77,40 +76,11 @@ export default function ManualInputScreen() {
   );
 
   const handlePriceChange = (text: string) => {
-    const cleaned = onlyDigits(text);
-    setPrice(cleaned);
-    const p = Number(cleaned);
-    const q = Number(quantity);
-    if (cleaned && quantity && q > 0) {
-      setTotalAmount(String(Math.round(p * q)));
-    } else if (cleaned && totalAmount && p > 0) {
-      setQuantity(roundDecimal(Number(totalAmount) / p));
-    }
+    setPrice(onlyDigits(text));
   };
 
   const handleTotalAmountChange = (text: string) => {
-    const cleaned = onlyDigits(text);
-    setTotalAmount(cleaned);
-    const t = Number(cleaned);
-    const p = Number(price);
-    const q = Number(quantity);
-    if (cleaned && price && p > 0) {
-      setQuantity(roundDecimal(t / p));
-    } else if (cleaned && quantity && q > 0) {
-      setPrice(String(Math.round(t / q)));
-    }
-  };
-
-  const handleQuantityChange = (text: string) => {
-    const cleaned = onlyDecimal(text);
-    setQuantity(cleaned);
-    const q = Number(cleaned);
-    const p = Number(price);
-    if (cleaned && price && p > 0) {
-      setTotalAmount(String(Math.round(p * q)));
-    } else if (cleaned && totalAmount && q > 0) {
-      setPrice(String(Number(totalAmount) / q));
-    }
+    setTotalAmount(onlyDigits(text));
   };
 
   const canProceed =
@@ -120,7 +90,7 @@ export default function ManualInputScreen() {
         ? !!selectedCoin
         : step === 'tradeType'
           ? !!tradeType
-          : !!price && !!totalAmount && !!quantity;
+          : !!price && !!totalAmount;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -130,29 +100,34 @@ export default function ManualInputScreen() {
         now.getMinutes(),
       ).padStart(2, '0')}`;
       const date = `${tradeDate.getFullYear()}-${String(tradeDate.getMonth() + 1).padStart(2, '0')}-${String(tradeDate.getDate()).padStart(2, '0')}`;
+      const tradedAt = `${date}T${time}:00`;
 
-      const tradeId = useTradeStore.getState().addTrade({
-        date,
-        coinName: selectedCoin?.name ?? '',
-        amount: Number(quantity),
-        symbol: selectedCoin?.symbol ?? '',
-        type: tradeType as TradeType,
-        time,
-        price: Number(price),
-      });
-
-      router.replace({
-        pathname: '/input/done',
-        params: {
-          tradeId: String(tradeId),
-          coinName: selectedCoin?.name ?? '',
-          symbol: selectedCoin?.symbol ?? '',
-          amount: quantity,
-          tradeType: tradeType ?? '',
-          price,
-          time,
+      createManualTrade.mutate(
+        {
+          ruleSetId: null,
+          coinType: selectedCoin?.symbol ?? '',
+          tradeType: tradeType === 'buy' ? 'BUY' : 'SELL',
+          price: Number(price),
+          totalAmount: Number(totalAmount),
+          tradedAt,
         },
-      });
+        {
+          onSuccess: (trade) => {
+            router.replace({
+              pathname: '/input/done',
+              params: {
+                tradeId: String(trade.tradeId),
+                coinName: selectedCoin?.name ?? '',
+                symbol: selectedCoin?.symbol ?? '',
+                amount: String(trade.quantity),
+                tradeType: tradeType ?? '',
+                price: String(trade.price),
+                time,
+              },
+            });
+          },
+        },
+      );
       return;
     }
     setStepIndex((i) => i + 1);
@@ -165,6 +140,10 @@ export default function ManualInputScreen() {
       router.back();
     }
   };
+
+  if (createManualTrade.isPending) {
+    return <LoadingScreen message="거래 내역을 저장하고 있어요" />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -358,13 +337,6 @@ export default function ManualInputScreen() {
                   </View>
                 </View>
 
-                <Ionicons
-                  name="swap-vertical-outline"
-                  size={20}
-                  color={COLORS_NEW.border}
-                  style={styles.swapIcon}
-                />
-
                 <View style={styles.section}>
                   <Text style={styles.label}>총 거래 금액</Text>
                   <View style={styles.inputBox}>
@@ -378,32 +350,6 @@ export default function ManualInputScreen() {
                     />
                   </View>
                 </View>
-
-                <Ionicons
-                  name="swap-vertical-outline"
-                  size={20}
-                  color={COLORS_NEW.border}
-                  style={styles.swapIcon}
-                />
-
-                <View style={styles.section}>
-                  <Text style={styles.label}>코인 거래량</Text>
-                  <View style={styles.inputBox}>
-                    <TextInput
-                      style={[styles.input, styles.quantityInput]}
-                      value={quantity}
-                      onChangeText={handleQuantityChange}
-                      placeholder={`예: 0.001 ${selectedCoin?.symbol ?? 'BTC'}`}
-                      placeholderTextColor={COLORS_NEW.border}
-                      keyboardType="numeric"
-                    />
-                    {!!quantity && (
-                      <Text style={styles.quantityUnit}>
-                        {selectedCoin?.symbol}
-                      </Text>
-                    )}
-                  </View>
-                </View>
               </>
             )}
           </ScrollView>
@@ -411,6 +357,11 @@ export default function ManualInputScreen() {
 
         {!(step === 'coin' && showCoinList) && (
           <View style={styles.footer}>
+            {createManualTrade.isError && (
+              <Text style={styles.submitError}>
+                저장에 실패했어요, 다시 시도해주세요
+              </Text>
+            )}
             <PrimaryButton
               label={stepIndex === STEPS.length - 1 ? '완료' : '다음'}
               onPress={handleNext}
@@ -475,16 +426,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Regular',
     padding: 0,
     fontSize: 22,
-  },
-  quantityInput: {
-    paddingRight: 50,
-  },
-  quantityUnit: {
-    position: 'absolute',
-    right: 20,
-    color: COLORS_NEW.border,
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 18,
   },
   inputBoxOpen: {
     borderBottomLeftRadius: 0,
@@ -585,11 +526,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 20,
   },
-  swapIcon: {
-    alignSelf: 'center',
-  },
   footer: {
     paddingBottom: 16,
     paddingTop: 12,
+  },
+  submitError: {
+    color: COLORS_NEW.downStrong,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 12,
   },
 });

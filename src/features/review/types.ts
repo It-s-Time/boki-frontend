@@ -1,3 +1,5 @@
+export type TradeGrade = 'S' | 'A' | 'B' | 'C' | 'F';
+
 export interface Review {
   id: string;
   content: string;
