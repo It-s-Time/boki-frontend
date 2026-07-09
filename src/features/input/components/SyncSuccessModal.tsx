@@ -8,11 +8,20 @@ import FinishIcon from '../../../../assets/finish.svg';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  bottomInset: number;
 }
 
-export default function SyncSuccessModal({ visible, onClose }: Props) {
+export default function SyncSuccessModal({
+  visible,
+  onClose,
+  bottomInset,
+}: Props) {
   return (
-    <BottomSheetModal visible={visible} onClose={onClose}>
+    <BottomSheetModal
+      visible={visible}
+      onClose={onClose}
+      sheetStyle={{ paddingBottom: bottomInset + 24 }}
+    >
       <View style={styles.headerRow}>
         <Pressable style={styles.closeButton} onPress={onClose}>
           <Ionicons name="close" size={20} color={COLORS_NEW.border} />
@@ -20,7 +29,7 @@ export default function SyncSuccessModal({ visible, onClose }: Props) {
       </View>
 
       <View style={styles.content}>
-        <FinishIcon width={140} height={140} />
+        <FinishIcon width={180} height={180} />
         <Text style={styles.message}>거래 내역 가져오기 성공</Text>
       </View>
 
@@ -33,7 +42,6 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: 12,
   },
 
   closeButton: {
@@ -48,13 +56,13 @@ const styles = StyleSheet.create({
 
   content: {
     alignItems: 'center',
-    gap: 20,
+    gap: 16,
     paddingBottom: 32,
   },
 
   message: {
-    fontSize: 18,
-    color: COLORS_NEW.textPrimary,
+    fontSize: 22,
+    color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },
 });

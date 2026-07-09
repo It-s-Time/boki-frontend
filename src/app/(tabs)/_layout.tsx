@@ -15,6 +15,7 @@ import LogIcon from '../../../assets/icons/log2.svg';
 import PrincipleIcon from '../../../assets/icons/principle.svg';
 import MyIcon from '../../../assets/icons/my.svg';
 import AddIcon from '../../../assets/icons/add.svg';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const SYNC_DURATION_MS = 1200;
 
@@ -123,7 +124,7 @@ function CustomTabBar({
         >
           <View style={[styles.fab, isSyncing && styles.fabDisabled]}>
             {isApiConnected ? (
-              <Ionicons name="refresh" size={18} color="#FFFFFF" />
+              <MaterialIcons name="refresh" size={24} color="#FFFFFF" />
             ) : (
               <AddIcon width={18} height={18} color="#FFFFFF" />
             )}
@@ -202,6 +203,7 @@ export default function TabLayout() {
       <SyncSuccessModal
         visible={syncSuccessVisible}
         onClose={() => setSyncSuccessVisible(false)}
+        bottomInset={insets.bottom}
       />
     </>
   );

@@ -6,12 +6,14 @@ import {
 } from '@/features/review/data';
 import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
+import ReviewMemoModal, {
+  ReviewMemo,
+} from '@/features/review/components/ReviewMemoModal';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
-import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useTradeStore } from '@/store/tradeStore';
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { useState, useCallback } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -44,13 +46,7 @@ export default function ReviewSessionScreen() {
   const total = principles.length;
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsLoading(false);
-    }, []),
-  );
+  const [showMemoModal, setShowMemoModal] = useState(false);
   const [answers, setAnswers] = useState<PrincipleAnswer[]>(
     principles.map((p) => ({
       principleId: p.id,
@@ -75,28 +71,19 @@ export default function ReviewSessionScreen() {
   const handleNext = () => {
     if (!isNextEnabled) return;
     if (isLast) {
-      setIsLoading(true);
-      if (tradeId) {
-        useTradeStore.getState().setReviewed(Number(tradeId), true);
-      }
-      setTimeout(() => {
-        router.push({
-          pathname: '/review/result',
-          params: {
-            principleSetId: principleSetId ?? '',
-            tradeType: tradeType ?? '',
-            coinName: coinName ?? '',
-            symbol: symbol ?? '',
-            amount: amount ?? '',
-            time: time ?? '',
-            price: price ?? '',
-            answers: JSON.stringify(answers),
-          },
-        });
-      }, 2000);
+      setShowMemoModal(true);
       return;
     }
     setCurrentIndex((i) => i + 1);
+  };
+
+  const handleMemoSubmit = (memo: ReviewMemo) => {
+    setShowMemoModal(false);
+    if (tradeId) {
+      useTradeStore.getState().setReviewed(Number(tradeId), true);
+    }
+    // TODO: persist memo.content / memo.photos once the review result flow is wired back up
+    router.replace('/(tabs)');
   };
 
   const handleBack = () => {
@@ -108,8 +95,6 @@ export default function ReviewSessionScreen() {
   };
 
   if (!principleSet || !currentPrinciple) return null;
-
-  if (isLoading) return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
 
   const isBuy = tradeType === 'buy';
   const illustration =
@@ -146,6 +131,12 @@ export default function ReviewSessionScreen() {
         onPress={handleNext}
         disabled={!isNextEnabled}
         style={styles.button}
+      />
+
+      <ReviewMemoModal
+        visible={showMemoModal}
+        onClose={() => setShowMemoModal(false)}
+        onSubmit={handleMemoSubmit}
       />
     </SafeAreaView>
   );
