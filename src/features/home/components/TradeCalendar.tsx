@@ -5,7 +5,6 @@ import { Calendar, LocaleConfig } from 'react-native-calendars';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import DateWheelPicker from '@/shared/components/DateWheelPicker';
-import { TradeType } from '../types';
 
 const DAY_SIZE = 44;
 const MIN_YEAR = new Date().getFullYear() - 5;
@@ -57,7 +56,7 @@ LocaleConfig.defaultLocale = 'kr';
 type Props = {
   currentDate: string;
   selectedDate: string;
-  tradeMarks: Record<string, TradeType[]>;
+  tradeMarks: Record<string, { buyCount: number; sellCount: number }>;
   onMonthChange: (date: string) => void;
   onDateSelect: (date: string) => void;
 };
@@ -116,12 +115,12 @@ export default function TradeCalendar({
 
             const dateString = date.dateString;
             const isSelected = dateString === selectedDate;
-            const dots = tradeMarks[dateString] ?? [];
+            const dayMark = tradeMarks[dateString];
             const isDisabled = state === 'disabled';
-            const hasBuy = dots.includes('buy');
-            const hasSell = dots.includes('sell');
+            const hasBuy = (dayMark?.buyCount ?? 0) > 0;
+            const hasSell = (dayMark?.sellCount ?? 0) > 0;
             const isMixed = hasBuy && hasSell;
-            const hasDot = dots.length > 0;
+            const hasDot = hasBuy || hasSell;
 
             const dayBoxColorStyle = isSelected
               ? styles.selectedDayBox

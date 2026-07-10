@@ -44,14 +44,15 @@ export default function Index() {
       Animated.parallel([
         Animated.timing(slideX, {
           toValue: 0,
-          duration: 200,
-          easing: Easing.out(Easing.cubic),
+          duration: 650,
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(logoTextOpacity, {
           toValue: 1,
-          duration: 200,
-          delay: 300,
+          duration: 550,
+          delay: 250,
+          easing: Easing.out(Easing.ease),
           useNativeDriver: true,
         }),
       ]),

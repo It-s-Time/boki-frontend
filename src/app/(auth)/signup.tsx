@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useSocialLogin } from '@/features/auth/hooks/useSocialLogin';
 
-const KAKAO_YELLOW = '#FFDC00';
+const KAKAO_YELLOW = '#FBE300';
 
 export default function SignupScreen() {
   const { login, isLoading, reset } = useSocialLogin();
@@ -56,7 +56,7 @@ export default function SignupScreen() {
           </Pressable>
 
           <Pressable style={styles.kakaoButton} onPress={() => login('kakao')}>
-            <KakaoIcon width={20} height={20} />
+            <KakaoIcon width={24} height={24} />
             <Text style={styles.kakaoLabel}>카카오로 시작하기</Text>
           </Pressable>
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
-    paddingVertical: 17,
+    paddingVertical: 18,
     borderWidth: 1,
     borderColor: '#D0D0D1',
   },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
     backgroundColor: KAKAO_YELLOW,
     borderRadius: 20,
     paddingVertical: 18,

@@ -1,9 +1,8 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { Principle, PrincipleAnswer } from '@/features/review/types';
-import {
-  PRINCIPLE_SETS,
-  PRINCIPLE_ILLUSTRATIONS,
-} from '@/features/review/data';
+import { PRINCIPLE_ILLUSTRATIONS, PRINCIPLE_SETS } from '@/features/review/data';
+import { useRuleSets } from '@/features/review/hooks/useRuleSets';
+import { useCreateAiReport } from '@/features/review/hooks/useAiReport';
 import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
 import ReviewMemoModal, {
@@ -11,7 +10,7 @@ import ReviewMemoModal, {
 } from '@/features/review/components/ReviewMemoModal';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
-import { useTradeStore } from '@/store/tradeStore';
+import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -39,14 +38,20 @@ export default function ReviewSessionScreen() {
     price: string;
   }>();
 
-  const principleSet = PRINCIPLE_SETS.find((s) => s.id === principleSetId);
+  const { data, isLoading: isPrincipleSetsLoading } = useRuleSets('template');
+  // Fall back to the local template set until the backend has TEMPLATE rule sets seeded.
+  const principleSets = data && data.length > 0 ? data : PRINCIPLE_SETS;
+  const principleSet = principleSets.find((s) => s.id === principleSetId);
   const principles: Principle[] = (principleSet?.principles ?? []).filter(
     (p) => p.type === tradeType,
   );
   const total = principles.length;
 
+  const createAiReport = useCreateAiReport();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMemoModal, setShowMemoModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [answers, setAnswers] = useState<PrincipleAnswer[]>(
     principles.map((p) => ({
       principleId: p.id,
@@ -79,11 +84,16 @@ export default function ReviewSessionScreen() {
 
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
-    if (tradeId) {
-      useTradeStore.getState().setReviewed(Number(tradeId), true);
-    }
+    setIsSubmitting(true);
     // TODO: persist memo.content / memo.photos once the review result flow is wired back up
-    router.replace('/(tabs)');
+    createAiReport.mutate(Number(tradeId), {
+      onSuccess: () => {
+        router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+      },
+      onError: () => {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleBack = () => {
@@ -93,6 +103,14 @@ export default function ReviewSessionScreen() {
       router.back();
     }
   };
+
+  if (isSubmitting) {
+    return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
+  }
+
+  if (isPrincipleSetsLoading) {
+    return <LoadingScreen message="매매원칙을 불러오고 있어요" />;
+  }
 
   if (!principleSet || !currentPrinciple) return null;
 
@@ -125,6 +143,12 @@ export default function ReviewSessionScreen() {
           onChange={(n) => updateAnswer({ score: n })}
         />
       </View>
+
+      {createAiReport.isError && (
+        <Text style={styles.submitError}>
+          리포트 생성에 실패했어요, 다시 시도해주세요
+        </Text>
+      )}
 
       <PrimaryButton
         label={isLast ? '완료' : '다음'}
@@ -178,5 +202,13 @@ const styles = StyleSheet.create({
 
   button: {
     marginTop: 24,
+  },
+
+  submitError: {
+    color: COLORS_NEW.downStrong,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });

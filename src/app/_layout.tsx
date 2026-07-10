@@ -17,7 +17,19 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{ headerShown: false }}
+        initialRouteName="index"
+      >
+        <Stack.Screen
+          name="(auth)/signup"
+          options={{ animation: 'fade', animationDuration: 500 }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ animation: 'fade', animationDuration: 500 }}
+        />
+      </Stack>
     </QueryClientProvider>
   );
 }

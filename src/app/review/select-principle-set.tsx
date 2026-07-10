@@ -2,6 +2,8 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import PrincipleSetCard from '@/features/review/components/PrincipleSetCard';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+import LoadingScreen from '@/shared/components/LoadingScreen';
+import { useRuleSets } from '@/features/review/hooks/useRuleSets';
 import { PRINCIPLE_SETS } from '@/features/review/data';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -22,6 +24,10 @@ export default function SelectPrincipleSetScreen() {
     }>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const { data, isLoading } = useRuleSets('template');
+  // Fall back to the local template set until the backend has TEMPLATE rule sets seeded.
+  const principleSets = data && data.length > 0 ? data : PRINCIPLE_SETS;
+
   const handleStart = () => {
     if (!selectedId) return;
     router.push({
@@ -39,6 +45,10 @@ export default function SelectPrincipleSetScreen() {
     });
   };
 
+  if (isLoading) {
+    return <LoadingScreen message="매매원칙을 불러오고 있어요" />;
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <BackHeader title="매매원칙 선택" onBack={() => router.back()} />
@@ -52,7 +62,7 @@ export default function SelectPrincipleSetScreen() {
           paddingTop: 24,
         }}
       >
-        {PRINCIPLE_SETS.map((set) => (
+        {principleSets.map((set) => (
           <PrincipleSetCard
             key={set.id}
             set={set}

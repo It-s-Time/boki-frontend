@@ -29,6 +29,7 @@ export const PRINCIPLE_ILLUSTRATIONS: Record<
   },
 };
 
+// Fallback template principle sets, used while /api/rule-sets has no TEMPLATE data seeded yet.
 export const PRINCIPLE_SETS: PrincipleSet[] = [
   {
     id: 'short-term',

@@ -2,7 +2,8 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
-import { Trade } from '../types';
+import { Trade } from '@/features/trade/types';
+import { COIN_NAMES } from '@/features/trade/constants';
 
 const COIN_ICONS: Record<string, number> = {
   BTC: require('../../../../assets/icons/main/bitcoin.png'),
@@ -13,26 +14,43 @@ type Props = {
   trade: Trade;
 };
 
+function formatTime(tradedAt: string) {
+  const date = new Date(tradedAt);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes(),
+  ).padStart(2, '0')}`;
+}
+
 export default function TradeCard({ trade }: Props) {
   const router = useRouter();
 
+  const isReviewed = trade.reviewStatus === 'COMPLETED';
+  const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
+  const time = formatTime(trade.tradedAt);
+
   const handleReview = () => {
-    if (trade.reviewed) return;
+    if (isReviewed) {
+      router.push({
+        pathname: '/review/ai-report',
+        params: { tradeId: trade.tradeId },
+      });
+      return;
+    }
     router.push({
       pathname: '/review/select-principle-set',
       params: {
-        tradeId: trade.id,
-        coinName: trade.coinName,
-        symbol: trade.symbol,
-        amount: trade.amount,
-        tradeType: trade.type,
-        time: trade.time,
+        tradeId: trade.tradeId,
+        coinName,
+        symbol: trade.coinType,
+        amount: trade.quantity,
+        tradeType: trade.tradeType === 'BUY' ? 'buy' : 'sell',
+        time,
         price: trade.price,
       },
     });
   };
 
-  const icon = COIN_ICONS[trade.symbol];
+  const icon = COIN_ICONS[trade.coinType];
 
   return (
     <View style={styles.tradeCard}>
@@ -40,29 +58,29 @@ export default function TradeCard({ trade }: Props) {
         {icon ? (
           <Image source={icon} style={styles.iconImage} resizeMode="contain" />
         ) : (
-          <Text style={styles.iconFallbackText}>{trade.symbol}</Text>
+          <Text style={styles.iconFallbackText}>{trade.coinType}</Text>
         )}
       </View>
 
       <View style={styles.infoColumn}>
         <Text style={styles.tradeNameRow}>
-          <Text style={styles.coinName}>{trade.coinName}</Text>
+          <Text style={styles.coinName}>{coinName}</Text>
           <Text style={styles.coinAmount}>
             {' '}
-            · {trade.amount}
-            {trade.symbol}
+            · {trade.quantity}
+            {trade.coinType}
           </Text>
         </Text>
 
         <Text style={styles.tradeInfo}>
-          {trade.time} · {trade.price.toLocaleString()}원 ·{' '}
+          {trade.price.toLocaleString()}원 ·{' '}
           <Text
             style={{
-              color: trade.type === 'buy' ? COLORS_NEW.buy : COLORS_NEW.sell,
+              color: trade.tradeType === 'BUY' ? COLORS_NEW.buy : COLORS_NEW.sell,
               fontFamily: 'Pretendard-Medium',
             }}
           >
-            {trade.type === 'buy' ? '매수' : '매도'}
+            {trade.tradeType === 'BUY' ? '매수' : '매도'}
           </Text>
         </Text>
       </View>
