@@ -21,6 +21,11 @@ interface Props {
 export default function ReportDetail({ report, onBack }: Props) {
   const [memoVisible, setMemoVisible] = useState(false);
 
+  const percent = Math.round((report.complianceRate ?? 0) * 100);
+  const hashtags = report.hashtags ?? [];
+  const goodPoints = report.goodPoints ?? [];
+  const badPoints = report.badPoints ?? [];
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.detailHeader}>
@@ -41,13 +46,13 @@ export default function ReportDetail({ report, onBack }: Props) {
         <View style={styles.detailCard}>
           <TicketDetailNotch side="left" />
           <TicketDetailNotch side="right" />
-          <ScoreBurst percent={Math.round(report.complianceRate * 100)} />
+          <ScoreBurst percent={percent} />
           <Text style={styles.rankText}>
-            Rank <Text style={styles.rankGrade}>{report.grade}</Text>
+            Rank <Text style={styles.rankGrade}>{report.grade ?? '-'}</Text>
           </Text>
 
           <View style={styles.tagWrap}>
-            {report.hashtags.map((tag) => (
+            {hashtags.map((tag) => (
               <View key={tag} style={styles.tag}>
                 <Text style={styles.tagText}># {tag}</Text>
               </View>
@@ -56,9 +61,11 @@ export default function ReportDetail({ report, onBack }: Props) {
 
           <View style={styles.dashedLine} />
 
-          <ReviewSection title="잘한 점" items={report.goodPoints} />
-          <ReviewSection title="아쉬운 점" items={report.badPoints} />
-          <RecommendedRuleSection rule={report.recommendedRule} />
+          <ReviewSection title="잘한 점" items={goodPoints} />
+          <ReviewSection title="아쉬운 점" items={badPoints} />
+          {report.recommendedRule && (
+            <RecommendedRuleSection rule={report.recommendedRule} />
+          )}
         </View>
       </ScrollView>
 

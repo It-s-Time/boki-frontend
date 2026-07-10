@@ -32,12 +32,15 @@ export interface AiReport {
   aiReportId: number;
   tradeId: number;
   status: AiReportStatus;
-  grade: TradeGrade;
-  complianceRate: number;
-  hashtags: string[];
-  goodPoints: string[];
-  badPoints: string[];
-  recommendedRule: RecommendedRule;
+  // The backend leaves these null while the report hasn't finished generating
+  // (and possibly even briefly after status stops being 'PENDING'), so treat
+  // all of them as optional at this API boundary.
+  grade: TradeGrade | null;
+  complianceRate: number | null;
+  hashtags: string[] | null;
+  goodPoints: string[] | null;
+  badPoints: string[] | null;
+  recommendedRule: RecommendedRule | null;
 }
 
 export interface Review {
