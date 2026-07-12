@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,114 +12,91 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
-import Button from '@/shared/components/Button';
-import ScreenHeader from '@/shared/components/ScreenHeader';
+import { COLORS, COLORS_NEW } from '@/shared/constants/colors';
+import { useApiStore } from '@/store/apiStore';
+
+const API_IP_ADDRESS = '13.124.152.202';
 
 export default function ApiManagementScreen() {
-  const scrollRef = useRef<ScrollView>(null);
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
-  const [isConnected, setIsConnected] = useState(false);
-  const [showAccessKey, setShowAccessKey] = useState(true);
-  const [showSecretKey, setShowSecretKey] = useState(true);
+  const [focusedInput, setFocusedInput] = useState<'access' | 'secret' | null>(
+    null,
+  );
+  const setApiConnected = useApiStore((s) => s.setApiConnected);
 
-  const handleConnect = () => {
-    setIsConnected(true);
-    setAccessKey(accessKey || 'Ab3dEfGhIjKlMn0pQrStUvWxYz12345');
-    setSecretKey(secretKey || 'XyZ9876543210WvUtSrQpOnMlKjIhGfEd');
-    requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-    });
+  const handleRegister = () => {
+    setApiConnected(true);
+    router.replace('/api-success');
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScreenHeader
-          title="업비트 API 관리"
-          onBack={() => router.back()}
-          style={styles.header}
-        />
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Feather name="chevron-left" size={28} color={COLORS.textPrimary} />
+          </Pressable>
+          <Text style={styles.headerTitle}>업비트 API 관리</Text>
+        </View>
 
         <ScrollView
-          ref={scrollRef}
           style={styles.scroll}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {isConnected ? (
-            <View style={styles.successCard}>
-              <View style={styles.smallIcon} />
-              <View style={styles.flex}>
-                <Text style={styles.successTitle}>연동 완료</Text>
-                <Text style={styles.description}>
-                  업비트 API가 성공적으로 연동되었습니다.
-                </Text>
-              </View>
-            </View>
-          ) : null}
-
-          <View style={styles.infoCard}>
-            <View style={styles.infoIcon} />
-            <View style={styles.flex}>
-              <Text style={styles.infoTitle}>API 연동 안내</Text>
-              <Text style={styles.infoText}>
-                업비트 API 키를 연동하면 거래 내역을 자동으로 불러올 수
-                있습니다. 키는 안전하게 암호화되어 저장됩니다.
-              </Text>
-            </View>
+          <View style={styles.ipCard}>
+            <Pressable style={styles.copyButton} onPress={() => {}}>
+              <Text style={styles.copyText}>복사</Text>
+            </Pressable>
+            <Text style={styles.ipLabel}>사용 IP 주소</Text>
+            <Text style={styles.ipValue}>{API_IP_ADDRESS}</Text>
           </View>
 
-          <ApiField
-            label="Secret Key"
+          <TextInput
             value={accessKey}
             onChangeText={setAccessKey}
-            placeholder="API 키를 입력하세요."
-            secureTextEntry={isConnected && !showAccessKey}
-            showToggle={isConnected}
-            onToggle={() => setShowAccessKey((value) => !value)}
+            onFocus={() => setFocusedInput('access')}
+            onBlur={() => setFocusedInput(null)}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={focusedInput === 'access' ? '' : 'Access key 입력'}
+            placeholderTextColor={COLORS.textPrimary}
+            style={styles.input}
+            textAlign="center"
           />
-          <ApiField
-            label="Access Key"
+
+          <TextInput
             value={secretKey}
             onChangeText={setSecretKey}
-            placeholder="Secret 키를 입력하세요."
-            secureTextEntry={isConnected && !showSecretKey}
-            showToggle={isConnected}
-            onToggle={() => setShowSecretKey((value) => !value)}
+            onFocus={() => setFocusedInput('secret')}
+            onBlur={() => setFocusedInput(null)}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+            placeholder={focusedInput === 'secret' ? '' : 'Secret key 입력'}
+            placeholderTextColor={COLORS.textPrimary}
+            style={styles.input}
+            textAlign="center"
           />
 
-          <Text style={styles.sectionTitle}>API 키 발급 방법</Text>
-          <View style={styles.guideBox}>
-            {[
-              '업비트 웹사이트 로그인',
-              '마이페이지 -> Open API 관리 메뉴 선택',
-              'API 키 발급 버튼 클릭',
-              '필요한 권한 선택 (조회 권한 필수)',
-              '발급된 키를 복사하여 입력',
-            ].map((item) => (
-              <Text key={item} style={styles.guideText}>
-                {item}
-              </Text>
-            ))}
-          </View>
+          <Pressable style={styles.registerButton} onPress={handleRegister}>
+            <Text style={styles.registerText}>API 키 등록하기</Text>
+          </Pressable>
 
-          {isConnected ? (
-            <Pressable
-              style={styles.unlinkButton}
-              onPress={() => setIsConnected(false)}
-            >
-              <Text style={styles.unlinkText}>연동 해제</Text>
-            </Pressable>
-          ) : null}
-
-          <View style={styles.submitBox}>
-            <Button label="연동하기" onPress={handleConnect} />
+          <View style={styles.guideSection}>
+            <Text style={styles.guideTitle}>업비트 API 연동 방법</Text>
+            <Text style={styles.guideText}>
+              1. 업비트 → 마이페이지 → Open API 관리 접속{'\n'}
+              2. IP 주소 등록: {API_IP_ADDRESS} 입력{'\n'}
+              3. API 키 발급 시 권한에서 자산조회 + 주문조회만 체크{'\n'}
+              {'   '}⚠ 주문하기 / 입출금 권한은 체크 금지{'\n'}
+              4. 발급된 Access Key, Secret Key를 BOKI 앱에 등록하기
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -127,183 +104,126 @@ export default function ApiManagementScreen() {
   );
 }
 
-function ApiField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  showToggle,
-  onToggle,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (value: string) => void;
-  placeholder: string;
-  secureTextEntry: boolean;
-  showToggle: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.inputBox}>
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={COLORS.textSecondary}
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry={secureTextEntry}
-          style={styles.input}
-        />
-        {showToggle ? (
-          <Pressable onPress={onToggle} hitSlop={8}>
-            <Feather name="eye" size={20} color={COLORS.textSecondary} />
-          </Pressable>
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.box,
   },
   flex: {
     flex: 1,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 44,
-    paddingBottom: 22,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    height: 112,
+    justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.box,
+  },
+  headerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 23,
+    fontFamily: 'Pretendard-Regular',
+    textAlign: 'center',
   },
   scroll: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingTop: 34,
-    paddingBottom: 28,
+    paddingHorizontal: 34,
+    paddingTop: 2,
+    paddingBottom: 132,
   },
-  successCard: {
-    minHeight: 68,
-    borderRadius: 8,
-    backgroundColor: COLORS.box,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 28,
-    flexDirection: 'row',
+  ipCard: {
+    height: 238,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 28,
     alignItems: 'center',
-    gap: 14,
-  },
-  smallIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#D2D2D2',
-  },
-  successTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontFamily: 'Pretendard-SemiBold',
-    marginBottom: 6,
-  },
-  description: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontFamily: 'Pretendard-Regular',
-  },
-  infoCard: {
-    borderRadius: 8,
-    backgroundColor: COLORS.primaryLight,
-    padding: 10,
-    flexDirection: 'row',
-    gap: 14,
-    marginBottom: 42,
-  },
-  infoIcon: {
-    width: 76,
-    height: 76,
-    borderRadius: 8,
-    backgroundColor: '#D2D2D2',
-  },
-  infoTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontFamily: 'Pretendard-SemiBold',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  infoText: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    lineHeight: 20,
-    fontFamily: 'Pretendard-Regular',
-  },
-  field: {
-    marginBottom: 22,
-  },
-  label: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontFamily: 'Pretendard-SemiBold',
+    justifyContent: 'center',
     marginBottom: 18,
   },
-  inputBox: {
-    minHeight: 60,
+  copyButton: {
+    position: 'absolute',
+    top: 34,
+    minWidth: 84,
+    height: 52,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 8,
-    backgroundColor: COLORS.box,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 26,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.box,
   },
-  input: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: 15,
+  copyText: {
+    color: COLORS.textSecondary,
+    fontSize: 18,
+    lineHeight: 26,
     fontFamily: 'Pretendard-Regular',
   },
-  sectionTitle: {
+  ipLabel: {
     color: COLORS.textPrimary,
-    fontSize: 18,
-    fontFamily: 'Pretendard-SemiBold',
-    marginTop: 2,
-    marginBottom: 20,
+    fontSize: 22,
+    lineHeight: 30,
+    fontFamily: 'Pretendard-Regular',
+    marginTop: 46,
+    marginBottom: 10,
   },
-  guideBox: {
+  ipValue: {
+    color: COLORS.textPrimary,
+    fontSize: 25,
+    lineHeight: 34,
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  input: {
+    height: 70,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
-    padding: 18,
+    borderRadius: 28,
+    backgroundColor: '#F4F3F8',
+    color: COLORS.textPrimary,
+    fontSize: 22,
+    lineHeight: 30,
+    fontFamily: 'Pretendard-SemiBold',
+    paddingHorizontal: 20,
+    marginBottom: 18,
+  },
+  registerButton: {
+    height: 80,
+    borderRadius: 28,
+    backgroundColor: '#272727',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 28,
+    marginBottom: 58,
+  },
+  registerText: {
+    color: COLORS.box,
+    fontSize: 24,
+    lineHeight: 34,
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  guideSection: {
+    gap: 22,
+  },
+  guideTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    lineHeight: 34,
+    fontFamily: 'Pretendard-SemiBold',
   },
   guideText: {
     color: COLORS.textSecondary,
-    fontSize: 15,
-    lineHeight: 28,
+    fontSize: 17,
+    lineHeight: 31,
     fontFamily: 'Pretendard-Regular',
-  },
-  unlinkButton: {
-    height: 68,
-    borderRadius: 8,
-    backgroundColor: COLORS.buy,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 68,
-  },
-  unlinkText: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
-    fontFamily: 'Pretendard-SemiBold',
-  },
-  submitBox: {
-    marginTop: 48,
   },
 });

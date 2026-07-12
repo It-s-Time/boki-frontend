@@ -31,7 +31,7 @@ export default function ApiKeyScreen() {
   const handleSubmit = () => {
     setIsLoading(true);
     setTimeout(() => {
-      router.push('/api-fail');
+      router.push('/api-success');
     }, 2000);
   };
 
