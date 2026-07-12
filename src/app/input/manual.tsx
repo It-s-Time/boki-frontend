@@ -104,7 +104,6 @@ export default function ManualInputScreen() {
 
       createManualTrade.mutate(
         {
-          ruleSetId: null,
           coinType: selectedCoin?.symbol ?? '',
           tradeType: tradeType === 'buy' ? 'BUY' : 'SELL',
           price: Number(price),

@@ -4,7 +4,6 @@ export type ReviewStatus = 'COMPLETED' | 'NOT_COMPLETED';
 
 export interface Trade {
   tradeId: number;
-  ruleSetId: number | null;
   memberId: number;
   coinType: string;
   tradeType: ApiTradeType;
@@ -45,7 +44,6 @@ export interface TradeCalendarSummary {
 }
 
 export interface CreateManualTradeInput {
-  ruleSetId: number | null;
   coinType: string;
   tradeType: ApiTradeType;
   price: number;
