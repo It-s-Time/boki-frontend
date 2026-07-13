@@ -115,6 +115,7 @@ export default function JournalScreen() {
     return (
       <ReportDetail
         report={buildMockAiReport(selectedEntry)}
+        review={undefined}
         onBack={() => setSelectedEntry(null)}
       />
     );

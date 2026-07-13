@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tradeApi } from '../api/tradeApi';
-import type { TradeListParams } from '../types';
+import type { TradeListParams, UpdateManualTradeInput } from '../types';
 
 export const tradeKeys = {
   all: ['trades'] as const,
@@ -27,6 +27,32 @@ export function useCreateManualTrade() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: tradeApi.createManual,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+    },
+  });
+}
+
+export function useUpdateTrade() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tradeId,
+      data,
+    }: {
+      tradeId: number;
+      data: UpdateManualTradeInput;
+    }) => tradeApi.update(tradeId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+    },
+  });
+}
+
+export function useDeleteTrade() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (tradeId: number) => tradeApi.remove(tradeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tradeKeys.all });
     },

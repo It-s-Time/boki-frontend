@@ -1,9 +1,11 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Trade } from '@/features/trade/types';
 import { COIN_NAMES } from '@/features/trade/constants';
+import TradeDetailModal from '@/features/trade/components/TradeDetailModal';
 
 const COIN_ICONS: Record<string, number> = {
   BTC: require('../../../../assets/icons/main/bitcoin.png'),
@@ -23,6 +25,7 @@ function formatTime(tradedAt: string) {
 
 export default function TradeCard({ trade }: Props) {
   const router = useRouter();
+  const [detailVisible, setDetailVisible] = useState(false);
 
   const isReviewed = trade.reviewStatus === 'COMPLETED';
   const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
@@ -54,36 +57,41 @@ export default function TradeCard({ trade }: Props) {
 
   return (
     <View style={styles.tradeCard}>
-      <View style={styles.iconBadge}>
-        {icon ? (
-          <Image source={icon} style={styles.iconImage} resizeMode="contain" />
-        ) : (
-          <Text style={styles.iconFallbackText}>{trade.coinType}</Text>
-        )}
-      </View>
+      <Pressable
+        style={styles.detailArea}
+        onPress={() => setDetailVisible(true)}
+      >
+        <View style={styles.iconBadge}>
+          {icon ? (
+            <Image source={icon} style={styles.iconImage} resizeMode="contain" />
+          ) : (
+            <Text style={styles.iconFallbackText}>{trade.coinType}</Text>
+          )}
+        </View>
 
-      <View style={styles.infoColumn}>
-        <Text style={styles.tradeNameRow}>
-          <Text style={styles.coinName}>{coinName}</Text>
-          <Text style={styles.coinAmount}>
-            {' '}
-            · {trade.quantity}
-            {trade.coinType}
+        <View style={styles.infoColumn}>
+          <Text style={styles.tradeNameRow}>
+            <Text style={styles.coinName}>{coinName}</Text>
+            <Text style={styles.coinAmount}>
+              {' '}
+              · {trade.quantity}
+              {trade.coinType}
+            </Text>
           </Text>
-        </Text>
 
-        <Text style={styles.tradeInfo}>
-          {trade.price.toLocaleString()}원 ·{' '}
-          <Text
-            style={{
-              color: trade.tradeType === 'BUY' ? COLORS_NEW.buy : COLORS_NEW.sell,
-              fontFamily: 'Pretendard-Medium',
-            }}
-          >
-            {trade.tradeType === 'BUY' ? '매수' : '매도'}
+          <Text style={styles.tradeInfo}>
+            {trade.price.toLocaleString()}원 ·{' '}
+            <Text
+              style={{
+                color: trade.tradeType === 'BUY' ? COLORS_NEW.buy : COLORS_NEW.sell,
+                fontFamily: 'Pretendard-Medium',
+              }}
+            >
+              {trade.tradeType === 'BUY' ? '매수' : '매도'}
+            </Text>
           </Text>
-        </Text>
-      </View>
+        </View>
+      </Pressable>
 
       <Pressable style={styles.reviewButton} onPress={handleReview}>
         <Entypo
@@ -92,6 +100,12 @@ export default function TradeCard({ trade }: Props) {
           color={COLORS_NEW.textPrimary}
         />
       </Pressable>
+
+      <TradeDetailModal
+        visible={detailVisible}
+        trade={trade}
+        onClose={() => setDetailVisible(false)}
+      />
     </View>
   );
 }
@@ -102,6 +116,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 8,
     marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  detailArea: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },

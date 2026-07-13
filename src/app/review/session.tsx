@@ -2,7 +2,7 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import { Principle, PrincipleAnswer } from '@/features/review/types';
 import { PRINCIPLE_ILLUSTRATIONS, PRINCIPLE_SETS } from '@/features/review/data';
 import { useRuleSets } from '@/features/review/hooks/useRuleSets';
-import { useCreateAiReport } from '@/features/review/hooks/useAiReport';
+import { useCreateReview } from '@/features/review/hooks/useReview';
 import ProgressBar from '@/features/review/components/ProgressBar';
 import ScoreSelector from '@/features/review/components/ScoreSelector';
 import ReviewMemoModal, {
@@ -47,7 +47,7 @@ export default function ReviewSessionScreen() {
   );
   const total = principles.length;
 
-  const createAiReport = useCreateAiReport();
+  const createReview = useCreateReview();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMemoModal, setShowMemoModal] = useState(false);
@@ -85,15 +85,32 @@ export default function ReviewSessionScreen() {
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
     setIsSubmitting(true);
-    // TODO: persist memo.content / memo.photos once the review result flow is wired back up
-    createAiReport.mutate(Number(tradeId), {
-      onSuccess: () => {
-        router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+    createReview.mutate(
+      {
+        tradeId: Number(tradeId),
+        data: {
+          ruleSetId: Number(principleSetId),
+          scores: principles.map((p, i) => ({
+            ruleId: Number(p.id),
+            score: Number(answers[i].score),
+          })),
+          content: memo.content,
+          replaceImages: false,
+          images: memo.photos,
+        },
       },
-      onError: () => {
-        setIsSubmitting(false);
+      {
+        onSuccess: () => {
+          router.replace({
+            pathname: '/review/confirm',
+            params: { tradeId },
+          });
+        },
+        onError: () => {
+          setIsSubmitting(false);
+        },
       },
-    });
+    );
   };
 
   const handleBack = () => {
@@ -105,7 +122,7 @@ export default function ReviewSessionScreen() {
   };
 
   if (isSubmitting) {
-    return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
+    return <LoadingScreen message="복기를 저장하고 있어요" />;
   }
 
   if (isPrincipleSetsLoading) {
@@ -144,9 +161,9 @@ export default function ReviewSessionScreen() {
         />
       </View>
 
-      {createAiReport.isError && (
+      {createReview.isError && (
         <Text style={styles.submitError}>
-          리포트 생성에 실패했어요, 다시 시도해주세요
+          복기 저장에 실패했어요, 다시 시도해주세요
         </Text>
       )}
 

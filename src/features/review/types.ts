@@ -43,14 +43,39 @@ export interface AiReport {
   recommendedRule: RecommendedRule | null;
 }
 
+export interface ReviewScoreInput {
+  ruleId: number;
+  score: number;
+}
+
+export interface ReviewScoreResult extends ReviewScoreInput {
+  ruleContent: string;
+}
+
 export interface Review {
-  id: string;
+  reviewId: number;
+  tradeId: number;
+  memberId: number;
+  ruleSetId: number;
   content: string;
+  scores: ReviewScoreResult[];
+  imageUrls: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateReviewInput {
+  ruleSetId: number;
+  scores: ReviewScoreInput[];
   content: string;
+  replaceImages: boolean;
+  images: string[];
+}
+
+export interface WorstRule {
+  content: string;
+  ruleType: RuleDirection;
+  complianceRate: number;
 }
 
 export interface PrincipleSet {

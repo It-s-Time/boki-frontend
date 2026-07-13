@@ -5,20 +5,19 @@ import Svg, { Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackwardIcon from 'assets/icons/backward.svg';
-import { AiReport } from '../types';
+import { AiReport, Review } from '../types';
 
 const SCORE_HORIZONTAL = require('../../../../assets/icons/Frame 550.png');
 const SCORE_VERTICAL = require('../../../../assets/icons/Frame 549.png');
 const MEMO_ICON = require('../../../../assets/icons/_레이어_1.png');
-const MEMO_CHART_IMAGE = require('../../../../assets/icons/Rectangle 1430106783.png');
-const MEMO_COIN_IMAGE = require('../../../../assets/icons/Rectangle 1430106784.png');
 
 interface Props {
   report: AiReport;
+  review: Review | undefined;
   onBack: () => void;
 }
 
-export default function ReportDetail({ report, onBack }: Props) {
+export default function ReportDetail({ report, review, onBack }: Props) {
   const [memoVisible, setMemoVisible] = useState(false);
 
   const percent = Math.round((report.complianceRate ?? 0) * 100);
@@ -69,7 +68,11 @@ export default function ReportDetail({ report, onBack }: Props) {
         </View>
       </ScrollView>
 
-      <MemoModal visible={memoVisible} onClose={() => setMemoVisible(false)} />
+      <MemoModal
+        visible={memoVisible}
+        review={review}
+        onClose={() => setMemoVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -170,11 +173,15 @@ function RecommendedRuleSection({
 
 function MemoModal({
   visible,
+  review,
   onClose,
 }: {
   visible: boolean;
+  review: Review | undefined;
   onClose: () => void;
 }) {
+  const imageUrls = review?.imageUrls ?? [];
+
   return (
     <Modal
       visible={visible}
@@ -189,23 +196,20 @@ function MemoModal({
           </Pressable>
           <Text style={styles.memoTitle}>메모</Text>
           <Text style={styles.memoText}>
-            당시 비트코인 시세가 갑작스럽게 오르자 판단이 다소 아쉬웠던 것
-            같다.{'\n\n'}
-            시드도 한번에 다 넣으면 안됐는데..{'\n'}
-            판단 미스다 😭
+            {review?.content || '작성된 메모가 없어요'}
           </Text>
-          <View style={styles.memoImageRow}>
-            <Image
-              source={MEMO_CHART_IMAGE}
-              style={styles.memoImage}
-              resizeMode="cover"
-            />
-            <Image
-              source={MEMO_COIN_IMAGE}
-              style={styles.memoImage}
-              resizeMode="cover"
-            />
-          </View>
+          {imageUrls.length > 0 && (
+            <View style={styles.memoImageRow}>
+              {imageUrls.map((url) => (
+                <Image
+                  key={url}
+                  source={{ uri: url }}
+                  style={styles.memoImage}
+                  resizeMode="cover"
+                />
+              ))}
+            </View>
+          )}
         </View>
       </View>
     </Modal>

@@ -1,9 +1,12 @@
+import type { TradeGrade } from '@/features/review/types';
+
 export type ApiTradeType = 'BUY' | 'SELL';
 export type InputType = 'MANUAL';
 export type ReviewStatus = 'COMPLETED' | 'NOT_COMPLETED';
 
 export interface Trade {
   tradeId: number;
+  ruleSetId: number | null;
   memberId: number;
   coinType: string;
   tradeType: ApiTradeType;
@@ -16,6 +19,7 @@ export interface Trade {
   createdAt: string;
   reviewStatus: ReviewStatus;
   reviewId: number | null;
+  grade: TradeGrade | null;
 }
 
 export interface TradeListParams {
@@ -50,3 +54,5 @@ export interface CreateManualTradeInput {
   totalAmount: number;
   tradedAt: string;
 }
+
+export type UpdateManualTradeInput = CreateManualTradeInput;
