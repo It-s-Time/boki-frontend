@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,13 +17,29 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import ProgressBar from '@/features/review/components/ProgressBar';
-import { PRINCIPLE_SETS } from '@/features/review/data';
-import { PrincipleSet } from '@/features/review/types';
+import {
+  PRINCIPLE_SETS,
+  PRINCIPLE_ILLUSTRATIONS,
+} from '@/features/review/data';
+import { Principle, PrincipleSet } from '@/features/review/types';
 import ShortTermIcon from '../../../assets/icons/onboarding/event_note.svg';
 import MidTermIcon from '../../../assets/icons/onboarding/android_cell.svg';
 import LongTermIcon from '../../../assets/icons/onboarding/nature.svg';
 
-const TOTAL_STEPS = 2;
+const TOTAL_STEPS = 3;
+
+const CARD_WIDTH = 250;
+const CARD_GAP = 16;
+const CARD_STEP = CARD_WIDTH + CARD_GAP;
+const CAROUSEL_PADDING = 20;
+const ILLUSTRATION_BOX = 150;
+const SCREEN_HORIZONTAL_PADDING = 24;
+
+const SHORT_TERM_SET =
+  PRINCIPLE_SETS.find((s) => s.id === 'short-term') ?? PRINCIPLE_SETS[0];
+const BUY_PRINCIPLES = SHORT_TERM_SET.principles
+  .filter((p) => p.type === 'buy')
+  .sort((a, b) => a.order - b.order);
 
 type HorizonType = 'short' | 'mid' | 'long';
 
@@ -90,15 +107,24 @@ interface TooltipPrincipleCardProps {
   set: PrincipleSet;
   dimOpacity: Animated.AnimatedInterpolation<number> | number;
   radioColor?: Animated.AnimatedInterpolation<string>;
+  shadowOpacity?: Animated.AnimatedInterpolation<number>;
+  elevation?: Animated.AnimatedInterpolation<number>;
 }
 
 function TooltipPrincipleCard({
   set,
   dimOpacity,
   radioColor,
+  shadowOpacity,
+  elevation,
 }: TooltipPrincipleCardProps) {
   return (
-    <View style={styles.innerCard}>
+    <Animated.View
+      style={[
+        styles.innerCard,
+        shadowOpacity !== undefined && { shadowOpacity, elevation },
+      ]}
+    >
       <Animated.View style={{ opacity: dimOpacity }}>
         <View style={styles.titleRow}>
           <Text style={styles.cardName}>{set.name}</Text>
@@ -117,7 +143,7 @@ function TooltipPrincipleCard({
             <View style={styles.nextButton}>
               <Entypo
                 name="chevron-thin-right"
-                size={16}
+                size={12}
                 color={COLORS_NEW.textPrimary}
               />
             </View>
@@ -127,13 +153,32 @@ function TooltipPrincipleCard({
             <View style={styles.nextButton}>
               <Entypo
                 name="chevron-thin-right"
-                size={16}
+                size={12}
                 color={COLORS_NEW.textPrimary}
               />
             </View>
           </View>
         </View>
       </Animated.View>
+    </Animated.View>
+  );
+}
+
+function SessionPreviewCard({ principle }: { principle: Principle }) {
+  const illustration = PRINCIPLE_ILLUSTRATIONS.buy[principle.order];
+  const scale = illustration ? ILLUSTRATION_BOX / illustration.height : 1;
+
+  return (
+    <View style={styles.previewCard}>
+      <Text style={styles.previewCardText}>{principle.content}</Text>
+      <View style={styles.previewIllustrationWrap}>
+        {illustration && (
+          <illustration.Icon
+            width={illustration.width * scale}
+            height={illustration.height * scale}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -141,6 +186,10 @@ function TooltipPrincipleCard({
 export default function SetupPrinciplesScreen() {
   const [step, setStep] = useState(0);
   const [expandedType, setExpandedType] = useState<HorizonType | null>(null);
+  const [groupBoxHeight, setGroupBoxHeight] = useState<number | null>(null);
+  const { width: windowWidth } = useWindowDimensions();
+  const carouselViewportWidth = windowWidth - SCREEN_HORIZONTAL_PADDING * 2;
+  const carouselX = useRef(new Animated.Value(0)).current;
   const dimAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -181,17 +230,91 @@ export default function SetupPrinciplesScreen() {
     outputRange: ['#D6D6D8', COLORS_NEW.border],
   });
 
+  const selectedShadowOpacity = dimAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.16],
+  });
+
+  const selectedElevation = dimAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 4],
+  });
+
+  const carouselCenterOffset =
+    (carouselViewportWidth - CARD_WIDTH) / 2 - CAROUSEL_PADDING;
+
+  const CAROUSEL_HOLD_MS = 800;
+  const CAROUSEL_ANTICIPATION_OFFSET = 8;
+  const CAROUSEL_ANTICIPATION_DURATION = 160;
+
+  // A single Animated.loop(Animated.sequence(...)) is handed to the native
+  // driver up front, so the hold/slide/hold/slide/.../return cycle keeps
+  // running natively and doesn't depend on the JS thread ticking a timer
+  // (e.g. setInterval) to kick off each step. carouselViewportWidth comes
+  // from useWindowDimensions rather than an onLayout callback, since
+  // onLayout was found to never fire for this box.
+  useEffect(() => {
+    if (step !== 2) {
+      carouselX.setValue(carouselCenterOffset);
+      return;
+    }
+
+    const targets = BUY_PRINCIPLES.map(
+      (_, k) => carouselCenterOffset - CARD_STEP * k,
+    );
+    carouselX.setValue(targets[0]);
+
+    if (targets.length <= 1) return;
+
+    // Each transition winds up with a small pull in the opposite direction
+    // before springing to the target, so the motion reads as elastic rather
+    // than a flat linear slide.
+    const buildTransition = (from: number, to: number) => {
+      const direction = to > from ? 1 : -1;
+      return [
+        Animated.timing(carouselX, {
+          toValue: from - direction * CAROUSEL_ANTICIPATION_OFFSET,
+          duration: CAROUSEL_ANTICIPATION_DURATION,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.spring(carouselX, {
+          toValue: to,
+          bounciness: 5,
+          speed: 10,
+          useNativeDriver: true,
+        }),
+      ];
+    };
+
+    const steps: Animated.CompositeAnimation[] = [];
+    for (let k = 1; k < targets.length; k++) {
+      steps.push(
+        Animated.delay(CAROUSEL_HOLD_MS),
+        ...buildTransition(targets[k - 1], targets[k]),
+      );
+    }
+    steps.push(
+      Animated.delay(CAROUSEL_HOLD_MS),
+      ...buildTransition(targets[targets.length - 1], targets[0]),
+    );
+
+    const loop = Animated.loop(Animated.sequence(steps));
+    loop.start();
+    return () => loop.stop();
+  }, [step, carouselX, carouselViewportWidth, carouselCenterOffset]);
+
   const handleNext = () => {
-    if (step === 0) {
-      setStep(1);
+    if (step < TOTAL_STEPS - 1) {
+      setStep((s) => s + 1);
       return;
     }
     router.push('/(tabs)');
   };
 
   const handleBack = () => {
-    if (step === 1) {
-      setStep(0);
+    if (step > 0) {
+      setStep((s) => s - 1);
       return;
     }
     router.back();
@@ -265,28 +388,60 @@ export default function SetupPrinciplesScreen() {
               );
             })}
           </ScrollView>
-        ) : (
-          <>
+        ) : step === 1 ? (
+          <View style={styles.content}>
             <Text style={styles.title}>매매원칙을 설정해 보세요</Text>
 
-            <View style={styles.groupWrap}>
+            <View
+              style={styles.groupWrap}
+              onLayout={(e) => setGroupBoxHeight(e.nativeEvent.layout.height)}
+            >
               {PRINCIPLE_SETS.map((set, i) => (
                 <TooltipPrincipleCard
                   key={set.id}
                   set={set}
                   dimOpacity={i !== 0 ? dimOpacity : 1}
                   radioColor={i === 0 ? radioColor : undefined}
+                  shadowOpacity={i === 0 ? selectedShadowOpacity : undefined}
+                  elevation={i === 0 ? selectedElevation : undefined}
                 />
               ))}
             </View>
 
             <Text style={styles.helperText}>
               본인의 코인 매매 스타일에 맞게
-            </Text>
-            <Text style={styles.helperText}>
+              {'\n'}
               자유롭게 설정해주세요. 추후 수정도 가능합니다.
             </Text>
-          </>
+          </View>
+        ) : (
+          <View style={styles.content}>
+            <Text style={styles.title}>매매원칙을 바탕으로 복기해 보세요</Text>
+
+            <View
+              style={[
+                styles.carouselGroupWrap,
+                groupBoxHeight ? { height: groupBoxHeight } : null,
+              ]}
+            >
+              <Animated.View
+                style={[
+                  styles.carouselRow,
+                  { transform: [{ translateX: carouselX }] },
+                ]}
+              >
+                {BUY_PRINCIPLES.map((principle, i) => (
+                  <SessionPreviewCard key={i} principle={principle} />
+                ))}
+              </Animated.View>
+            </View>
+
+            <Text style={styles.helperText}>
+              매매원칙을 제대로 지켰는지 점수를 매겨주세요.
+              {'\n'}
+              솔직하게 답변하실 수록 투자 실력에 도움이 됩니다.
+            </Text>
+          </View>
         )}
       </View>
 
@@ -301,7 +456,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS_NEW.background,
-    paddingHorizontal: 24,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
   },
   headerWrap: {
     paddingTop: 20,
@@ -317,7 +472,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingVertical: 24,
+    paddingVertical: 20,
+  },
+  content: {
+    paddingVertical: 20,
   },
   title: {
     color: COLORS_NEW.textPrimary,
@@ -397,13 +555,49 @@ const styles = StyleSheet.create({
   groupWrap: {
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
-    padding: 12,
-    gap: 12,
+    paddingVertical: 32,
+    paddingHorizontal: 44,
+    gap: 16,
+  },
+  carouselGroupWrap: {
+    backgroundColor: COLORS_NEW.lightGray,
+    borderRadius: 20,
+    paddingHorizontal: CAROUSEL_PADDING,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  carouselRow: {
+    flexDirection: 'row',
+  },
+  previewCard: {
+    width: CARD_WIDTH,
+    height: 350,
+    marginRight: CARD_GAP,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewCardText: {
+    fontSize: 18,
+    color: COLORS_NEW.textPrimary,
+    fontFamily: 'Pretendard-SemiBold',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  previewIllustrationWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   innerCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 16,
   },
   titleRow: {
     flexDirection: 'row',
@@ -412,22 +606,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   cardName: {
-    fontSize: 20,
+    fontSize: 18,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },
   radio: {
-    width: 22,
-    height: 22,
+    width: 20,
+    height: 20,
     borderRadius: 11,
     borderWidth: 5,
     borderColor: '#D6D6D8',
   },
   cardDescription: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   badges: {
     flexDirection: 'row',
@@ -440,18 +634,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
     gap: 6,
   },
   badgeText: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
   nextButton: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     borderRadius: 22,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -460,9 +654,10 @@ const styles = StyleSheet.create({
   helperText: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 14,
+    fontSize: 18,
+    lineHeight: 28,
+    marginTop: 32,
     textAlign: 'center',
-    marginTop: 16,
   },
   footer: {
     paddingBottom: 24,
