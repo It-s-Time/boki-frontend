@@ -6,8 +6,9 @@ export function useCreateAiReport() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (tradeId: number) => aiReportApi.create(tradeId),
-    onSuccess: () => {
+    onSuccess: (_result, tradeId) => {
       queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['aiReport', tradeId] });
     },
   });
 }
