@@ -17,7 +17,7 @@ import { logoutApi } from '@/api/auth';
 
 type ConfirmType = 'logout' | 'withdraw' | null;
 
-const PROFILE_IMAGE = require('../../../design/j1y0on_Cute_3D_character_avatar_a_friendly_Asian_boy_wearing__6b66ae6e-f2fa-4be3-b4aa-272ee6565f3b_2 1.png');
+const PROFILE_IMAGE = require('../../../assets/images/profile-avatar.png');
 
 export default function MyPageScreen() {
   const [confirmType, setConfirmType] = useState<ConfirmType>(null);
@@ -90,6 +90,7 @@ export default function MyPageScreen() {
         <MenuItem title="로그아웃" onPress={() => setConfirmType('logout')} />
         <MenuItem
           title="회원 탈퇴"
+          titleColor="#EE7A60"
           onPress={() => setConfirmType('withdraw')}
         />
       </ScrollView>
@@ -131,14 +132,16 @@ function SectionTitle({ title }: { title: string }) {
 
 function MenuItem({
   title,
+  titleColor = COLORS.textPrimary,
   onPress,
 }: {
   title: string;
+  titleColor?: string;
   onPress: () => void;
 }) {
   return (
     <Pressable style={styles.menuItem} onPress={onPress}>
-      <Text style={styles.menuTitle}>{title}</Text>
+      <Text style={[styles.menuTitle, { color: titleColor }]}>{title}</Text>
       <View style={styles.arrowButton}>
         <Feather name="chevron-right" size={28} color={COLORS.textSecondary} />
       </View>
@@ -193,11 +196,11 @@ const styles = StyleSheet.create({
   avatarBox: {
     width: 136,
     height: 136,
-    borderRadius: 8,
-    backgroundColor: '#B7E8E3',
+    borderRadius: 24,
+    backgroundColor: COLORS.box,
     overflow: 'hidden',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   avatar: {

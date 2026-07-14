@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
@@ -24,9 +23,33 @@ type PrincipleGroup = {
   sell: string[];
 };
 
-const SHORT_ICON = require('../../../design/event_note.png');
-const MIDDLE_ICON = require('../../../design/android_cell_4_bar.png');
-const LONG_ICON = require('../../../design/nature.png');
+type WeakPrinciple = {
+  id: string;
+  content: string;
+  complianceRate: number;
+};
+
+const SHORT_ICON = require('../../../assets/images/principle-short.png');
+const MIDDLE_ICON = require('../../../assets/images/principle-middle.png');
+const LONG_ICON = require('../../../assets/images/principle-long.png');
+
+const WEAK_PRINCIPLES: WeakPrinciple[] = [
+  {
+    id: 'chase-news',
+    content: '급등 뉴스나 이슈 터진 직후 추격 매수 안 하기',
+    complianceRate: 26,
+  },
+  {
+    id: 'asset-ratio',
+    content: '전체 자산의 일정 비율 이상은 코인에 안 넣기',
+    complianceRate: 40,
+  },
+  {
+    id: 'watch-surged',
+    content: '최근 급등한 코인은 일단 지켜보고 매수 보류하기',
+    complianceRate: 60,
+  },
+];
 
 const PRINCIPLE_GROUPS: PrincipleGroup[] = [
   {
@@ -89,9 +112,6 @@ export default function PrinciplesScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Feather name="chevron-left" size={28} color={COLORS.textPrimary} />
-        </Pressable>
         <Text style={styles.headerTitle}>원칙</Text>
       </View>
 
@@ -100,6 +120,8 @@ export default function PrinciplesScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <WeakPrinciplesTopThree />
+
         {PRINCIPLE_GROUPS.map((group) => {
           const expanded = expandedKey === group.key;
           const dimmed = expandedKey !== null && !expanded;
@@ -118,6 +140,39 @@ export default function PrinciplesScreen() {
         })}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function WeakPrinciplesTopThree() {
+  return (
+    <View style={styles.weakSection}>
+      <Text style={styles.weakTitle}>못 지킨 Top 3를 신경 써주세요!</Text>
+      <View style={styles.weakList}>
+        {WEAK_PRINCIPLES.map((principle, index) => (
+          <View key={principle.id} style={styles.weakItem}>
+            <View style={styles.weakHeaderRow}>
+              <View style={styles.weakNumber}>
+                <Text style={styles.weakNumberText}>{index + 1}</Text>
+              </View>
+              <Text style={styles.weakContent}>{principle.content}</Text>
+            </View>
+            <View style={styles.weakProgressRow}>
+              <View style={styles.weakProgressTrack}>
+                <View
+                  style={[
+                    styles.weakProgressFill,
+                    { width: `${principle.complianceRate}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles.weakRate}>
+                준수율 {principle.complianceRate}%
+              </Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -190,38 +245,97 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.box,
   },
   header: {
-    height: 76,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 24,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.box,
+    height: 92,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingBottom: 24,
   },
   headerTitle: {
     color: COLORS.textPrimary,
-    fontSize: 20,
-    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 23,
+    fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
   scroll: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingHorizontal: 30,
+    paddingTop: 18,
     paddingBottom: 120,
+  },
+  weakSection: {
+    marginBottom: 48,
+    marginTop: -5,
+  },
+  weakTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    letterSpacing: -0.6,
+    lineHeight: 32,
+    fontFamily: 'Pretendard-SemiBold',
+    marginBottom: 19,
+  },
+  weakList: {
+    gap: 26,
+  },
+  weakItem: {
+    gap: 10,
+  },
+  weakHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  weakNumber: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: COLORS.textSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  weakNumberText: {
+    color: COLORS.box,
+    fontSize: 14,
+    lineHeight: 21,
+    fontFamily: 'Pretendard-SemiBold',
+    textAlign: 'center',
+  },
+  weakContent: {
+    flex: 1,
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    letterSpacing: -0.6,
+    lineHeight: 26,
+    fontFamily: 'Pretendard-Regular',
+  },
+  weakProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 38,
+  },
+  weakProgressTrack: {
+    flex: 1,
+    height: 13,
+    borderRadius: 7,
+    backgroundColor: '#F2F2F5',
+    overflow: 'hidden',
+    marginRight: 16,
+  },
+  weakProgressFill: {
+    height: '100%',
+    borderRadius: 7,
+    backgroundColor: '#F79474',
+  },
+  weakRate: {
+    width: 86,
+    color: '#F79474',
+    fontSize: 16,
+    letterSpacing: -0.6,
+    lineHeight: 24,
+    fontFamily: 'Pretendard-SemiBold',
+    textAlign: 'right',
   },
   summaryCard: {
     minHeight: 94,
