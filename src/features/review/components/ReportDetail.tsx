@@ -1,6 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
@@ -10,6 +18,10 @@ import { AiReport, Review } from '../types';
 const SCORE_HORIZONTAL = require('../../../../assets/icons/Frame 550.png');
 const SCORE_VERTICAL = require('../../../../assets/icons/Frame 549.png');
 const MEMO_ICON = require('../../../../assets/icons/_레이어_1.png');
+const MEMO_CHART_IMAGE = require('../../../../assets/icons/Rectangle 1430106783.png');
+const MEMO_COIN_IMAGE = require('../../../../assets/icons/Rectangle 1430106784.png');
+const DETAIL_CARD_RADIUS = 24;
+const DETAIL_NOTCH_RADIUS = 14;
 
 interface Props {
   report: AiReport;
@@ -19,9 +31,17 @@ interface Props {
 
 export default function ReportDetail({ report, review, onBack }: Props) {
   const [memoVisible, setMemoVisible] = useState(false);
+  const [detailCardSize, setDetailCardSize] = useState({ width: 0, height: 0 });
+  const [dividerY, setDividerY] = useState<number | null>(null);
 
   const percent = Math.round((report.complianceRate ?? 0) * 100);
   const hashtags = report.hashtags ?? [];
+  const tagRows =
+    hashtags.length === 0
+      ? []
+      : hashtags.length > 3
+        ? [hashtags.slice(0, hashtags.length - 3), hashtags.slice(-3)]
+        : [hashtags];
   const goodPoints = report.goodPoints ?? [];
   const badPoints = report.badPoints ?? [];
 
@@ -32,7 +52,10 @@ export default function ReportDetail({ report, review, onBack }: Props) {
           <BackwardIcon width={9} height={15} />
         </Pressable>
         <Text style={styles.headerTitle}>일지</Text>
-        <Pressable style={styles.headerCircle} onPress={() => setMemoVisible(true)}>
+        <Pressable
+          style={styles.headerCircle}
+          onPress={() => setMemoVisible(true)}
+        >
           <Image source={MEMO_ICON} style={styles.memoHeaderIcon} />
         </Pressable>
       </View>
@@ -42,29 +65,46 @@ export default function ReportDetail({ report, review, onBack }: Props) {
         contentContainerStyle={styles.detailContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.detailCard}>
-          <TicketDetailNotch side="left" />
-          <TicketDetailNotch side="right" />
+        <View
+          style={styles.detailCard}
+          onLayout={(event) => {
+            const { width, height } = event.nativeEvent.layout;
+            setDetailCardSize({ width, height });
+          }}
+        >
+          {detailCardSize.width > 0 &&
+            detailCardSize.height > 0 &&
+            dividerY !== null && (
+              <TicketDetailBackground
+                width={detailCardSize.width}
+                height={detailCardSize.height}
+                notchCenterY={dividerY}
+              />
+            )}
           <ScoreBurst percent={percent} />
           <Text style={styles.rankText}>
             Rank <Text style={styles.rankGrade}>{report.grade ?? '-'}</Text>
           </Text>
 
           <View style={styles.tagWrap}>
-            {hashtags.map((tag) => (
-              <View key={tag} style={styles.tag}>
-                <Text style={styles.tagText}># {tag}</Text>
+            {tagRows.map((row, rowIndex) => (
+              <View key={`tag-row-${rowIndex}`} style={styles.tagRow}>
+                {row.map((tag) => (
+                  <View key={tag} style={styles.tag}>
+                    <Text style={styles.tagText}># {tag}</Text>
+                  </View>
+                ))}
               </View>
             ))}
           </View>
 
-          <View style={styles.dashedLine} />
+          <View
+            style={styles.dashedLine}
+            onLayout={(event) => setDividerY(event.nativeEvent.layout.y)}
+          />
 
           <ReviewSection title="잘한 점" items={goodPoints} />
           <ReviewSection title="아쉬운 점" items={badPoints} />
-          {report.recommendedRule && (
-            <RecommendedRuleSection rule={report.recommendedRule} />
-          )}
         </View>
       </ScrollView>
 
@@ -77,32 +117,58 @@ export default function ReportDetail({ report, review, onBack }: Props) {
   );
 }
 
-function TicketDetailNotch({ side }: { side: 'left' | 'right' }) {
-  const size = 28;
-  const path =
-    side === 'left'
-      ? `M 0 0 A ${size / 2} ${size / 2} 0 0 1 0 ${size}`
-      : `M ${size / 2} 0 A ${size / 2} ${size / 2} 0 0 0 ${
-          size / 2
-        } ${size}`;
+function TicketDetailBackground({
+  width,
+  height,
+  notchCenterY,
+}: {
+  width: number;
+  height: number;
+  notchCenterY: number;
+}) {
+  const radius = DETAIL_CARD_RADIUS;
+  const notchRadius = DETAIL_NOTCH_RADIUS;
+  const notchControl = notchRadius * 0.5522847498;
+  const notchY = Math.min(
+    Math.max(notchCenterY, radius + notchRadius),
+    height - radius - notchRadius,
+  );
+  const path = [
+    `M ${radius} 0`,
+    `H ${width - radius}`,
+    `Q ${width} 0 ${width} ${radius}`,
+    `V ${notchY - notchRadius}`,
+    `C ${width - notchControl} ${notchY - notchRadius} ${
+      width - notchRadius
+    } ${notchY - notchControl} ${width - notchRadius} ${notchY}`,
+    `C ${width - notchRadius} ${notchY + notchControl} ${
+      width - notchControl
+    } ${notchY + notchRadius} ${width} ${notchY + notchRadius}`,
+    `V ${height - radius}`,
+    `Q ${width} ${height} ${width - radius} ${height}`,
+    `H ${radius}`,
+    `Q 0 ${height} 0 ${height - radius}`,
+    `V ${notchY + notchRadius}`,
+    `C ${notchControl} ${notchY + notchRadius} ${notchRadius} ${
+      notchY + notchControl
+    } ${notchRadius} ${notchY}`,
+    `C ${notchRadius} ${notchY - notchControl} ${notchControl} ${
+      notchY - notchRadius
+    } 0 ${notchY - notchRadius}`,
+    `V ${radius}`,
+    `Q 0 0 ${radius} 0`,
+    'Z',
+  ].join(' ');
 
   return (
-    <View
-      style={
-        side === 'left' ? styles.notchLeftDetail : styles.notchRightDetail
-      }
+    <Svg
+      pointerEvents="none"
+      width={width}
+      height={height}
+      style={styles.detailCardBackground}
     >
-      <Svg width={size / 2} height={size} viewBox={`0 0 ${size / 2} ${size}`}>
-        <Path d={path} stroke="#E9E9EC" strokeWidth={1} fill="none" />
-      </Svg>
-      <View
-        style={
-          side === 'left'
-            ? styles.notchLineMaskLeftDetail
-            : styles.notchLineMaskRightDetail
-        }
-      />
-    </View>
+      <Path d={path} fill="#FFFFFF" stroke="#E9E9EC" strokeWidth={1} />
+    </Svg>
   );
 }
 
@@ -151,22 +217,6 @@ function ReviewSection({ title, items }: { title: string; items: string[] }) {
           <Text style={styles.reviewText}>{item}</Text>
         </View>
       ))}
-    </View>
-  );
-}
-
-function RecommendedRuleSection({
-  rule,
-}: {
-  rule: { type: string; content: string };
-}) {
-  return (
-    <View style={styles.reviewSection}>
-      <Text style={styles.reviewTitle}>추천 원칙</Text>
-      <View style={styles.recommendedTag}>
-        <Text style={styles.recommendedTagText}>{rule.type}</Text>
-      </View>
-      <Text style={styles.recommendedContent}>{rule.content}</Text>
     </View>
   );
 }
@@ -255,10 +305,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   detailCard: {
-    borderWidth: 1,
-    borderColor: '#E9E9EC',
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     paddingHorizontal: 24,
     paddingBottom: 26,
     shadowColor: '#000000',
@@ -267,47 +314,10 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
-  notchLeftDetail: {
+  detailCardBackground: {
     position: 'absolute',
-    left: -1,
-    top: 408,
-    width: 14,
-    height: 28,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    zIndex: 2,
-  },
-  notchRightDetail: {
-    position: 'absolute',
-    right: -1,
-    top: 408,
-    width: 14,
-    height: 28,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    zIndex: 2,
-  },
-  notchLineMaskLeftDetail: {
-    position: 'absolute',
-    left: -1,
-    width: 5,
-    height: 30,
-    backgroundColor: '#FFFFFF',
-    zIndex: 3,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  notchLineMaskRightDetail: {
-    position: 'absolute',
-    right: -1,
-    width: 5,
-    height: 30,
-    backgroundColor: '#FFFFFF',
-    zIndex: 3,
-    elevation: 0,
-    shadowOpacity: 0,
+    left: 0,
+    top: 0,
   },
   scoreBox: {
     height: 246,
@@ -376,24 +386,33 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.point,
   },
   tagWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 34,
   },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: 14,
+  },
   tag: {
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#F2F2F5',
-    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#efefef',
+    borderRadius: 15,
+    backgroundColor: '#f2f2f5',
+    paddingHorizontal: 15,
+    paddingVertical: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tagText: {
-    color: '#5E5E61',
     fontSize: 16,
+    letterSpacing: -0.6,
+    lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
+    color: '#5e5e61',
+    textAlign: 'center',
   },
   dashedLine: {
     borderTopWidth: 1,
@@ -440,28 +459,6 @@ const styles = StyleSheet.create({
     lineHeight: 25,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'left',
-  },
-  recommendedTag: {
-    alignSelf: 'flex-start',
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F2F2F5',
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  recommendedTagText: {
-    color: '#5E5E61',
-    fontSize: 14,
-    fontFamily: 'Pretendard-Medium',
-  },
-  recommendedContent: {
-    color: '#5E5E61',
-    fontSize: 17,
-    letterSpacing: -0.6,
-    lineHeight: 25,
-    fontFamily: 'Pretendard-Regular',
   },
   modalBackdrop: {
     flex: 1,

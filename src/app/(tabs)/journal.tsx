@@ -21,6 +21,9 @@ type JournalEntry = {
 };
 
 const FILTERS: GradeFilter[] = ['전체', 'S', 'A', 'B', 'C', 'F'];
+const CARD_HEIGHT = 112;
+const CARD_RADIUS = 18;
+const NOTCH_RADIUS = 10;
 
 const JOURNAL_ENTRIES: JournalEntry[] = [
   {
@@ -68,7 +71,7 @@ function buildMockAiReport(entry: JournalEntry): AiReport {
     status: 'COMPLETED',
     grade: entry.grade,
     complianceRate: 0.75,
-    hashtags: ['원칙준수율 A급', '이성적인', '꼼꼼한', '엄격한', '우직한'],
+    hashtags: ['원칙준수율 A급', '이성적인', '꼼꼼한', '우아한', '우직한'],
     goodPoints: [
       '정해둔 손실 한도를 지켜서 큰 손해를 막았어요',
       '구매 시점을 아주 잘 잡았어요',
@@ -183,10 +186,15 @@ function JournalCard({
   entry: JournalEntry;
   onPress: () => void;
 }) {
+  const [cardWidth, setCardWidth] = useState(0);
+
   return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <TicketNotch side="left" />
-      <TicketNotch side="right" />
+    <Pressable
+      style={styles.card}
+      onLayout={(event) => setCardWidth(event.nativeEvent.layout.width)}
+      onPress={onPress}
+    >
+      {cardWidth > 0 && <TicketCardBackground width={cardWidth} />}
       <View style={styles.cardTopRow}>
         <GradeBadge grade={entry.grade} />
         <View style={styles.tradeBadge}>
@@ -203,38 +211,50 @@ function JournalCard({
   );
 }
 
-function TicketNotch({
-  side,
-  size = 20,
-}: {
-  side: 'left' | 'right';
-  size?: number;
-}) {
-  const path =
-    side === 'left'
-      ? `M 0 0 A ${size / 2} ${size / 2} 0 0 1 0 ${size}`
-      : `M ${size / 2} 0 A ${size / 2} ${size / 2} 0 0 0 ${
-          size / 2
-        } ${size}`;
+function TicketCardBackground({ width }: { width: number }) {
+  const height = CARD_HEIGHT;
+  const radius = CARD_RADIUS;
+  const notchRadius = NOTCH_RADIUS;
+  const notchCenterY = height / 2;
+  const notchControl = notchRadius * 0.5522847498;
+  const path = [
+    `M ${radius} 0`,
+    `H ${width - radius}`,
+    `Q ${width} 0 ${width} ${radius}`,
+    `V ${notchCenterY - notchRadius}`,
+    `C ${width - notchControl} ${notchCenterY - notchRadius} ${
+      width - notchRadius
+    } ${notchCenterY - notchControl} ${width - notchRadius} ${notchCenterY}`,
+    `C ${width - notchRadius} ${notchCenterY + notchControl} ${
+      width - notchControl
+    } ${notchCenterY + notchRadius} ${width} ${
+      notchCenterY + notchRadius
+    }`,
+    `V ${height - radius}`,
+    `Q ${width} ${height} ${width - radius} ${height}`,
+    `H ${radius}`,
+    `Q 0 ${height} 0 ${height - radius}`,
+    `V ${notchCenterY + notchRadius}`,
+    `C ${notchControl} ${notchCenterY + notchRadius} ${notchRadius} ${
+      notchCenterY + notchControl
+    } ${notchRadius} ${notchCenterY}`,
+    `C ${notchRadius} ${notchCenterY - notchControl} ${notchControl} ${
+      notchCenterY - notchRadius
+    } 0 ${notchCenterY - notchRadius}`,
+    `V ${radius}`,
+    `Q 0 0 ${radius} 0`,
+    'Z',
+  ].join(' ');
 
   return (
-    <View style={side === 'left' ? styles.notchLeft : styles.notchRight}>
-      <View
-        style={
-          side === 'left' ? styles.notchMaskLeft : styles.notchMaskRight
-        }
-      />
-      <Svg width={size / 2} height={size} viewBox={`0 0 ${size / 2} ${size}`}>
-        <Path d={path} stroke="#EFEFEF" strokeWidth={1} fill="none" />
-      </Svg>
-      <View
-        style={
-          side === 'left'
-            ? styles.notchLineMaskLeft
-            : styles.notchLineMaskRight
-        }
-      />
-    </View>
+    <Svg
+      pointerEvents="none"
+      width={width}
+      height={height}
+      style={styles.cardBackground}
+    >
+      <Path d={path} fill="#FFFFFF" stroke="#EFEFEF" strokeWidth={1} />
+    </Svg>
   );
 }
 
@@ -334,84 +354,35 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   card: {
-    height: 103,
+    height: CARD_HEIGHT,
     width: '100%',
-    borderWidth: 1,
-    borderColor: '#EFEFEF',
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
+    backgroundColor: 'transparent',
     paddingHorizontal: 18,
-    paddingTop: 17,
-    paddingBottom: 17,
+    paddingTop: 20,
+    paddingBottom: 20,
     marginBottom: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  notchLeft: {
+  cardBackground: {
     position: 'absolute',
-    left: 1,
-    top: 42.5,
-    width: 10,
-    height: 20,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  notchRight: {
-    position: 'absolute',
-    right: 1,
-    top: 42.5,
-    width: 10,
-    height: 20,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  notchMaskLeft: {
-    position: 'absolute',
-    left: -10,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-  },
-  notchMaskRight: {
-    position: 'absolute',
-    right: -10,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-  },
-  notchLineMaskLeft: {
-    position: 'absolute',
-    left: -2,
-    width: 5,
-    height: 22,
-    backgroundColor: '#FFFFFF',
-    zIndex: 3,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  notchLineMaskRight: {
-    position: 'absolute',
-    right: -2,
-    width: 5,
-    height: 22,
-    backgroundColor: '#FFFFFF',
-    zIndex: 3,
-    elevation: 0,
-    shadowOpacity: 0,
+    left: 0,
+    top: 0,
   },
   cardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     marginBottom: 12,
+    zIndex: 1,
   },
   gradeBadge: {
-    minWidth: 30,
-    height: 30,
-    borderRadius: 15,
+    minWidth: 34,
+    height: 34,
+    borderRadius: 17,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -419,7 +390,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   gradeText: {
-    fontSize: 16,
+    fontSize: 17,
     letterSpacing: -0.6,
     lineHeight: 24,
     fontFamily: 'Pretendard-Medium',
@@ -429,8 +400,8 @@ const styles = StyleSheet.create({
     color: '#14151F',
   },
   tradeBadge: {
-    height: 30,
-    borderRadius: 15,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#F2F2F5',
     alignItems: 'center',
     justifyContent: 'center',
@@ -439,7 +410,7 @@ const styles = StyleSheet.create({
   },
   tradeText: {
     color: '#5E5E61',
-    fontSize: 16,
+    fontSize: 17,
     letterSpacing: -0.6,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
@@ -448,16 +419,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    zIndex: 1,
   },
   coinText: {
     flex: 1,
     color: '#14151F',
-    fontSize: 21,
+    fontSize: 23,
     fontFamily: 'Pretendard-SemiBold',
   },
   priceText: {
     color: '#14151F',
-    fontSize: 16,
+    fontSize: 17,
     letterSpacing: -0.6,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',

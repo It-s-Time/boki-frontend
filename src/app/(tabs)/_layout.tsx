@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemHighlightFocused: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderRadius: 32,
   },
   fabWrapper: {
