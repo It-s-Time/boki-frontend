@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { router } from 'expo-router';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
@@ -11,6 +12,12 @@ export default function ApiSuccessScreen() {
 
   useEffect(() => {
     setApiConnected(true);
+
+    const timer = setTimeout(() => {
+      router.replace('/(tabs)/mypage');
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [setApiConnected]);
 
   return (
