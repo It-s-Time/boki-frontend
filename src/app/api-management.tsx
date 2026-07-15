@@ -13,7 +13,11 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getExchangeApiKeyStatus, saveExchangeApiKey } from '@/api/exchange';
+import {
+  deleteExchangeApiKey,
+  getExchangeApiKeyStatus,
+  saveExchangeApiKey,
+} from '@/api/exchange';
 import { COLORS, COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 
@@ -57,7 +61,7 @@ export default function ApiManagementScreen() {
     };
   }, [setApiConnected]);
 
-  const getRegisterErrorMessage = (error: unknown) => {
+  const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
     if (axios.isAxiosError(error)) {
       const responseData = error.response?.data as
         | { message?: string; code?: string; error?: string }
@@ -76,7 +80,7 @@ export default function ApiManagementScreen() {
       }
 
       if (error.response?.status) {
-        return `API 키 등록에 실패했습니다. (${error.response.status})`;
+        return `${fallbackMessage} (${error.response.status})`;
       }
 
       if (error.code === 'ECONNABORTED') {
@@ -87,8 +91,8 @@ export default function ApiManagementScreen() {
     }
 
     return error instanceof Error
-      ? `API 키 등록에 실패했습니다. (${error.message})`
-      : 'API 키 등록에 실패했습니다. 키 정보를 다시 확인해주세요.';
+      ? `${fallbackMessage} (${error.message})`
+      : fallbackMessage;
   };
 
   const handleRegister = async () => {
@@ -124,11 +128,59 @@ export default function ApiManagementScreen() {
       setIsRegistered(true);
       router.replace('/api-success');
     } catch (error) {
-      setErrorMessage(getRegisterErrorMessage(error));
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'API 키 등록에 실패했습니다. 키 정보를 다시 확인해주세요.',
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleDelete = async () => {
+    if (isSubmitting) return;
+
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const data = await deleteExchangeApiKey();
+
+      if (!data.isSuccess) {
+        setErrorMessage(
+          data.code
+            ? `${data.message || 'API 삭제에 실패했습니다.'} (${data.code})`
+            : data.message || 'API 삭제에 실패했습니다.',
+        );
+        return;
+      }
+
+      setAccessKey('');
+      setSecretKey('');
+      setIsRegistered(false);
+      setApiConnected(false);
+      router.replace('/api-deleted');
+    } catch (error) {
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'API 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        ),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const buttonLabel = isRegistered
+    ? isSubmitting
+      ? '삭제 중...'
+      : '등록한 API 삭제하기'
+    : isSubmitting
+      ? '등록 중...'
+      : 'API 키 등록하기';
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -168,6 +220,7 @@ export default function ApiManagementScreen() {
             placeholderTextColor={COLORS.textPrimary}
             style={styles.input}
             textAlign="center"
+            editable={!isRegistered && !isSubmitting}
           />
 
           <TextInput
@@ -182,6 +235,7 @@ export default function ApiManagementScreen() {
             placeholderTextColor={COLORS.textPrimary}
             style={styles.input}
             textAlign="center"
+            editable={!isRegistered && !isSubmitting}
           />
 
           {errorMessage ? (
@@ -193,15 +247,11 @@ export default function ApiManagementScreen() {
               styles.registerButton,
               isSubmitting && styles.registerButtonDisabled,
             ]}
-            onPress={handleRegister}
+            onPress={isRegistered ? handleDelete : handleRegister}
             disabled={isSubmitting}
           >
-            <Text style={styles.registerText}>
-              {isSubmitting ? '등록 중...' : 'API 키 등록하기'}
-            </Text>
+            <Text style={styles.registerText}>{buttonLabel}</Text>
           </Pressable>
-
-          {isRegistered ? <Text style={styles.statusText}>등록됨</Text> : null}
 
           <View style={styles.guideSection}>
             <Text style={styles.guideTitle}>업비트 API 연동 방법</Text>
@@ -318,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 28,
-    marginBottom: 16,
+    marginBottom: 60,
   },
   registerButtonDisabled: {
     opacity: 0.55,
@@ -337,14 +387,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: -4,
     marginBottom: 12,
-  },
-  statusText: {
-    color: '#2EAD5B',
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: 'Pretendard-SemiBold',
-    textAlign: 'center',
-    marginBottom: 34,
   },
   guideSection: {
     gap: 22,
