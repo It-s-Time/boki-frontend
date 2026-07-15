@@ -6,6 +6,7 @@ import type {
   TradeCalendarParams,
   TradeCalendarSummary,
   CreateManualTradeInput,
+  UpdateManualTradeInput,
 } from '../types';
 
 export const tradeApi = {
@@ -22,5 +23,15 @@ export const tradeApi = {
   createManual: (data: CreateManualTradeInput) =>
     apiClient
       .post<ApiResponse<Trade>>('/api/trades/manual', data)
+      .then((res) => res.data.result),
+
+  update: (tradeId: number, data: UpdateManualTradeInput) =>
+    apiClient
+      .patch<ApiResponse<Trade>>(`/api/trades/${tradeId}`, data)
+      .then((res) => res.data.result),
+
+  remove: (tradeId: number) =>
+    apiClient
+      .delete<ApiResponse<string>>(`/api/trades/${tradeId}`)
       .then((res) => res.data.result),
 };

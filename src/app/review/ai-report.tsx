@@ -3,7 +3,8 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import ReportDetail from '@/features/review/components/ReportDetail';
-import { useAiReport } from '@/features/review/hooks/useAiReport';
+import { useAiReport, useCreateAiReport } from '@/features/review/hooks/useAiReport';
+import { useReview } from '@/features/review/hooks/useReview';
 import { COLORS_NEW } from '@/shared/constants/colors';
 
 export default function AiReportScreen() {
@@ -11,17 +12,26 @@ export default function AiReportScreen() {
   const { tradeId } = useLocalSearchParams<{ tradeId: string }>();
   const numericTradeId = tradeId ? Number(tradeId) : undefined;
 
-  const { data: report, isLoading, isError, refetch } = useAiReport(numericTradeId);
+  const { data: report, isLoading, isError } = useAiReport(numericTradeId);
+  const { data: review } = useReview(numericTradeId);
+  const createAiReport = useCreateAiReport();
 
-  if (isLoading || report?.status === 'PENDING') {
+  if (isLoading || report?.status === 'PENDING' || createAiReport.isPending) {
     return <LoadingScreen message="AI가 피드백을 만들고 있어요" />;
   }
 
-  if (isError || !report) {
+  if (isError || !report || report.status === 'FAILED') {
     return (
       <SafeAreaView style={styles.errorContainer} edges={['top', 'bottom']}>
         <Text style={styles.errorText}>리포트를 불러오지 못했어요</Text>
-        <Pressable style={styles.retryButton} onPress={() => refetch()}>
+        <Pressable
+          style={styles.retryButton}
+          onPress={() => {
+            if (numericTradeId !== undefined) {
+              createAiReport.mutate(numericTradeId);
+            }
+          }}
+        >
           <Text style={styles.retryText}>다시 시도</Text>
         </Pressable>
       </SafeAreaView>
@@ -29,7 +39,11 @@ export default function AiReportScreen() {
   }
 
   return (
-    <ReportDetail report={report} onBack={() => router.replace('/(tabs)/journal')} />
+    <ReportDetail
+      report={report}
+      review={review}
+      onBack={() => router.replace('/(tabs)/journal')}
+    />
   );
 }
 
