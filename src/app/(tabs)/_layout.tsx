@@ -1,14 +1,17 @@
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, View, StyleSheet } from 'react-native';
+import { Alert, Pressable, View, StyleSheet } from 'react-native';
 import { type ComponentType, useState } from 'react';
+import axios from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQueryClient } from '@tanstack/react-query';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { syncExchangeTrades } from '@/api/exchange';
 import InputOptionsModal from '@/features/input/components/InputOptionsModal';
 import SyncSuccessModal from '@/features/input/components/SyncSuccessModal';
+import { tradeKeys } from '@/features/trade/hooks/useTrades';
 import { useApiStore } from '@/store/apiStore';
 import HomeIcon from '../../../assets/icons/home.svg';
 import LogIcon from '../../../assets/icons/log2.svg';
@@ -17,10 +20,37 @@ import MyIcon from '../../../assets/icons/my.svg';
 import AddIcon from '../../../assets/icons/add.svg';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const SYNC_DURATION_MS = 1200;
-
 const TAB_BAR_HEIGHT = 52;
 const ICON_SIZE = 16;
+
+const getSyncErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as
+      | { message?: string; code?: string; error?: string }
+      | undefined;
+    const serverMessage = responseData?.message || responseData?.error;
+
+    if (serverMessage) {
+      return responseData?.code
+        ? `${serverMessage} (${responseData.code})`
+        : serverMessage;
+    }
+
+    if (error.response?.status === 401) {
+      return '로그인이 만료되었습니다. 다시 로그인해주세요.';
+    }
+
+    if (error.response?.status) {
+      return `서버 요청에 실패했습니다. (${error.response.status})`;
+    }
+
+    if (error.code === 'ECONNABORTED') {
+      return '서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.';
+    }
+  }
+
+  return '잠시 후 다시 시도해주세요.';
+};
 
 interface TabIconConfig {
   name: string;
@@ -157,9 +187,10 @@ export default function TabLayout() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccessVisible, setSyncSuccessVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   const isApiConnected = useApiStore((s) => s.isApiConnected);
 
-  const handleFabPress = () => {
+  const handleFabPress = async () => {
     if (!isApiConnected) {
       setModalVisible(true);
       return;
@@ -167,10 +198,52 @@ export default function TabLayout() {
     if (isSyncing) return;
 
     setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
+    try {
+      const data = await syncExchangeTrades();
+
+      if (!data.isSuccess) {
+        Alert.alert('거래 내역 가져오기 실패', data.message);
+        return;
+      }
+
+      const syncResult = data.result;
+      const syncedTrades = syncResult?.trades ?? [];
+      await queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+
+      if (syncedTrades.length > 0) {
+        queryClient.setQueryData(tradeKeys.list(), syncedTrades);
+      }
+
+      router.replace('/(tabs)');
+      const syncedCount = syncResult?.syncedCount ?? syncedTrades.length;
+      const skippedCount = syncResult?.skippedCount ?? 0;
+      const hasSyncedTrades = syncedCount > 0 || syncedTrades.length > 0;
+
+      if (!hasSyncedTrades && skippedCount > 0) {
+        Alert.alert(
+          '새로 가져온 거래 내역이 없어요',
+          `이미 가져온 거래 ${skippedCount}건은 중복으로 건너뛰었어요.`,
+        );
+        return;
+      }
+
+      if (!hasSyncedTrades) {
+        Alert.alert(
+          '가져온 거래 내역이 없어요',
+          '업비트에서 조회된 완료 거래가 없어요. API 키 계정, 주문조회 권한, 실제 체결 내역을 확인해주세요.',
+        );
+        return;
+      }
+
       setSyncSuccessVisible(true);
-    }, SYNC_DURATION_MS);
+    } catch (error) {
+      Alert.alert(
+        '거래 내역 가져오기 실패',
+        getSyncErrorMessage(error),
+      );
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   return (
