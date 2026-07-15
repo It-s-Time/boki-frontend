@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
   iconText: {
     color: '#FFFFFF',
     fontSize: 72,
+    letterSpacing: -2.88,
     fontFamily: 'Pretendard-Bold',
     lineHeight: 60,
   },
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 20,
+    letterSpacing: -0.8,
     lineHeight: 32,
     textAlign: 'center',
   },
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
   },
 });

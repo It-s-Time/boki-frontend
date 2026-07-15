@@ -246,6 +246,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
@@ -281,12 +282,14 @@ const styles = StyleSheet.create({
   copyText: {
     color: COLORS.textSecondary,
     fontSize: 18,
+    letterSpacing: -0.72,
     lineHeight: 26,
     fontFamily: 'Pretendard-Regular',
   },
   ipLabel: {
     color: COLORS.textPrimary,
     fontSize: 22,
+    letterSpacing: -0.88,
     lineHeight: 30,
     fontFamily: 'Pretendard-Regular',
     marginTop: 46,
@@ -295,6 +298,7 @@ const styles = StyleSheet.create({
   ipValue: {
     color: COLORS.textPrimary,
     fontSize: 25,
+    letterSpacing: -1,
     lineHeight: 34,
     fontFamily: 'Pretendard-SemiBold',
   },
@@ -306,6 +310,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F3F8',
     color: COLORS.textPrimary,
     fontSize: 22,
+    letterSpacing: -0.88,
     lineHeight: 30,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 20,
@@ -326,12 +331,14 @@ const styles = StyleSheet.create({
   registerText: {
     color: COLORS.box,
     fontSize: 24,
+    letterSpacing: -0.96,
     lineHeight: 34,
     fontFamily: 'Pretendard-SemiBold',
   },
   errorText: {
     color: '#EE7A60',
     fontSize: 14,
+    letterSpacing: -0.56,
     lineHeight: 20,
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
@@ -341,6 +348,7 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#2EAD5B',
     fontSize: 16,
+    letterSpacing: -0.64,
     lineHeight: 24,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
@@ -352,12 +360,14 @@ const styles = StyleSheet.create({
   guideTitle: {
     color: COLORS.textPrimary,
     fontSize: 24,
+    letterSpacing: -0.96,
     lineHeight: 34,
     fontFamily: 'Pretendard-SemiBold',
   },
   guideText: {
     color: COLORS.textSecondary,
     fontSize: 17,
+    letterSpacing: -0.68,
     lineHeight: 31,
     fontFamily: 'Pretendard-Regular',
   },

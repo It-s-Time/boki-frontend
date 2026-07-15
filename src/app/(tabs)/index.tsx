@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
 
   tradeTitle: {
     fontSize: 22,
+    letterSpacing: -0.88,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 16,
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
 
   emptyText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },

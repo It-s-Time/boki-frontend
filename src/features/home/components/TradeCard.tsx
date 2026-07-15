@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
 
   iconFallbackText: {
     fontSize: 12,
+    letterSpacing: -0.48,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },
@@ -170,21 +171,23 @@ const styles = StyleSheet.create({
 
   coinName: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
 
   coinAmount: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
 
   tradeInfo: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    letterSpacing: -0.5,
   },
 
   reviewButton: {

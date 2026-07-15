@@ -8,7 +8,10 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
-import { PRINCIPLE_SETS, PRINCIPLE_ILLUSTRATIONS } from '@/features/review/data';
+import {
+  PRINCIPLE_SETS,
+  PRINCIPLE_ILLUSTRATIONS,
+} from '@/features/review/data';
 import { Principle } from '@/features/review/types';
 
 const CARD_WIDTH = 250;
@@ -101,9 +104,7 @@ export default function PrincipleReviewCarousel({ active, height }: Props) {
   }, [active, carouselX, carouselViewportWidth, carouselCenterOffset]);
 
   return (
-    <View
-      style={[styles.carouselGroupWrap, height ? { height } : null]}
-    >
+    <View style={[styles.carouselGroupWrap, height ? { height } : null]}>
       <Animated.View
         style={[styles.carouselRow, { transform: [{ translateX: carouselX }] }]}
       >
@@ -157,6 +158,7 @@ const styles = StyleSheet.create({
   },
   previewCardText: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',

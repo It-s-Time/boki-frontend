@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
     marginLeft: 44,
     marginBottom: 16,
   },
@@ -168,11 +169,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
   },
   questionText: {
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 18,
+    letterSpacing: -0.72,
   },
   guideBody: {
     backgroundColor: COLORS.box,
@@ -189,11 +192,13 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   guideNote: {
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 12,
+    letterSpacing: -0.48,
     textAlign: 'center',
   },
   ipRow: {
@@ -209,11 +214,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   ipValue: {
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   copyButton: {
     paddingHorizontal: 12,
@@ -225,6 +232,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 12,
+    letterSpacing: -0.48,
   },
   bottom: {
     paddingHorizontal: 20,
@@ -252,6 +260,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   input: {
     flex: 1,
@@ -260,5 +269,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
 });

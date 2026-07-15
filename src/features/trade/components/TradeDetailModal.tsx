@@ -383,6 +383,7 @@ const styles = StyleSheet.create({
   },
   coinName: {
     fontSize: 24,
+    letterSpacing: -0.96,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
@@ -393,6 +394,7 @@ const styles = StyleSheet.create({
   },
   tradeBadgeText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     fontFamily: 'Pretendard-Medium',
   },
   content: {
@@ -408,11 +410,13 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
   detailValue: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
@@ -425,6 +429,7 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
@@ -443,6 +448,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonSmallText: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },
@@ -459,6 +465,7 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },
@@ -501,6 +508,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 20,
+    letterSpacing: -0.8,
   },
   field: {
     gap: 8,
@@ -510,6 +518,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 18,
+    letterSpacing: -0.72,
   },
   inputBox: {
     flexDirection: 'row',
@@ -527,6 +536,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Regular',
     padding: 0,
     fontSize: 18,
+    letterSpacing: -0.72,
   },
   dateModalBackdrop: {
     flex: 1,
@@ -567,6 +577,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginTop: 16,
   },

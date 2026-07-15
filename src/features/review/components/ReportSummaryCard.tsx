@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     height: 45,
     color: '#14151F',
     fontSize: 35,
-    letterSpacing: -0.6,
+    letterSpacing: -1.4,
     lineHeight: 45,
     fontFamily: 'Pretendard-Bold',
     textAlign: 'center',
@@ -260,6 +260,7 @@ const styles = StyleSheet.create({
   scoreUnit: {
     color: '#5E5E61',
     fontSize: 17,
+    letterSpacing: -0.68,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 8,
     marginLeft: 5,
@@ -267,6 +268,7 @@ const styles = StyleSheet.create({
   rankText: {
     color: '#14151F',
     fontSize: 24,
+    letterSpacing: -0.96,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
     marginBottom: 22,
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 16,
-    letterSpacing: -0.6,
+    letterSpacing: -0.64,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
     color: '#5e5e61',
@@ -315,6 +317,7 @@ const styles = StyleSheet.create({
   reviewTitle: {
     color: '#14151F',
     fontSize: 21,
+    letterSpacing: -0.84,
     fontFamily: 'Pretendard-SemiBold',
     marginBottom: 14,
   },
@@ -336,6 +339,7 @@ const styles = StyleSheet.create({
   reviewNumberText: {
     color: '#F2F2F5',
     fontSize: 14,
+    letterSpacing: -0.56,
     lineHeight: 21,
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
@@ -344,7 +348,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#5E5E61',
     fontSize: 17,
-    letterSpacing: -0.6,
+    letterSpacing: -0.68,
     lineHeight: 25,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'left',

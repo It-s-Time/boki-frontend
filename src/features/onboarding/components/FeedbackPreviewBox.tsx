@@ -527,6 +527,7 @@ const styles = StyleSheet.create({
   },
   feedbackGradeText: {
     fontSize: 13,
+    letterSpacing: -0.52,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
@@ -545,6 +546,7 @@ const styles = StyleSheet.create({
   feedbackTradeText: {
     color: '#5E5E61',
     fontSize: 13,
+    letterSpacing: -0.52,
     fontFamily: 'Pretendard-Regular',
   },
   feedbackCardBottomRow: {
@@ -556,11 +558,13 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#14151F',
     fontSize: 17,
+    letterSpacing: -0.68,
     fontFamily: 'Pretendard-SemiBold',
   },
   feedbackPriceText: {
     color: '#14151F',
     fontSize: 13,
+    letterSpacing: -0.52,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'right',
     marginLeft: 10,

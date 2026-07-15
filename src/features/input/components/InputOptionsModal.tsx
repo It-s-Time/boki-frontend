@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 22,
+    letterSpacing: -0.88,
   },
 
   headerIcon: {
@@ -128,5 +129,6 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 18,
+    letterSpacing: -0.72,
   },
 });

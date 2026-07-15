@@ -253,6 +253,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
@@ -271,7 +272,7 @@ const styles = StyleSheet.create({
   weakTitle: {
     color: COLORS.textPrimary,
     fontSize: 24,
-    letterSpacing: -0.6,
+    letterSpacing: -0.96,
     lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
     marginBottom: 19,
@@ -298,6 +299,7 @@ const styles = StyleSheet.create({
   weakNumberText: {
     color: COLORS.box,
     fontSize: 14,
+    letterSpacing: -0.56,
     lineHeight: 21,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
@@ -306,7 +308,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS.textPrimary,
     fontSize: 18,
-    letterSpacing: -0.6,
+    letterSpacing: -0.72,
     lineHeight: 26,
     fontFamily: 'Pretendard-Regular',
   },
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
     width: 86,
     color: '#F79474',
     fontSize: 16,
-    letterSpacing: -0.6,
+    letterSpacing: -0.64,
     lineHeight: 24,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'right',
@@ -370,6 +372,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     color: COLORS.textPrimary,
     fontSize: 20,
+    letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
     lineHeight: 28,
   },
@@ -377,6 +380,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: COLORS.textSecondary,
     fontSize: 16,
+    letterSpacing: -0.64,
     fontFamily: 'Pretendard-Regular',
     lineHeight: 20,
   },
@@ -402,6 +406,7 @@ const styles = StyleSheet.create({
   ruleSectionTitle: {
     color: COLORS.textPrimary,
     fontSize: 20,
+    letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
     marginBottom: 16,
   },
@@ -426,12 +431,14 @@ const styles = StyleSheet.create({
   ruleNumberText: {
     color: COLORS.box,
     fontSize: 12,
+    letterSpacing: -0.48,
     fontFamily: 'Pretendard-SemiBold',
   },
   ruleText: {
     flex: 1,
     color: COLORS.textSecondary,
     fontSize: 17,
+    letterSpacing: -0.68,
     fontFamily: 'Pretendard-Regular',
     lineHeight: 24,
   },

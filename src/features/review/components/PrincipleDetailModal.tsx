@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
 
   sheetTitle: {
     fontSize: 24,
+    letterSpacing: -0.96,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
@@ -94,6 +95,7 @@ const styles = StyleSheet.create({
 
   typeBadgeText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     fontFamily: 'Pretendard-SemiBold',
   },
 
@@ -116,6 +118,7 @@ const styles = StyleSheet.create({
 
   principleContent: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
@@ -131,6 +134,7 @@ const styles = StyleSheet.create({
 
   confirmText: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },

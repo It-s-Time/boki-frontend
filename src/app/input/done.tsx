@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 22,
+    letterSpacing: -0.88,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },

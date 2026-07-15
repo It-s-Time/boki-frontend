@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
     fontSize: 20,
+    letterSpacing: -0.8,
     marginTop: 32,
   },
   footer: {
@@ -120,6 +121,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   kakaoButton: {
     flexDirection: 'row',
@@ -135,12 +137,14 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   termsText: {
     marginTop: 24,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 12,
+    letterSpacing: -0.48,
     lineHeight: 16,
     textAlign: 'center',
     marginBottom: 64,

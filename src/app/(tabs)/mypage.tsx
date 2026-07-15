@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 20,
+    letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
   },
@@ -210,6 +211,7 @@ const styles = StyleSheet.create({
   name: {
     color: COLORS.textPrimary,
     fontSize: 20,
+    letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
   },
   editButton: {
@@ -234,6 +236,7 @@ const styles = StyleSheet.create({
   editText: {
     color: COLORS.textSecondary,
     fontSize: 14,
+    letterSpacing: -0.56,
     fontFamily: 'Pretendard-Medium',
   },
   sectionTitle: {
@@ -241,6 +244,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     color: COLORS.textPrimary,
     fontSize: 18,
+    letterSpacing: -0.72,
     fontFamily: 'Pretendard-Medium',
   },
   menuItem: {
@@ -265,6 +269,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     color: COLORS.textPrimary,
     fontSize: 18,
+    letterSpacing: -0.72,
     fontFamily: 'Pretendard-SemiBold',
   },
   modalBackdrop: {
@@ -284,6 +289,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     color: COLORS.textPrimary,
     fontSize: 18,
+    letterSpacing: -0.72,
     lineHeight: 26,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
@@ -313,11 +319,13 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: COLORS.textPrimary,
     fontSize: 16,
+    letterSpacing: -0.64,
     fontFamily: 'Pretendard-SemiBold',
   },
   confirmButtonText: {
     color: COLORS.box,
     fontSize: 16,
+    letterSpacing: -0.64,
     fontFamily: 'Pretendard-SemiBold',
   },
 });

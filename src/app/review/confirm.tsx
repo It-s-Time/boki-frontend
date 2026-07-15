@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     marginBottom: 14,
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
   scoreContent: {
     flex: 1,
     fontSize: 15,
+    letterSpacing: -0.6,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
@@ -167,12 +169,14 @@ const styles = StyleSheet.create({
 
   scoreChipText: {
     fontSize: 13,
+    letterSpacing: -0.52,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },
 
   memoText: {
     fontSize: 15,
+    letterSpacing: -0.6,
     lineHeight: 22,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
@@ -198,6 +202,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -213,6 +218,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
@@ -226,6 +232,7 @@ const styles = StyleSheet.create({
 
   retryText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },

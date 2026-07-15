@@ -433,6 +433,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 26,
+    letterSpacing: -1.04,
   },
   inputBox: {
     flexDirection: 'row',
@@ -450,6 +451,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Regular',
     padding: 0,
     fontSize: 22,
+    letterSpacing: -0.88,
   },
   inputBoxOpen: {
     borderBottomLeftRadius: 0,
@@ -508,11 +510,13 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 15,
+    letterSpacing: -0.6,
   },
   coinName: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 13,
+    letterSpacing: -0.52,
   },
   badge: {
     paddingHorizontal: 10,
@@ -523,6 +527,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 12,
+    letterSpacing: -0.48,
   },
   tradeTypeRow: {
     flexDirection: 'row',
@@ -549,6 +554,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 20,
+    letterSpacing: -0.8,
   },
   footer: {
     paddingBottom: 16,
@@ -558,6 +564,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginBottom: 12,
   },

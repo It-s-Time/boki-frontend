@@ -150,12 +150,14 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 20,
+    letterSpacing: -0.8,
     marginBottom: 4,
   },
   cardSubtitle: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   detail: {
     backgroundColor: COLORS_NEW.lightGray,
@@ -167,6 +169,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 18,
+    letterSpacing: -0.72,
     marginBottom: 14,
   },
   detailRow: {
@@ -187,12 +190,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 14,
+    letterSpacing: -0.56,
   },
   detailText: {
     flex: 1,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
     lineHeight: 20,
   },
 });

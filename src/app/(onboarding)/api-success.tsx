@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
     fontSize: 23,
+    letterSpacing: -0.92,
     lineHeight: 32,
   },
 });

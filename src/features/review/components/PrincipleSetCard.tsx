@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
 
   description: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 20,
@@ -157,6 +159,7 @@ const styles = StyleSheet.create({
 
   badgeText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },

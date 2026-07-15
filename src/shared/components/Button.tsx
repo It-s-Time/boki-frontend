@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },

@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
 
   principleContent: {
     fontSize: 26,
+    letterSpacing: -1.04,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 22,
@@ -252,6 +253,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginTop: 12,
   },
