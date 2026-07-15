@@ -49,4 +49,6 @@ export const COLORS_NEW = {
 
   lightBorder: '#EFEFEF', // 연한 테두리
   handle: '#D6D6D8',
+
+  reviewed: '#EE7A60', // 복기 완료 표시
 };

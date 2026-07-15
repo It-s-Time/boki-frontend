@@ -16,6 +16,19 @@ import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const ILLUSTRATION_HEIGHT = 190;
+
+// RN's line breaker can split inside a single 어절 (e.g. "사기" -> "사" / "기")
+// since Hangul syllables are individually breakable by default. Joining each
+// word's characters with a zero-width word joiner blocks breaks there while
+// leaving the real spaces between words breakable.
+function keepWordsTogether(text: string) {
+  return text
+    .split(' ')
+    .map((word) => [...word].join('⁠'))
+    .join(' ');
+}
+
 export default function ReviewSessionScreen() {
   const router = useRouter();
   const {
@@ -85,19 +98,27 @@ export default function ReviewSessionScreen() {
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
     setIsSubmitting(true);
+    const usingBackendRuleSets = Boolean(data && data.length > 0);
+    const reviewData = {
+      ruleSetId: Number(principleSetId),
+      scores: principles.map((p, i) => ({
+        ruleId: Number(p.id),
+        score: Number(answers[i].score),
+      })),
+      content: memo.content,
+      replaceImages: false,
+      images: memo.photos,
+    };
+    console.log('[Review] submitting', {
+      usingBackendRuleSets,
+      principleSetId,
+      ruleSetId: reviewData.ruleSetId,
+      scores: reviewData.scores,
+    });
     createReview.mutate(
       {
         tradeId: Number(tradeId),
-        data: {
-          ruleSetId: Number(principleSetId),
-          scores: principles.map((p, i) => ({
-            ruleId: Number(p.id),
-            score: Number(answers[i].score),
-          })),
-          content: memo.content,
-          replaceImages: false,
-          images: memo.photos,
-        },
+        data: reviewData,
       },
       {
         onSuccess: () => {
@@ -144,13 +165,18 @@ export default function ReviewSessionScreen() {
       </View>
 
       <View style={styles.principleContentWrap}>
-        <Text style={styles.principleContent}>{currentPrinciple.content}</Text>
+        <Text
+          style={styles.principleContent}
+          lineBreakStrategyIOS="hangul-word"
+        >
+          {keepWordsTogether(currentPrinciple.content)}
+        </Text>
 
         <View style={styles.illustrationArea}>
           {illustration && (
             <illustration.Icon
-              width={illustration.width}
-              height={illustration.height}
+              width={illustration.width * (ILLUSTRATION_HEIGHT / illustration.height)}
+              height={ILLUSTRATION_HEIGHT}
             />
           )}
         </View>
@@ -215,6 +241,7 @@ const styles = StyleSheet.create({
   illustrationArea: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: -30,
   },
 
   button: {

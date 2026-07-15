@@ -29,9 +29,9 @@ export default function InputOptionsModal({
     >
       <View style={styles.header}>
         <Text style={styles.title}>어떻게 거래내역을 추가할까요?</Text>
-        <View style={styles.headerIcon}>
+        {/* <View style={styles.headerIcon}>
           <Feather name="calendar" size={20} color={COLORS_NEW.border} />
-        </View>
+        </View> */}
       </View>
 
       <View style={styles.optionGroup}>

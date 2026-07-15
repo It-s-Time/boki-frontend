@@ -16,3 +16,21 @@ apiClient.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `[API] ${error.config?.method?.toUpperCase()} ${error.config?.url} failed (${error.response?.status ?? error.code}):`,
+        error.response?.data ?? error.message,
+      );
+    } else {
+      // Errors thrown before dispatch (e.g. the request interceptor's
+      // SecureStore read) never become AxiosErrors, so log them too —
+      // otherwise they fail completely silently.
+      console.error('[API] request failed before reaching the network:', error);
+    }
+    return Promise.reject(error);
+  },
+);

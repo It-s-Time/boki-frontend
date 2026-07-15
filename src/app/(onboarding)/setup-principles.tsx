@@ -81,7 +81,10 @@ export default function SetupPrinciplesScreen() {
         ) : step === 2 ? (
           <View style={styles.content}>
             <Text style={styles.title}>매매원칙을 바탕으로 복기해 보세요</Text>
-            <PrincipleReviewCarousel active={step === 2} height={groupBoxHeight} />
+            <PrincipleReviewCarousel
+              active={step === 2}
+              height={groupBoxHeight}
+            />
             <Text style={styles.helperText}>
               매매원칙을 제대로 지켰는지 점수를 매겨주세요.
               {'\n'}

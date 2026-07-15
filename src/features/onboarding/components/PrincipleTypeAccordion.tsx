@@ -105,6 +105,8 @@ export default function PrincipleTypeAccordion() {
                   </View>
                 ))}
 
+                <View style={{ height: 16 }} />
+
                 <Text style={styles.detailSectionTitle}>매도</Text>
                 {item.sell.map((line, i) => (
                   <View key={i} style={styles.detailRow}>
@@ -158,14 +160,14 @@ const styles = StyleSheet.create({
   detail: {
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
-    padding: 16,
+    padding: 18,
     marginBottom: 16,
   },
   detailSectionTitle: {
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 18,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   detailRow: {
     flexDirection: 'row',
@@ -184,13 +186,13 @@ const styles = StyleSheet.create({
   detailIndexText: {
     color: '#FFFFFF',
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 13,
+    fontSize: 14,
   },
   detailText: {
     flex: 1,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
   },
 });

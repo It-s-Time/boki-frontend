@@ -23,6 +23,7 @@ interface Props {
   visibleCount?: number;
   highlightVariant?: 'border' | 'fill';
   showHighlight?: boolean;
+  fontSize?: number;
 }
 
 export default function WheelPicker({
@@ -34,6 +35,7 @@ export default function WheelPicker({
   visibleCount = DEFAULT_VISIBLE_COUNT,
   highlightVariant = 'border',
   showHighlight = true,
+  fontSize = 20,
 }: Props) {
   const ITEM_HEIGHT = itemHeight;
   const PADDING = (ITEM_HEIGHT * (visibleCount - 1)) / 2;
@@ -98,6 +100,7 @@ export default function WheelPicker({
               style={[
                 styles.itemText,
                 index === selectedIndex && styles.itemTextSelected,
+                { fontSize },
               ]}
             >
               {label}
@@ -137,13 +140,11 @@ const styles = StyleSheet.create({
   },
 
   itemText: {
-    fontSize: 20,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
 
   itemTextSelected: {
-    fontSize: 20,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
