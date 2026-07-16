@@ -1,16 +1,18 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Trade } from '@/features/trade/types';
-import { COIN_NAMES } from '@/features/trade/constants';
+import { COIN_NAMES, getCoinSymbol } from '@/features/trade/constants';
 import TradeDetailModal from '@/features/trade/components/TradeDetailModal';
+import BitcoinIcon from '../../../../assets/icons/main/bitcoin.svg';
+import RippleIcon from '../../../../assets/icons/main/ripple.svg';
 
-const COIN_ICONS: Record<string, number> = {
-  BTC: require('../../../../assets/icons/main/bitcoin.png'),
-  XRP: require('../../../../assets/icons/main/ripple.png'),
+const COIN_ICONS: Record<string, typeof BitcoinIcon> = {
+  BTC: BitcoinIcon,
+  XRP: RippleIcon,
 };
 
 type Props = {
@@ -30,7 +32,8 @@ export default function TradeCard({ trade }: Props) {
 
   const isReviewed = trade.reviewStatus === 'COMPLETED';
   const isReportDone = trade.grade !== null;
-  const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
+  const coinSymbol = getCoinSymbol(trade.coinType);
+  const coinName = COIN_NAMES[coinSymbol] ?? coinSymbol;
   const time = formatTime(trade.tradedAt);
 
   const handleReview = () => {
@@ -40,7 +43,7 @@ export default function TradeCard({ trade }: Props) {
         params: {
           tradeId: trade.tradeId,
           coinName,
-          symbol: trade.coinType,
+          symbol: coinSymbol,
           amount: trade.quantity,
           tradeType: trade.tradeType === 'BUY' ? 'buy' : 'sell',
           time,
@@ -62,7 +65,7 @@ export default function TradeCard({ trade }: Props) {
     });
   };
 
-  const icon = COIN_ICONS[trade.coinType];
+  const Icon = COIN_ICONS[coinSymbol];
 
   return (
     <View style={styles.tradeCard}>
@@ -71,14 +74,10 @@ export default function TradeCard({ trade }: Props) {
         onPress={() => setDetailVisible(true)}
       >
         <View style={styles.iconBadge}>
-          {icon ? (
-            <Image
-              source={icon}
-              style={styles.iconImage}
-              resizeMode="contain"
-            />
+          {Icon ? (
+            <Icon width={40} height={16} />
           ) : (
-            <Text style={styles.iconFallbackText}>{trade.coinType}</Text>
+            <Text style={styles.iconFallbackText}>{coinSymbol}</Text>
           )}
         </View>
 
@@ -88,7 +87,7 @@ export default function TradeCard({ trade }: Props) {
             <Text style={styles.coinAmount}>
               {' '}
               · {trade.quantity}
-              {trade.coinType}
+              {coinSymbol}
             </Text>
           </Text>
 
@@ -158,11 +157,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
-  },
-
-  iconImage: {
-    width: 40,
-    height: 16,
   },
 
   iconFallbackText: {

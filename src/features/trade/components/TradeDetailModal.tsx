@@ -13,7 +13,7 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import DateWheelPicker from '@/shared/components/DateWheelPicker';
-import { COIN_NAMES } from '@/features/trade/constants';
+import { COIN_NAMES, getCoinSymbol } from '@/features/trade/constants';
 import {
   useDeleteTrade,
   useUpdateTrade,
@@ -61,7 +61,8 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
   const deleteTrade = useDeleteTrade();
 
   const isManual = trade.externalTradeId === null;
-  const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
+  const coinSymbol = getCoinSymbol(trade.coinType);
+  const coinName = COIN_NAMES[coinSymbol] ?? coinSymbol;
 
   const resetEditState = () => {
     setTradeDate(new Date(trade.tradedAt));
@@ -189,7 +190,7 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
               />
               <DetailRow
                 label="수량"
-                value={`${trade.quantity}${trade.coinType}`}
+                value={`${trade.quantity}${coinSymbol}`}
               />
               <DetailRow label="거래일자" value={formatDate(trade.tradedAt)} />
 

@@ -29,7 +29,7 @@ export default function SetupPrinciplesScreen() {
     setNavigating(true);
     markOnboardingSeen().then(() => {
       setTimeout(() => {
-        router.replace('/(auth)/signup');
+        router.replace('/(tabs)/index');
       }, 3000);
     });
   };

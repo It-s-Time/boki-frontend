@@ -8,7 +8,7 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
 import { TradeGrade } from '@/features/review/types';
 import { useTradeList } from '@/features/trade/hooks/useTrades';
-import { COIN_NAMES } from '@/features/trade/constants';
+import { COIN_NAMES, getCoinSymbol } from '@/features/trade/constants';
 import type { Trade } from '@/features/trade/types';
 
 type GradeFilter = '전체' | TradeGrade;
@@ -150,7 +150,8 @@ function JournalCard({
   onPress: () => void;
 }) {
   const [cardWidth, setCardWidth] = useState(0);
-  const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
+  const coinSymbol = getCoinSymbol(trade.coinType);
+  const coinName = COIN_NAMES[coinSymbol] ?? coinSymbol;
   const typeText = trade.tradeType === 'BUY' ? '매수' : '매도';
 
   return (
@@ -169,7 +170,7 @@ function JournalCard({
       <View style={styles.cardBottomRow}>
         <Text style={styles.coinText}>
           {coinName} · {trade.quantity}
-          {trade.coinType}
+          {coinSymbol}
         </Text>
         <Text style={styles.priceText}>{trade.price.toLocaleString()}원</Text>
       </View>

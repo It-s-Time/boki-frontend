@@ -140,10 +140,10 @@ const styles = StyleSheet.create({
     letterSpacing: -0.64,
   },
   termsText: {
-    marginTop: 24,
+    marginTop: 32,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
+    fontSize: 14,
     letterSpacing: -0.48,
     lineHeight: 16,
     textAlign: 'center',

@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { exchangeLoginCode } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
+import { hasSeenOnboarding } from '@/features/onboarding/utils/onboardingStorage';
 
 const AUTH_CALLBACK_PATH = 'auth/callback';
 
@@ -59,17 +60,27 @@ export const completeLoginWithCode = async (loginCode: string): Promise<void> =>
     return;
   }
 
-  const lastConsumed = await SecureStore.getItemAsync(LAST_LOGIN_CODE_KEY);
-  if (lastConsumed === loginCode) {
+  const lastAttempted = await SecureStore.getItemAsync(LAST_LOGIN_CODE_KEY);
+  if (lastAttempted === loginCode) {
     router.replace('/(auth)/signup');
     return;
   }
 
+  // Record the attempt *before* the network call, not just on success.
+  // singleTask can redeliver the same stale deep-link Intent on a JS-only
+  // reload too (not just a cold start) — if we only remembered a code once
+  // it succeeded, a code that fails (e.g. already expired) would retry on
+  // every reload forever instead of just once.
+  await SecureStore.setItemAsync(LAST_LOGIN_CODE_KEY, loginCode);
+
   const task = (async () => {
     const authData = await exchangeLoginCode(loginCode);
-    await SecureStore.setItemAsync(LAST_LOGIN_CODE_KEY, loginCode);
     await useAuthStore.getState().setAuth(authData);
-    router.replace('/(tabs)');
+
+    const seenOnboarding = await hasSeenOnboarding();
+    router.replace(
+      seenOnboarding ? '/(tabs)' : '/(onboarding)/setup-principles',
+    );
   })();
 
   exchangeTasks.set(loginCode, task);

@@ -1,6 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { LogBox } from 'react-native';
+
+// 개발 중 화면에 뜨는 빨간/노란 에러·경고 오버레이를 끈다.
+LogBox.ignoreAllLogs(true);
 
 const queryClient = new QueryClient();
 
