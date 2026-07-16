@@ -71,14 +71,14 @@ export default function SymbolIntro({ size = 96, onFinish }: Props) {
         easing: Easing.out(Easing.ease),
         useNativeDriver: false,
       }),
-      Animated.delay(1000),
+      Animated.delay(600),
       Animated.timing(stage1, {
         toValue: 1,
         duration: 150,
         easing: Easing.out(Easing.ease),
         useNativeDriver: false,
       }),
-      Animated.delay(1000),
+      Animated.delay(600),
     ]);
 
     // finished가 true일 때만 완료 처리 (재렌더로 애니메이션이 중간에

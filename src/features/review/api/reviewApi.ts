@@ -33,6 +33,9 @@ export const reviewApi = {
       .post<ApiResponse<Review>>(
         `/api/trades/${tradeId}/reviews`,
         buildReviewFormData(data),
+        // Android RN's networking bridge only builds a multipart body when it
+        // sees this header; without it FormData bodies fail to send at all
+        // (ERR_NETWORK, no request even reaches the server).
         { headers: { 'Content-Type': 'multipart/form-data' } },
       )
       .then((res) => res.data.result),

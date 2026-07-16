@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 8,
     right: 8,
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: COLORS_NEW.lightGray,
   },
 

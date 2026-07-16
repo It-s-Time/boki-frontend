@@ -257,7 +257,7 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
               </View>
 
               <View style={styles.field}>
-                <Text style={styles.label}>가격 (원)</Text>
+                <Text style={styles.editLabel}>거래 가격 (원)</Text>
                 <View style={styles.inputBox}>
                   <TextInput
                     style={styles.input}
@@ -269,7 +269,7 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
               </View>
 
               <View style={styles.field}>
-                <Text style={styles.label}>총 거래금액</Text>
+                <Text style={styles.editLabel}>총 거래 금액</Text>
                 <View style={styles.inputBox}>
                   <TextInput
                     style={styles.input}
@@ -356,6 +356,8 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
               itemHeight={56}
               fontSize={24}
               columnGap={32}
+              yearColumnWidth={104}
+              columnWidth={72}
               highlightFull
             />
           </Pressable>
@@ -520,6 +522,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     letterSpacing: -0.72,
   },
+  editLabel: {
+    color: COLORS_NEW.textPrimary,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    letterSpacing: -0.72,
+  },
   inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -554,7 +562,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 8,
   },
   datePickerCloseButton: {
     width: 44,

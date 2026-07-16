@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import Symbol from '../../../assets/symbol.svg';
 import LogoText from '../../../assets/logo2.svg';
 import GoogleIcon from '../../../assets/icons/google.svg';
-import KakaoIcon from '../../../assets/icons/kakao.svg';
+import KakaoIcon from '../../../assets/icons/kakao2.svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LoadingScreen from '@/shared/components/LoadingScreen';
@@ -51,12 +51,12 @@ export default function SignupScreen() {
             style={styles.googleButton}
             onPress={() => login('google')}
           >
-            <GoogleIcon width={20} height={20} />
+            <GoogleIcon width={24} height={24} />
             <Text style={styles.googleLabel}>구글로 시작하기</Text>
           </Pressable>
 
           <Pressable style={styles.kakaoButton} onPress={() => login('kakao')}>
-            <KakaoIcon width={24} height={24} />
+            <KakaoIcon width={28} height={28} />
             <Text style={styles.kakaoLabel}>카카오로 시작하기</Text>
           </Pressable>
 
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 14,
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
     paddingVertical: 18,
@@ -120,14 +120,14 @@ const styles = StyleSheet.create({
   googleLabel: {
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
-    fontSize: 16,
+    fontSize: 18,
     letterSpacing: -0.64,
   },
   kakaoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 14,
     backgroundColor: KAKAO_YELLOW,
     borderRadius: 20,
     paddingVertical: 18,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   kakaoLabel: {
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
-    fontSize: 16,
+    fontSize: 18,
     letterSpacing: -0.64,
   },
   termsText: {

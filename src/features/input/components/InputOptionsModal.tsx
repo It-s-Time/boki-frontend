@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
+    marginTop: 8,
     fontSize: 22,
     letterSpacing: -0.88,
   },

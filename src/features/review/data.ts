@@ -20,7 +20,7 @@ export const PRINCIPLE_ILLUSTRATIONS: Record<
   buy: {
     1: { Icon: BuyPrincipleIcon1, width: 189, height: 220 },
     2: { Icon: BuyPrincipleIcon2, width: 200, height: 220 },
-    3: { Icon: BuyPrincipleIcon3, width: 220, height: 171 },
+    3: { Icon: BuyPrincipleIcon3, width: 250, height: 195 },
   },
   sell: {
     1: { Icon: SellPrincipleIcon1, width: 220, height: 220 },

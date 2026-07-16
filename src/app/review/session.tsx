@@ -16,7 +16,8 @@ import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ILLUSTRATION_HEIGHT = 190;
+const ILLUSTRATION_HEIGHT = 240;
+const ILLUSTRATION_MAX_WIDTH = 300;
 
 // RN's line breaker can split inside a single 어절 (e.g. "사기" -> "사" / "기")
 // since Hangul syllables are individually breakable by default. Joining each
@@ -155,6 +156,12 @@ export default function ReviewSessionScreen() {
   const isBuy = tradeType === 'buy';
   const illustration =
     PRINCIPLE_ILLUSTRATIONS[isBuy ? 'buy' : 'sell'][currentPrinciple.order];
+  const illustrationScale = illustration
+    ? Math.min(
+        ILLUSTRATION_HEIGHT / illustration.height,
+        ILLUSTRATION_MAX_WIDTH / illustration.width,
+      )
+    : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -175,8 +182,8 @@ export default function ReviewSessionScreen() {
         <View style={styles.illustrationArea}>
           {illustration && (
             <illustration.Icon
-              width={illustration.width * (ILLUSTRATION_HEIGHT / illustration.height)}
-              height={ILLUSTRATION_HEIGHT}
+              width={illustration.width * illustrationScale}
+              height={illustration.height * illustrationScale}
             />
           )}
         </View>
@@ -235,7 +242,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 22,
-    lineHeight: 30,
+    lineHeight: 36,
     textAlign: 'center',
   },
 

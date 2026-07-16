@@ -14,6 +14,8 @@ interface Props {
   columnGap?: number;
   highlightInset?: number;
   highlightFull?: boolean;
+  yearColumnWidth?: number;
+  columnWidth?: number;
 }
 
 const VISIBLE_COUNT = 3;
@@ -32,6 +34,8 @@ export default function DateWheelPicker({
   columnGap = 0,
   highlightInset = 24,
   highlightFull = false,
+  yearColumnWidth = 76,
+  columnWidth = 56,
 }: Props) {
   const highlightTop = (itemHeight * (VISIBLE_COUNT - 1)) / 2;
   const year = value.getFullYear();
@@ -87,7 +91,7 @@ export default function DateWheelPicker({
           itemHeight={itemHeight}
           fontSize={fontSize}
           showHighlight={false}
-          style={styles.yearColumn}
+          style={[styles.yearColumn, { width: yearColumnWidth }]}
         />
         <WheelPicker
           items={months.map((m) => `${m}월`)}
@@ -97,7 +101,7 @@ export default function DateWheelPicker({
           itemHeight={itemHeight}
           fontSize={fontSize}
           showHighlight={false}
-          style={styles.column}
+          style={[styles.column, { width: columnWidth }]}
         />
         {showDay && (
           <WheelPicker
@@ -108,7 +112,7 @@ export default function DateWheelPicker({
             itemHeight={itemHeight}
             fontSize={fontSize}
             showHighlight={false}
-            style={styles.column}
+            style={[styles.column, { width: columnWidth }]}
           />
         )}
       </View>
@@ -126,15 +130,13 @@ const styles = StyleSheet.create({
   },
   yearColumn: {
     flex: 0,
-    width: 76,
   },
   column: {
     flex: 0,
-    width: 56,
   },
   highlight: {
     position: 'absolute',
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: COLORS_NEW.lightGray,
   },
 });

@@ -65,12 +65,12 @@ const styles = StyleSheet.create({
   labels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 12,
     paddingHorizontal: 2,
   },
 
   label: {
-    fontSize: 13,
+    fontSize: 14,
     letterSpacing: -0.52,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
