@@ -9,6 +9,7 @@ import {
   useTradeList,
 } from '@/features/trade/hooks/useTrades';
 import { toTradeMarks } from '@/features/trade/utils';
+import { useApiStore } from '@/store/apiStore';
 
 const toDateString = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -20,6 +21,7 @@ export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(() =>
     toDateString(new Date()),
   );
+  const isApiConnected = useApiStore((s) => s.isApiConnected);
 
   const currentYear = parseInt(currentDate.slice(0, 4));
   const currentMonth = parseInt(currentDate.slice(5, 7));
@@ -36,6 +38,15 @@ export default function HomeScreen() {
     isError: isListError,
     refetch: refetchList,
   } = useTradeList({ date: selectedDate });
+  const {
+    data: recentTrades,
+    isLoading: isRecentLoading,
+    isError: isRecentError,
+    refetch: refetchRecent,
+  } = useTradeList();
+
+  const hasSelectedTrades = Boolean(selectedTrades?.length);
+  const hasRecentTrades = Boolean(recentTrades?.length);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -56,24 +67,41 @@ export default function HomeScreen() {
             {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래를 복기해보세요`}
           </Text>
 
-          {isListLoading ? (
+          {isListLoading || isRecentLoading ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyText}>불러오는 중이에요</Text>
             </View>
-          ) : isListError ? (
-            <Pressable style={styles.emptyCard} onPress={() => refetchList()}>
-              <Text style={styles.emptyText}>
-                불러오지 못했어요, 다시 시도해주세요
-              </Text>
+          ) : isListError || isRecentError ? (
+            <Pressable
+              style={styles.emptyCard}
+              onPress={() => {
+                refetchList();
+                refetchRecent();
+              }}
+            >
+              <Text style={styles.emptyText}>불러오지 못했어요, 다시 시도해주세요</Text>
             </Pressable>
-          ) : !selectedTrades || selectedTrades.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>거래 내역이 없어요</Text>
-            </View>
-          ) : (
-            selectedTrades.map((trade) => (
+          ) : hasSelectedTrades ? (
+            selectedTrades?.map((trade) => (
               <TradeCard key={trade.tradeId} trade={trade} />
             ))
+          ) : hasRecentTrades ? (
+            <>
+              <Text style={styles.recentHint}>
+                선택한 날짜 거래가 없어 최근 거래를 보여드려요
+              </Text>
+              {recentTrades?.map((trade) => (
+                <TradeCard key={trade.tradeId} trade={trade} />
+              ))}
+            </>
+          ) : (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>
+                {isApiConnected
+                  ? '하단 가운데 버튼을 눌러 거래내역을 가져와주세요'
+                  : '거래 내역이 없어요'}
+              </Text>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -114,5 +142,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
+  },
+
+  recentHint: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: COLORS_NEW.textSecondary,
+    fontFamily: 'Pretendard-Regular',
+    marginBottom: 10,
   },
 });

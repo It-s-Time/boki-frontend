@@ -30,6 +30,7 @@ export const COLORS = {
 export const COLORS_NEW = {
   background: '#FFFFFF', // 배경
   textPrimary: '#14151F', // 기본 글자
+  textSecondary: '#5E5E61', // 보조 글자 (border와 동일 색상)
   fab: '#272727', // fab
 
   border: '#5E5E61', // 선 / 연한 글자 / 아이콘

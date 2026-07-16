@@ -1,7 +1,7 @@
 import type { TradeGrade } from '@/features/review/types';
 
 export type ApiTradeType = 'BUY' | 'SELL';
-export type InputType = 'MANUAL';
+export type InputType = 'MANUAL' | 'API';
 export type ReviewStatus = 'COMPLETED' | 'NOT_COMPLETED';
 
 export interface Trade {
