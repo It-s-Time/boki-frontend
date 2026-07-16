@@ -42,9 +42,6 @@ export default function MyPageScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Feather name="chevron-left" size={28} color={COLORS.textPrimary} />
-        </Pressable>
         <Text style={styles.headerTitle}>마이페이지</Text>
       </View>
 
@@ -73,17 +70,17 @@ export default function MyPageScreen() {
         <SectionTitle title="거래 설정" />
         <MenuItem
           title="업비트 API 관리"
-          onPress={() => router.push('/api-management')}
+          onPress={() => router.push('/(tabs)/api-management')}
         />
 
         <SectionTitle title="약관 및 정책" />
         <MenuItem
           title="서비스 이용 약관"
-          onPress={() => router.push('/terms')}
+          onPress={() => router.push('/(tabs)/terms')}
         />
         <MenuItem
           title="개인 정보 처리 방침"
-          onPress={() => router.push('/privacy')}
+          onPress={() => router.push('/(tabs)/privacy')}
         />
 
         <SectionTitle title="기타" />
@@ -276,15 +273,15 @@ const styles = StyleSheet.create({
   modalCard: {
     borderRadius: 28,
     backgroundColor: COLORS.box,
-    paddingHorizontal: 20,
-    paddingTop: 46,
-    paddingBottom: 18,
+    paddingHorizontal: 22,
+    paddingTop: 56,
+    paddingBottom: 22,
     alignItems: 'center',
   },
   modalTitle: {
     color: COLORS.textPrimary,
-    fontSize: 18,
-    lineHeight: 26,
+    fontSize: 20,
+    lineHeight: 29,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
   },
@@ -292,32 +289,32 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     gap: 12,
-    marginTop: 40,
+    marginTop: 44,
   },
   cancelButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 26,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#F4F3F8',
     alignItems: 'center',
     justifyContent: 'center',
   },
   confirmButton: {
     flex: 1,
-    height: 52,
-    borderRadius: 26,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: COLORS.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelButtonText: {
     color: COLORS.textPrimary,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Pretendard-SemiBold',
   },
   confirmButtonText: {
     color: COLORS.box,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Pretendard-SemiBold',
   },
 });

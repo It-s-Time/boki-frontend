@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -22,6 +23,8 @@ import { COLORS, COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 
 const API_IP_ADDRESS = '13.124.152.202';
+const DELETE_API_UNAVAILABLE_MESSAGE =
+  'API 삭제 기능이 서버에 아직 연결되어 있지 않습니다. 백엔드에 DELETE /api/exchange/api-key API 추가가 필요합니다.';
 
 export default function ApiManagementScreen() {
   const [accessKey, setAccessKey] = useState('');
@@ -31,8 +34,28 @@ export default function ApiManagementScreen() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [, setErrorMessage] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setApiConnected = useApiStore((s) => s.setApiConnected);
+
+  const goToMypage = useCallback(() => {
+    router.replace('/(tabs)/mypage');
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          goToMypage();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [goToMypage]),
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -60,6 +83,14 @@ export default function ApiManagementScreen() {
       isMounted = false;
     };
   }, [setApiConnected]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current) {
+        clearTimeout(copyResetTimerRef.current);
+      }
+    };
+  }, []);
 
   const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
     if (axios.isAxiosError(error)) {
@@ -149,6 +180,14 @@ export default function ApiManagementScreen() {
       const data = await deleteExchangeApiKey();
 
       if (!data.isSuccess) {
+        const isServerDeleteError =
+          data.code?.includes('500') || data.message?.includes('서버');
+
+        if (isServerDeleteError) {
+          setErrorMessage(DELETE_API_UNAVAILABLE_MESSAGE);
+          return;
+        }
+
         setErrorMessage(
           data.code
             ? `${data.message || 'API 삭제에 실패했습니다.'} (${data.code})`
@@ -161,8 +200,17 @@ export default function ApiManagementScreen() {
       setSecretKey('');
       setIsRegistered(false);
       setApiConnected(false);
-      router.replace('/api-deleted');
+      router.replace('/(tabs)/api-deleted');
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+        if (status === 404 || status === 405 || status === 500) {
+          setErrorMessage(DELETE_API_UNAVAILABLE_MESSAGE);
+          return;
+        }
+      }
+
       setErrorMessage(
         getApiErrorMessage(
           error,
@@ -171,6 +219,26 @@ export default function ApiManagementScreen() {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyIpAddress = async () => {
+    try {
+      const Clipboard = await import('expo-clipboard');
+      await Clipboard.setStringAsync(API_IP_ADDRESS);
+      setIsCopied(true);
+
+      if (copyResetTimerRef.current) {
+        clearTimeout(copyResetTimerRef.current);
+      }
+
+      copyResetTimerRef.current = setTimeout(() => {
+        setIsCopied(false);
+      }, 1200);
+    } catch {
+      setErrorMessage(
+        '복사 기능을 사용하려면 앱을 다시 빌드해주세요. IP 주소를 직접 복사해주세요.',
+      );
     }
   };
 
@@ -189,8 +257,8 @@ export default function ApiManagementScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Feather name="chevron-left" size={28} color={COLORS.textPrimary} />
+          <Pressable style={styles.backButton} onPress={goToMypage}>
+            <Feather name="chevron-left" size={32} color={COLORS.textPrimary} />
           </Pressable>
           <Text style={styles.headerTitle}>업비트 API 관리</Text>
         </View>
@@ -202,8 +270,8 @@ export default function ApiManagementScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.ipCard}>
-            <Pressable style={styles.copyButton} onPress={() => {}}>
-              <Text style={styles.copyText}>복사</Text>
+            <Pressable style={styles.copyButton} onPress={handleCopyIpAddress}>
+              <Text style={styles.copyText}>{isCopied ? '복사됨' : '복사'}</Text>
             </Pressable>
             <Text style={styles.ipLabel}>사용 IP 주소</Text>
             <Text style={styles.ipValue}>{API_IP_ADDRESS}</Text>
@@ -237,10 +305,6 @@ export default function ApiManagementScreen() {
             textAlign="center"
             editable={!isRegistered && !isSubmitting}
           />
-
-          {errorMessage ? (
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          ) : null}
 
           <Pressable
             style={[
@@ -278,12 +342,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    height: 112,
+    height: 94,
     justifyContent: 'center',
   },
   backButton: {
     position: 'absolute',
-    left: 30,
+    left: 24,
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -295,7 +359,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: COLORS.textPrimary,
-    fontSize: 23,
+    fontSize: 22,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
@@ -304,103 +368,95 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 34,
-    paddingTop: 2,
-    paddingBottom: 132,
+    paddingTop: 0,
+    paddingBottom: 124,
   },
   ipCard: {
-    height: 238,
+    height: 210,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
+    marginBottom: 12,
   },
   copyButton: {
     position: 'absolute',
-    top: 34,
-    minWidth: 84,
-    height: 52,
+    top: 19,
+    minWidth: 72,
+    height: 44,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
-    borderRadius: 26,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.box,
   },
   copyText: {
     color: COLORS.textSecondary,
-    fontSize: 18,
-    lineHeight: 26,
+    fontSize: 15,
+    lineHeight: 20,
     fontFamily: 'Pretendard-Regular',
   },
   ipLabel: {
     color: COLORS.textPrimary,
-    fontSize: 22,
-    lineHeight: 30,
-    fontFamily: 'Pretendard-Regular',
-    marginTop: 46,
-    marginBottom: 10,
+    fontSize: 20,
+    lineHeight: 28,
+    fontFamily: 'Pretendard-SemiBold',
+    marginTop: 34,
+    marginBottom: 6,
   },
   ipValue: {
     color: COLORS.textPrimary,
-    fontSize: 25,
-    lineHeight: 34,
+    fontSize: 28,
+    lineHeight: 36,
     fontFamily: 'Pretendard-SemiBold',
   },
   input: {
-    height: 70,
+    height: 66,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 28,
+    borderRadius: 25,
     backgroundColor: '#F4F3F8',
     color: COLORS.textPrimary,
     fontSize: 22,
     lineHeight: 30,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 20,
-    marginBottom: 18,
+    marginBottom: 16,
   },
   registerButton: {
-    height: 80,
-    borderRadius: 28,
+    height: 72,
+    borderRadius: 30,
     backgroundColor: '#272727',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 28,
-    marginBottom: 60,
+    marginTop: 18,
+    marginBottom: 28,
   },
   registerButtonDisabled: {
     opacity: 0.55,
   },
   registerText: {
     color: COLORS.box,
-    fontSize: 24,
-    lineHeight: 34,
+    fontSize: 23,
+    lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
   },
-  errorText: {
-    color: '#EE7A60',
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: 'Pretendard-Medium',
-    textAlign: 'center',
-    marginTop: -4,
-    marginBottom: 12,
-  },
   guideSection: {
-    gap: 22,
+    gap: 12,
+    marginTop: 16,
   },
   guideTitle: {
     color: COLORS.textPrimary,
     fontSize: 24,
-    lineHeight: 34,
+    lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
   },
   guideText: {
     color: COLORS.textSecondary,
-    fontSize: 17,
-    lineHeight: 31,
+    fontSize: 16,
+    lineHeight: 32,
     fontFamily: 'Pretendard-Regular',
   },
 });
