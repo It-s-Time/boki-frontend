@@ -1,11 +1,21 @@
 import { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, FeDropShadow, Filter, Path } from 'react-native-svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { AiReport } from '../types';
 
-const SCORE_HORIZONTAL = require('../../../../assets/icons/Frame 550.png');
-const SCORE_VERTICAL = require('../../../../assets/icons/Frame 549.png');
+// 8-ray sunburst around the score: rays fill clockwise from the top
+// (12 o'clock) in proportion to `percent`, one ray per 12.5%.
+const SCORE_RAY_COUNT = 8;
+const SCORE_RAY_ANGLES = Array.from(
+  { length: SCORE_RAY_COUNT },
+  (_, index) => (360 / SCORE_RAY_COUNT) * index,
+);
+// Colors sampled directly from the zdesign mockup's baked-in artwork
+// (assets/icons/Frame 549/550.png) so the dynamic rays match exactly.
+const SCORE_RAY_FILLED = '#EE7A60';
+const SCORE_RAY_UNFILLED = '#252930';
+const SCORE_RAY_RADIUS = 72;
 const DETAIL_CARD_RADIUS = 24;
 const DETAIL_NOTCH_RADIUS = 14;
 // Extra canvas room so the drop-shadow filter isn't clipped at the card's
@@ -14,7 +24,7 @@ const DETAIL_SHADOW_MARGIN = 24;
 
 interface Props {
   report: AiReport;
-  // Defaults to the real screen's 26. Callers that shrink this card down
+  // Defaults to the real screen's 20. Callers that shrink this card down
   // (e.g. FeedbackPreviewBox) can pass a smaller value so the bottom
   // whitespace is trimmed *before* layout — the rounded-corner notch below
   // is redrawn to match whatever height that produces, so cropping the
@@ -32,7 +42,7 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
   const [detailCardSize, setDetailCardSize] = useState({ width: 0, height: 0 });
   const [dividerY, setDividerY] = useState<number | null>(null);
 
-  const percent = Math.round((report.complianceRate ?? 0) * 100);
+  const percent = Math.round(report.complianceRate ?? 0);
   const hashtags = report.hashtags ?? [];
   const tagRows =
     hashtags.length === 0
@@ -86,7 +96,7 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
       />
 
       <ReviewSection title="잘한 점" items={goodPoints} />
-      <ReviewSection title="아쉬운 점" items={badPoints} />
+      <ReviewSection title="아쉬운 점" items={badPoints} isLast />
     </View>
   );
 }
@@ -145,7 +155,13 @@ function TicketDetailBackground({
       ]}
     >
       <Defs>
-        <Filter id="detailCardShadow" x="-50%" y="-50%" width="200%" height="200%">
+        <Filter
+          id="detailCardShadow"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+        >
           <FeDropShadow
             dx={0}
             dy={0}
@@ -168,29 +184,29 @@ function TicketDetailBackground({
 }
 
 function ScoreBurst({ percent }: { percent: number }) {
+  const filledCount = Math.max(
+    0,
+    Math.min(SCORE_RAY_COUNT, Math.round((percent / 100) * SCORE_RAY_COUNT)),
+  );
   return (
     <View style={styles.scoreBox}>
       <View style={styles.scoreArtwork}>
-        <Image
-          source={SCORE_HORIZONTAL}
-          style={styles.scoreHorizontalImage}
-          resizeMode="contain"
-        />
-        <Image
-          source={SCORE_VERTICAL}
-          style={styles.scoreVerticalImage}
-          resizeMode="contain"
-        />
-        <Image
-          source={SCORE_HORIZONTAL}
-          style={styles.scoreDiagonalDownImage}
-          resizeMode="contain"
-        />
-        <Image
-          source={SCORE_HORIZONTAL}
-          style={styles.scoreDiagonalUpImage}
-          resizeMode="contain"
-        />
+        {SCORE_RAY_ANGLES.map((angle, index) => (
+          <View
+            key={angle}
+            style={[
+              styles.scoreRay,
+              {
+                backgroundColor:
+                  index < filledCount ? SCORE_RAY_FILLED : SCORE_RAY_UNFILLED,
+                transform: [
+                  { rotate: `${angle}deg` },
+                  { translateY: -SCORE_RAY_RADIUS },
+                ],
+              },
+            ]}
+          />
+        ))}
         <View style={styles.scoreTextRow}>
           <Text style={styles.scorePercent}>{percent}</Text>
           <Text style={styles.scoreUnit}>%</Text>
@@ -200,12 +216,26 @@ function ScoreBurst({ percent }: { percent: number }) {
   );
 }
 
-function ReviewSection({ title, items }: { title: string; items: string[] }) {
+function ReviewSection({
+  title,
+  items,
+  isLast,
+}: {
+  title: string;
+  items: string[];
+  isLast?: boolean;
+}) {
   return (
-    <View style={styles.reviewSection}>
+    <View style={[styles.reviewSection, isLast && styles.reviewSectionLast]}>
       <Text style={styles.reviewTitle}>{title}</Text>
       {items.map((item, index) => (
-        <View key={item} style={styles.reviewRow}>
+        <View
+          key={item}
+          style={[
+            styles.reviewRow,
+            isLast && index === items.length - 1 && styles.reviewRowLast,
+          ]}
+        >
           <View style={styles.reviewNumber}>
             <Text style={styles.reviewNumberText}>{index + 1}</Text>
           </View>
@@ -220,7 +250,8 @@ const styles = StyleSheet.create({
   detailCard: {
     backgroundColor: 'transparent',
     paddingHorizontal: 24,
-    paddingBottom: 26,
+    paddingTop: 16,
+    paddingBottom: 32,
   },
   detailCardBackground: {
     position: 'absolute',
@@ -239,27 +270,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: -5,
   },
-  scoreHorizontalImage: {
+  scoreRay: {
     position: 'absolute',
-    width: 198,
-    height: 22,
-  },
-  scoreVerticalImage: {
-    position: 'absolute',
-    width: 22,
-    height: 198,
-  },
-  scoreDiagonalDownImage: {
-    position: 'absolute',
-    width: 180,
-    height: 20,
-    transform: [{ rotate: '45deg' }],
-  },
-  scoreDiagonalUpImage: {
-    position: 'absolute',
-    width: 180,
-    height: 20,
-    transform: [{ rotate: '-45deg' }],
+    // Centered within scoreArtwork (214x234); rotate+translateY (applied
+    // per-ray above) then sweeps each one out to its point on the ring.
+    left: 97,
+    top: 92,
+    width: 20,
+    height: 48,
+    borderRadius: 4,
   },
   scoreTextRow: {
     flexDirection: 'row',
@@ -270,7 +289,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     color: COLORS_NEW.textPrimary,
-    fontSize: 35,
+    fontSize: 36,
     letterSpacing: -1.4,
     lineHeight: 45,
     fontFamily: 'Pretendard-Bold',
@@ -278,22 +297,25 @@ const styles = StyleSheet.create({
   },
   scoreUnit: {
     color: COLORS_NEW.textSecondary,
-    fontSize: 17,
+    fontSize: 16,
     letterSpacing: -0.68,
     fontFamily: 'Pretendard-Regular',
-    marginBottom: 8,
-    marginLeft: 5,
+    marginLeft: 2,
+    marginBottom: 6,
   },
   rankText: {
     color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
     marginBottom: 22,
   },
   rankGrade: {
-    color: COLORS_NEW.point,
+    color: '#EE7A60',
+    fontSize: 24,
+    letterSpacing: -0.96,
+    fontFamily: 'Pretendard-Bold',
   },
   tagWrap: {
     alignItems: 'center',
@@ -333,6 +355,9 @@ const styles = StyleSheet.create({
   reviewSection: {
     marginBottom: 20,
   },
+  reviewSectionLast: {
+    marginBottom: 0,
+  },
   reviewTitle: {
     color: COLORS_NEW.textPrimary,
     fontSize: 21,
@@ -344,6 +369,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 11,
+  },
+  reviewRowLast: {
+    marginBottom: 0,
   },
   reviewNumber: {
     width: 22,

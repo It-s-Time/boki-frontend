@@ -33,6 +33,13 @@
       ],
       "expo-web-browser",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b8ebc1cd-9fcd-4200-b80c-5988ce7f4870"
+      }
+    },
+    "owner": "cho22"
   }
 }

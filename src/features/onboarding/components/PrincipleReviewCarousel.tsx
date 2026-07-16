@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { keepWordsTogether } from '@/shared/utils/text';
 import {
   PRINCIPLE_SETS,
   PRINCIPLE_ILLUSTRATIONS,
@@ -15,6 +16,7 @@ import {
 import { Principle } from '@/features/review/types';
 
 const CARD_WIDTH = 250;
+const CARD_HEIGHT = 350;
 const CARD_GAP = 16;
 const CARD_STEP = CARD_WIDTH + CARD_GAP;
 const CAROUSEL_PADDING = 20;
@@ -103,8 +105,15 @@ export default function PrincipleReviewCarousel({ active, height }: Props) {
     return () => loop.stop();
   }, [active, carouselX, carouselViewportWidth, carouselCenterOffset]);
 
+  // 옆 스텝(PrincipleSetPreviewList)에서 측정된 높이를 그대로 물려받다 보니,
+  // 그 값이 카드 실제 높이보다 작게 나오는 화면(작은 기기/큰 시스템 폰트)에서는
+  // overflow:hidden에 카드가 잘려 보였다. 최소 카드 높이는 항상 보장한다.
+  const groupHeight = height
+    ? Math.max(height, CARD_HEIGHT + CAROUSEL_PADDING * 2)
+    : null;
+
   return (
-    <View style={[styles.carouselGroupWrap, height ? { height } : null]}>
+    <View style={[styles.carouselGroupWrap, groupHeight ? { height: groupHeight } : null]}>
       <Animated.View
         style={[styles.carouselRow, { transform: [{ translateX: carouselX }] }]}
       >
@@ -122,7 +131,9 @@ function SessionPreviewCard({ principle }: { principle: Principle }) {
 
   return (
     <View style={styles.previewCard}>
-      <Text style={styles.previewCardText}>{principle.content}</Text>
+      <Text style={styles.previewCardText} lineBreakStrategyIOS="hangul-word">
+        {keepWordsTogether(principle.content)}
+      </Text>
       <View style={styles.previewIllustrationWrap}>
         {illustration && (
           <illustration.Icon
@@ -148,7 +159,7 @@ const styles = StyleSheet.create({
   },
   previewCard: {
     width: CARD_WIDTH,
-    height: 350,
+    height: CARD_HEIGHT,
     marginRight: CARD_GAP,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,

@@ -10,6 +10,7 @@ import { TradeGrade } from '@/features/review/types';
 import { useTradeList } from '@/features/trade/hooks/useTrades';
 import { COIN_NAMES, getCoinSymbol } from '@/features/trade/constants';
 import type { Trade } from '@/features/trade/types';
+import SymbolSpinner from '@/shared/components/SymbolSpinner';
 
 type GradeFilter = '전체' | TradeGrade;
 type GradedTrade = Trade & { grade: TradeGrade };
@@ -110,7 +111,9 @@ export default function JournalScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <Text style={styles.stateText}>불러오는 중이에요</Text>
+          <View style={styles.stateContainer}>
+            <SymbolSpinner size={40} />
+          </View>
         ) : isError ? (
           <Pressable onPress={() => refetch()}>
             <Text style={styles.stateText}>
@@ -320,6 +323,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 30,
     paddingBottom: 120,
+  },
+  stateContainer: {
+    alignItems: 'center',
+    paddingVertical: 28,
   },
   stateText: {
     color: COLORS_NEW.textSecondary,

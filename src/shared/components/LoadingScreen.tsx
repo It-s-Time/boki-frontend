@@ -30,10 +30,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS_NEW.background,
   },
   loadingBlock: {
-    marginTop: 390,
     alignItems: 'center',
   },
   message: {
