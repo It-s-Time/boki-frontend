@@ -23,7 +23,6 @@ AI 피드백을 통해 다음 매매를 더 나은 방향으로 이끄는 모바
 
 - [소개](#소개)
 - [주요 기능](#주요-기능)
-- [스크린샷](#스크린샷)
 - [기술 스택](#기술-스택)
 - [시작하기](#시작하기)
 - [폴더 구조](#폴더-구조)
@@ -89,11 +88,10 @@ EXPO_PUBLIC_API_URL=https://api.boki.asia
 npx expo start -c
 ```
 
-### 4. 플랫폼별 실행
+### 4. 플랫폼 실행
 
 ```bash
 npx expo run:android   # Android
-npx expo run:ios       # iOS
 ```
 
 <br/>
@@ -211,13 +209,13 @@ git commit -m "docs: README 정리"
     <td align="center">
       <a href="https://github.com/Batrnan">
         <img src="https://github.com/Batrnan.png" width="100" style="border-radius:50%" alt="Batrnan" /><br/>
-        <sub><b>Batrnan</b></sub>
+        <b>Batrnan</b>
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/Kimoojin">
         <img src="https://github.com/Kimoojin.png" width="100" style="border-radius:50%" alt="Kimoojin" /><br/>
-        <sub><b>Kimoojin</b></sub>
+        <b>Kimoojin</b>
       </a>
     </td>
   </tr>
