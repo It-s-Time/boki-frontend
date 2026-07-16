@@ -81,7 +81,10 @@ export default function SetupPrinciplesScreen() {
         ) : step === 2 ? (
           <View style={styles.content}>
             <Text style={styles.title}>매매원칙을 바탕으로 복기해 보세요</Text>
-            <PrincipleReviewCarousel active={step === 2} height={groupBoxHeight} />
+            <PrincipleReviewCarousel
+              active={step === 2}
+              height={groupBoxHeight}
+            />
             <Text style={styles.helperText}>
               매매원칙을 제대로 지켰는지 점수를 매겨주세요.
               {'\n'}
@@ -137,15 +140,17 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 24,
+    letterSpacing: -0.96,
     marginBottom: 28,
   },
   helperText: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 18,
+    letterSpacing: -0.72,
     lineHeight: 28,
     marginTop: 32,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   footer: {
     paddingBottom: 24,

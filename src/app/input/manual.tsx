@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import { COLORS_NEW } from '@/shared/constants/colors';
@@ -18,6 +19,30 @@ import ProgressBar from '@/features/review/components/ProgressBar';
 import DateWheelPicker from '@/shared/components/DateWheelPicker';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useCreateManualTrade } from '@/features/trade/hooks/useTrades';
+
+const getManualTradeErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as
+      | { message?: string; result?: Record<string, string> }
+      | undefined;
+
+    const fieldMessages = responseData?.result
+      ? Object.values(responseData.result).filter(
+          (v): v is string => typeof v === 'string' && v.length > 0,
+        )
+      : [];
+
+    if (fieldMessages.length > 0) {
+      return fieldMessages.join('\n');
+    }
+
+    if (responseData?.message) {
+      return responseData.message;
+    }
+  }
+
+  return '저장에 실패했어요, 다시 시도해주세요';
+};
 
 const COINS = [
   { symbol: 'BTC', market: 'KRW', name: '비트코인' },
@@ -358,7 +383,7 @@ export default function ManualInputScreen() {
           <View style={styles.footer}>
             {createManualTrade.isError && (
               <Text style={styles.submitError}>
-                저장에 실패했어요, 다시 시도해주세요
+                {getManualTradeErrorMessage(createManualTrade.error)}
               </Text>
             )}
             <PrimaryButton
@@ -408,6 +433,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 26,
+    letterSpacing: -1.04,
   },
   inputBox: {
     flexDirection: 'row',
@@ -425,6 +451,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Regular',
     padding: 0,
     fontSize: 22,
+    letterSpacing: -0.88,
   },
   inputBoxOpen: {
     borderBottomLeftRadius: 0,
@@ -439,16 +466,17 @@ const styles = StyleSheet.create({
   },
   calendarButtonActive: {
     backgroundColor: COLORS_NEW.border,
+    borderRadius: 999,
   },
   datePickerPanel: {
     alignSelf: 'flex-end',
-    width: '70%',
+    width: '68%',
     backgroundColor: COLORS_NEW.background,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
     borderRadius: 20,
     paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -483,11 +511,13 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 15,
+    letterSpacing: -0.6,
   },
   coinName: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 13,
+    letterSpacing: -0.52,
   },
   badge: {
     paddingHorizontal: 10,
@@ -498,6 +528,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 12,
+    letterSpacing: -0.48,
   },
   tradeTypeRow: {
     flexDirection: 'row',
@@ -524,6 +555,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 20,
+    letterSpacing: -0.8,
   },
   footer: {
     paddingBottom: 16,
@@ -533,6 +565,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginBottom: 12,
   },

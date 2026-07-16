@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
@@ -140,16 +141,16 @@ const styles = StyleSheet.create({
   articleTitle: {
     color: '#14151F',
     fontSize: 22,
+    letterSpacing: -0.88,
     fontFamily: 'Pretendard-Bold',
-    letterSpacing: -0.4,
     marginBottom: 10,
   },
   paragraph: {
     color: COLORS.textSecondary,
     fontSize: 18,
+    letterSpacing: -0.72,
     lineHeight: 29,
     fontFamily: 'Pretendard-Regular',
-    letterSpacing: -0.3,
     marginBottom: 13,
   },
 });

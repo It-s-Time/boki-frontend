@@ -16,6 +16,20 @@ import { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const ILLUSTRATION_HEIGHT = 240;
+const ILLUSTRATION_MAX_WIDTH = 300;
+
+// RN's line breaker can split inside a single 어절 (e.g. "사기" -> "사" / "기")
+// since Hangul syllables are individually breakable by default. Joining each
+// word's characters with a zero-width word joiner blocks breaks there while
+// leaving the real spaces between words breakable.
+function keepWordsTogether(text: string) {
+  return text
+    .split(' ')
+    .map((word) => [...word].join('⁠'))
+    .join(' ');
+}
+
 export default function ReviewSessionScreen() {
   const router = useRouter();
   const {
@@ -85,19 +99,27 @@ export default function ReviewSessionScreen() {
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
     setIsSubmitting(true);
+    const usingBackendRuleSets = Boolean(data && data.length > 0);
+    const reviewData = {
+      ruleSetId: Number(principleSetId),
+      scores: principles.map((p, i) => ({
+        ruleId: Number(p.id),
+        score: Number(answers[i].score),
+      })),
+      content: memo.content,
+      replaceImages: false,
+      images: memo.photos,
+    };
+    console.log('[Review] submitting', {
+      usingBackendRuleSets,
+      principleSetId,
+      ruleSetId: reviewData.ruleSetId,
+      scores: reviewData.scores,
+    });
     createReview.mutate(
       {
         tradeId: Number(tradeId),
-        data: {
-          ruleSetId: Number(principleSetId),
-          scores: principles.map((p, i) => ({
-            ruleId: Number(p.id),
-            score: Number(answers[i].score),
-          })),
-          content: memo.content,
-          replaceImages: false,
-          images: memo.photos,
-        },
+        data: reviewData,
       },
       {
         onSuccess: () => {
@@ -134,6 +156,12 @@ export default function ReviewSessionScreen() {
   const isBuy = tradeType === 'buy';
   const illustration =
     PRINCIPLE_ILLUSTRATIONS[isBuy ? 'buy' : 'sell'][currentPrinciple.order];
+  const illustrationScale = illustration
+    ? Math.min(
+        ILLUSTRATION_HEIGHT / illustration.height,
+        ILLUSTRATION_MAX_WIDTH / illustration.width,
+      )
+    : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -144,13 +172,18 @@ export default function ReviewSessionScreen() {
       </View>
 
       <View style={styles.principleContentWrap}>
-        <Text style={styles.principleContent}>{currentPrinciple.content}</Text>
+        <Text
+          style={styles.principleContent}
+          lineBreakStrategyIOS="hangul-word"
+        >
+          {keepWordsTogether(currentPrinciple.content)}
+        </Text>
 
         <View style={styles.illustrationArea}>
           {illustration && (
             <illustration.Icon
-              width={illustration.width}
-              height={illustration.height}
+              width={illustration.width * illustrationScale}
+              height={illustration.height * illustrationScale}
             />
           )}
         </View>
@@ -205,16 +238,18 @@ const styles = StyleSheet.create({
 
   principleContent: {
     fontSize: 26,
+    letterSpacing: -1.04,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 22,
-    lineHeight: 30,
+    lineHeight: 36,
     textAlign: 'center',
   },
 
   illustrationArea: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: -30,
   },
 
   button: {
@@ -225,6 +260,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginTop: 12,
   },

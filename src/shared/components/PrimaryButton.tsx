@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
 
   buttonText: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },

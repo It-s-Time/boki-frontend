@@ -1,4 +1,5 @@
 import * as Linking from 'expo-linking';
+import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { exchangeLoginCode } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
@@ -6,6 +7,12 @@ import { useAuthStore } from '@/store/authStore';
 const AUTH_CALLBACK_PATH = 'auth/callback';
 
 export const AUTH_REDIRECT_URI = 'boki://auth/callback';
+
+// singleTask launchMode(AndroidManifest)는 앱을 완전히 종료 후 재실행할 때
+// 이전에 처리했던 딥링크 Intent를 다시 전달하는 경우가 있다. 그 안의 1회용
+// loginCode로 재교환을 시도하면 서버가 401을 내려주므로, 마지막으로 성공한
+// loginCode를 기억해두고 동일한 값이 재유입되면 조용히 무시한다.
+const LAST_LOGIN_CODE_KEY = 'lastConsumedLoginCode';
 
 const exchangeTasks = new Map<string, Promise<void>>();
 
@@ -52,8 +59,15 @@ export const completeLoginWithCode = async (loginCode: string): Promise<void> =>
     return;
   }
 
+  const lastConsumed = await SecureStore.getItemAsync(LAST_LOGIN_CODE_KEY);
+  if (lastConsumed === loginCode) {
+    router.replace('/(auth)/signup');
+    return;
+  }
+
   const task = (async () => {
     const authData = await exchangeLoginCode(loginCode);
+    await SecureStore.setItemAsync(LAST_LOGIN_CODE_KEY, loginCode);
     await useAuthStore.getState().setAuth(authData);
     router.replace('/(tabs)');
   })();

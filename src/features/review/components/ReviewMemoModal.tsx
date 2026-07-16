@@ -14,12 +14,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import AddImage from '@/assets/icons/review/image-plus.svg';
+import type { ReviewImageAsset } from '../types';
 
 const MAX_PHOTOS = 3;
 
 export interface ReviewMemo {
   content: string;
-  photos: string[];
+  photos: ReviewImageAsset[];
 }
 
 interface Props {
@@ -30,7 +31,7 @@ interface Props {
 
 export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
   const [content, setContent] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<ReviewImageAsset[]>([]);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
 
   const handleAddPhoto = async () => {
@@ -42,14 +43,32 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
       quality: 0.7,
     });
     if (!result.canceled) {
+      console.log(
+        '[ReviewMemo] picked photos',
+        result.assets.map((a) => ({
+          fileName: a.fileName,
+          mimeType: a.mimeType,
+          fileSize: a.fileSize,
+          width: a.width,
+          height: a.height,
+          uri: a.uri,
+        })),
+      );
       setPhotos((prev) =>
-        [...prev, ...result.assets.map((a) => a.uri)].slice(0, MAX_PHOTOS),
+        [
+          ...prev,
+          ...result.assets.map((a) => ({
+            uri: a.uri,
+            fileName: a.fileName,
+            mimeType: a.mimeType,
+          })),
+        ].slice(0, MAX_PHOTOS),
       );
     }
   };
 
   const handleRemovePhoto = (uri: string) => {
-    setPhotos((prev) => prev.filter((p) => p !== uri));
+    setPhotos((prev) => prev.filter((p) => p.uri !== uri));
   };
 
   const handleSubmit = () => {
@@ -117,14 +136,14 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
               <Text style={styles.addPhotoText}>최대 3장 추가 가능</Text>
             )}
 
-            {photos.map((uri) => (
-              <View key={uri} style={styles.photoThumbWrap}>
-                <Pressable onPress={() => setPreviewUri(uri)}>
-                  <Image source={{ uri }} style={styles.photoThumb} />
+            {photos.map((photo) => (
+              <View key={photo.uri} style={styles.photoThumbWrap}>
+                <Pressable onPress={() => setPreviewUri(photo.uri)}>
+                  <Image source={{ uri: photo.uri }} style={styles.photoThumb} />
                 </Pressable>
                 <Pressable
                   style={styles.photoRemove}
-                  onPress={() => handleRemovePhoto(uri)}
+                  onPress={() => handleRemovePhoto(photo.uri)}
                 >
                   <Ionicons name="close" size={12} color="#FFFFFF" />
                 </Pressable>
@@ -199,6 +218,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 22,
+    letterSpacing: -0.88,
   },
   checkButton: {
     width: 44,
@@ -217,6 +237,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
     padding: 0,
   },
   photoRow: {
@@ -239,6 +260,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     fontSize: 16,
+    letterSpacing: -0.64,
   },
   photoThumbWrap: {
     position: 'relative',

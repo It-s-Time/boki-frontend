@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
 
   helperText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',

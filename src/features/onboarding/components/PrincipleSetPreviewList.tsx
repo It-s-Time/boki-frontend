@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },
@@ -183,6 +184,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 16,
@@ -204,6 +206,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },

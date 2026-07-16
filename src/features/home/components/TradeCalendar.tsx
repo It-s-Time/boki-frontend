@@ -190,6 +190,7 @@ export default function TradeCalendar({
                   width: DAY_SIZE,
                   textAlign: 'center',
                   fontSize: 16,
+                  letterSpacing: -0.64,
                   fontFamily: 'Pretendard-SemiBold',
                   color: COLORS_NEW.textPrimary,
                 },
@@ -264,6 +265,7 @@ const styles = StyleSheet.create({
 
   monthPillText: {
     fontSize: 20,
+    letterSpacing: -0.8,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
@@ -297,6 +299,7 @@ const styles = StyleSheet.create({
 
   dayText: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
   },

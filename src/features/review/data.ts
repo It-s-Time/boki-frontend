@@ -1,14 +1,37 @@
-import { ComponentType } from 'react';
-import { SvgProps } from 'react-native-svg';
+import { ComponentType, createElement } from 'react';
+import { Image } from 'react-native';
 import { PrincipleSet } from './types';
 import BuyPrincipleIcon1 from '../../../assets/icons/reivew/buy-principe1.svg';
-import BuyPrincipleIcon2 from '../../../assets/icons/reivew/buy-principle2.svg';
 import BuyPrincipleIcon3 from '../../../assets/icons/reivew/buy-principle3.svg';
-import SellPrincipleIcon1 from '../../../assets/icons/reivew/sell-principle1.svg';
-import SellPrincipleIcon3 from '../../../assets/icons/reivew/sell-principle3.svg';
+
+// buy-principle2/sell-principle1/sell-principle3 were exported as SVGs that
+// just embed a giant base64 PNG (no real vector paths), which bloated the
+// Metro/Babel SVG transform. They're plain images now, wrapped to match the
+// same width/height-only component shape as the real SVG icons above.
+const buyPrincipleImage2 = require('../../../assets/icons/reivew/buy-principle2.png');
+const sellPrincipleImage1 = require('../../../assets/icons/reivew/sell-principle1.png');
+const sellPrincipleImage3 = require('../../../assets/icons/reivew/sell-principle3.png');
+
+type IllustrationProps = { width?: number; height?: number };
+
+function createRasterIcon(source: number): ComponentType<IllustrationProps> {
+  return function RasterIcon({ width, height }: IllustrationProps) {
+    return createElement(Image, {
+      source,
+      style: { width, height },
+      resizeMode: 'contain',
+    });
+  };
+}
+
+const BuyPrincipleIcon2 = createRasterIcon(buyPrincipleImage2);
+const SellPrincipleIcon1 = createRasterIcon(sellPrincipleImage1);
+const SellPrincipleIcon3 = createRasterIcon(sellPrincipleImage3);
 
 interface PrincipleIllustration {
-  Icon: ComponentType<SvgProps>;
+  Icon: ComponentType<IllustrationProps>;
+  // Source image's native aspect ratio, so callers can scale it down to fit
+  // a target box without stretching/distorting it.
   width: number;
   height: number;
 }
@@ -19,12 +42,12 @@ export const PRINCIPLE_ILLUSTRATIONS: Record<
 > = {
   buy: {
     1: { Icon: BuyPrincipleIcon1, width: 189, height: 220 },
-    2: { Icon: BuyPrincipleIcon2, width: 200, height: 220 },
-    3: { Icon: BuyPrincipleIcon3, width: 220, height: 171 },
+    2: { Icon: BuyPrincipleIcon2, width: 190, height: 220 },
+    3: { Icon: BuyPrincipleIcon3, width: 250, height: 195 },
   },
   sell: {
-    1: { Icon: SellPrincipleIcon1, width: 220, height: 220 },
-    2: { Icon: BuyPrincipleIcon2, width: 200, height: 220 },
+    1: { Icon: SellPrincipleIcon1, width: 207, height: 220 },
+    2: { Icon: BuyPrincipleIcon2, width: 190, height: 220 },
     3: { Icon: SellPrincipleIcon3, width: 220, height: 142 },
   },
 };

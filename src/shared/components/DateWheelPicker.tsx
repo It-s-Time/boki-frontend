@@ -9,11 +9,16 @@ interface Props {
   minYear?: number;
   maxYear?: number;
   showDay?: boolean;
+  itemHeight?: number;
+  fontSize?: number;
+  columnGap?: number;
+  highlightInset?: number;
+  highlightFull?: boolean;
+  yearColumnWidth?: number;
+  columnWidth?: number;
 }
 
-const ITEM_HEIGHT = 44;
 const VISIBLE_COUNT = 3;
-const HIGHLIGHT_TOP = (ITEM_HEIGHT * (VISIBLE_COUNT - 1)) / 2;
 
 const daysInMonth = (year: number, month: number) =>
   new Date(year, month, 0).getDate();
@@ -24,7 +29,15 @@ export default function DateWheelPicker({
   minYear = new Date().getFullYear() - 5,
   maxYear = new Date().getFullYear(),
   showDay = true,
+  itemHeight = 44,
+  fontSize = 20,
+  columnGap = 0,
+  highlightInset = 24,
+  highlightFull = false,
+  yearColumnWidth = 76,
+  columnWidth = 56,
 }: Props) {
+  const highlightTop = (itemHeight * (VISIBLE_COUNT - 1)) / 2;
   const year = value.getFullYear();
   const month = value.getMonth() + 1;
   const day = value.getDate();
@@ -46,25 +59,49 @@ export default function DateWheelPicker({
 
   return (
     <View style={styles.row}>
-      <View style={styles.wheels}>
-        <View style={styles.highlight} pointerEvents="none" />
+      {highlightFull && (
+        <View
+          style={[
+            styles.highlight,
+            { left: 0, right: 0, top: highlightTop, height: itemHeight },
+          ]}
+          pointerEvents="none"
+        />
+      )}
+      <View style={[styles.wheels, { columnGap }]}>
+        {!highlightFull && (
+          <View
+            style={[
+              styles.highlight,
+              {
+                left: -highlightInset,
+                right: -highlightInset,
+                top: highlightTop,
+                height: itemHeight,
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
         <WheelPicker
           items={years.map((y) => `${y}년`)}
           selectedIndex={years.indexOf(year)}
           onChange={(i) => updateDate(years[i], month, day)}
           visibleCount={VISIBLE_COUNT}
-          itemHeight={ITEM_HEIGHT}
+          itemHeight={itemHeight}
+          fontSize={fontSize}
           showHighlight={false}
-          style={styles.yearColumn}
+          style={[styles.yearColumn, { width: yearColumnWidth }]}
         />
         <WheelPicker
           items={months.map((m) => `${m}월`)}
           selectedIndex={month - 1}
           onChange={(i) => updateDate(year, months[i], day)}
           visibleCount={VISIBLE_COUNT}
-          itemHeight={ITEM_HEIGHT}
+          itemHeight={itemHeight}
+          fontSize={fontSize}
           showHighlight={false}
-          style={styles.column}
+          style={[styles.column, { width: columnWidth }]}
         />
         {showDay && (
           <WheelPicker
@@ -72,9 +109,10 @@ export default function DateWheelPicker({
             selectedIndex={day - 1}
             onChange={(i) => updateDate(year, month, days[i])}
             visibleCount={VISIBLE_COUNT}
-            itemHeight={ITEM_HEIGHT}
+            itemHeight={itemHeight}
+            fontSize={fontSize}
             showHighlight={false}
-            style={styles.column}
+            style={[styles.column, { width: columnWidth }]}
           />
         )}
       </View>
@@ -92,19 +130,13 @@ const styles = StyleSheet.create({
   },
   yearColumn: {
     flex: 0,
-    width: 76,
   },
   column: {
     flex: 0,
-    width: 56,
   },
   highlight: {
     position: 'absolute',
-    left: -24,
-    right: -24,
-    top: HIGHLIGHT_TOP,
-    height: ITEM_HEIGHT,
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: COLORS_NEW.lightGray,
   },
 });

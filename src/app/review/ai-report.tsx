@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
   },
   retryText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },

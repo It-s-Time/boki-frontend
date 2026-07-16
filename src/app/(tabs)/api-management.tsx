@@ -360,6 +360,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: COLORS.textPrimary,
     fontSize: 22,
+    letterSpacing: -0.88,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
   },
@@ -395,12 +396,14 @@ const styles = StyleSheet.create({
   copyText: {
     color: COLORS.textSecondary,
     fontSize: 15,
+    letterSpacing: -0.6,
     lineHeight: 20,
     fontFamily: 'Pretendard-Regular',
   },
   ipLabel: {
     color: COLORS.textPrimary,
     fontSize: 20,
+    letterSpacing: -0.8,
     lineHeight: 28,
     fontFamily: 'Pretendard-SemiBold',
     marginTop: 34,
@@ -409,6 +412,7 @@ const styles = StyleSheet.create({
   ipValue: {
     color: COLORS.textPrimary,
     fontSize: 28,
+    letterSpacing: -1.12,
     lineHeight: 36,
     fontFamily: 'Pretendard-SemiBold',
   },
@@ -420,6 +424,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F3F8',
     color: COLORS.textPrimary,
     fontSize: 22,
+    letterSpacing: -0.88,
     lineHeight: 30,
     fontFamily: 'Pretendard-SemiBold',
     paddingHorizontal: 20,
@@ -440,6 +445,7 @@ const styles = StyleSheet.create({
   registerText: {
     color: COLORS.box,
     fontSize: 23,
+    letterSpacing: -0.92,
     lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
   },
@@ -450,12 +456,14 @@ const styles = StyleSheet.create({
   guideTitle: {
     color: COLORS.textPrimary,
     fontSize: 24,
+    letterSpacing: -0.96,
     lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
   },
   guideText: {
     color: COLORS.textSecondary,
     fontSize: 16,
+    letterSpacing: -0.64,
     lineHeight: 32,
     fontFamily: 'Pretendard-Regular',
   },

@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import { useApiStore } from '@/store/apiStore';
-import ManualInputIcon from '../../../../assets/icons/input/input.svg';
-import ApiInputIcon from '../../../../assets/icons/input/api.svg';
+
+const manualInputImage = require('../../../../assets/icons/input/input.png');
+const apiInputImage = require('../../../../assets/icons/input/api.png');
 
 interface Props {
   visible: boolean;
@@ -29,9 +30,9 @@ export default function InputOptionsModal({
     >
       <View style={styles.header}>
         <Text style={styles.title}>어떻게 거래내역을 추가할까요?</Text>
-        <View style={styles.headerIcon}>
+        {/* <View style={styles.headerIcon}>
           <Feather name="calendar" size={20} color={COLORS_NEW.border} />
-        </View>
+        </View> */}
       </View>
 
       <View style={styles.optionGroup}>
@@ -44,7 +45,10 @@ export default function InputOptionsModal({
           }}
         >
           <View style={styles.iconWrapper}>
-            <ManualInputIcon width={127} height={120} />
+            <Image
+              source={manualInputImage}
+              style={{ width: 127, height: 120 }}
+            />
           </View>
           <Text style={styles.optionTitle}>수동 입력</Text>
         </Pressable>
@@ -59,7 +63,7 @@ export default function InputOptionsModal({
           }}
         >
           <View style={styles.iconWrapper}>
-            <ApiInputIcon width={127} height={104} />
+            <Image source={apiInputImage} style={{ width: 127, height: 104 }} />
           </View>
           <Text style={styles.optionTitle}>
             {isApiConnected ? '연동 완료' : 'API 연동'}
@@ -84,7 +88,9 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
+    marginTop: 8,
     fontSize: 22,
+    letterSpacing: -0.88,
   },
 
   headerIcon: {
@@ -128,5 +134,6 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 18,
+    letterSpacing: -0.72,
   },
 });

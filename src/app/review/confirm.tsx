@@ -17,10 +17,18 @@ export default function ReviewConfirmScreen() {
   const createAiReport = useCreateAiReport();
 
   const handleViewReport = () => {
-    if (numericTradeId === undefined) return;
+    if (numericTradeId === undefined) {
+      console.error('[AI Report] tradeId param missing, skipping create call');
+      return;
+    }
+    console.log('[AI Report] requesting create for tradeId', numericTradeId);
     createAiReport.mutate(numericTradeId, {
-      onSuccess: () => {
+      onSuccess: (result) => {
+        console.log('[AI Report] create succeeded', result);
         router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+      },
+      onError: (err) => {
+        console.error('[AI Report] create failed', err);
       },
     });
   };
@@ -130,6 +138,7 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 18,
+    letterSpacing: -0.72,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
     marginBottom: 14,
@@ -146,6 +155,7 @@ const styles = StyleSheet.create({
   scoreContent: {
     flex: 1,
     fontSize: 15,
+    letterSpacing: -0.6,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
@@ -159,12 +169,14 @@ const styles = StyleSheet.create({
 
   scoreChipText: {
     fontSize: 13,
+    letterSpacing: -0.52,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },
 
   memoText: {
     fontSize: 15,
+    letterSpacing: -0.6,
     lineHeight: 22,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
@@ -190,6 +202,7 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.downStrong,
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
+    letterSpacing: -0.56,
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -205,6 +218,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
   },
@@ -218,6 +232,7 @@ const styles = StyleSheet.create({
 
   retryText: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
   },

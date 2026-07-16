@@ -2,6 +2,7 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Trade } from '@/features/trade/types';
 import { COIN_NAMES } from '@/features/trade/constants';
@@ -63,7 +64,11 @@ export default function TradeCard({ trade }: Props) {
       >
         <View style={styles.iconBadge}>
           {icon ? (
-            <Image source={icon} style={styles.iconImage} resizeMode="contain" />
+            <Image
+              source={icon}
+              style={styles.iconImage}
+              resizeMode="contain"
+            />
           ) : (
             <Text style={styles.iconFallbackText}>{trade.coinType}</Text>
           )}
@@ -83,7 +88,8 @@ export default function TradeCard({ trade }: Props) {
             {trade.price.toLocaleString()}원 ·{' '}
             <Text
               style={{
-                color: trade.tradeType === 'BUY' ? COLORS_NEW.buy : COLORS_NEW.sell,
+                color:
+                  trade.tradeType === 'BUY' ? COLORS_NEW.buy : COLORS_NEW.sell,
                 fontFamily: 'Pretendard-Medium',
               }}
             >
@@ -93,12 +99,19 @@ export default function TradeCard({ trade }: Props) {
         </View>
       </Pressable>
 
-      <Pressable style={styles.reviewButton} onPress={handleReview}>
-        <Entypo
-          name="chevron-thin-right"
-          size={18}
-          color={COLORS_NEW.textPrimary}
-        />
+      <Pressable
+        style={[styles.reviewButton, isReviewed && styles.reviewButtonDone]}
+        onPress={handleReview}
+      >
+        {isReviewed ? (
+          <AntDesign name="check" size={20} color={COLORS_NEW.background} />
+        ) : (
+          <Entypo
+            name="chevron-thin-right"
+            size={18}
+            color={COLORS_NEW.textPrimary}
+          />
+        )}
       </Pressable>
 
       <TradeDetailModal
@@ -143,6 +156,7 @@ const styles = StyleSheet.create({
 
   iconFallbackText: {
     fontSize: 12,
+    letterSpacing: -0.48,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },
@@ -157,21 +171,23 @@ const styles = StyleSheet.create({
 
   coinName: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
 
   coinAmount: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
 
   tradeInfo: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    letterSpacing: -0.5,
   },
 
   reviewButton: {
@@ -181,5 +197,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  reviewButtonDone: {
+    backgroundColor: COLORS_NEW.reviewed,
   },
 });

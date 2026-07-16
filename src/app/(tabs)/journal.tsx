@@ -326,6 +326,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: '#14151F',
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
   },
   filterRow: {
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
   filterText: {
     color: '#5E5E61',
     fontSize: 16,
-    letterSpacing: -0.6,
+    letterSpacing: -0.64,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'center',
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
   },
   gradeText: {
     fontSize: 17,
-    letterSpacing: -0.6,
+    letterSpacing: -0.68,
     lineHeight: 24,
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
@@ -439,7 +440,7 @@ const styles = StyleSheet.create({
   tradeText: {
     color: '#5E5E61',
     fontSize: 17,
-    letterSpacing: -0.6,
+    letterSpacing: -0.68,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
   },
@@ -453,12 +454,13 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#14151F',
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-SemiBold',
   },
   priceText: {
     color: '#14151F',
     fontSize: 17,
-    letterSpacing: -0.6,
+    letterSpacing: -0.68,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'right',

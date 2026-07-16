@@ -120,6 +120,9 @@ const MOCK_REPORT: AiReport = {
 // — it only controls how much white space sits around the fixed-size
 // content, so it's fine to run wider than a real phone's card would be.
 const REPORT_NATURAL_WIDTH = 400;
+// Extra shrink applied on top of the height-fit scale below, to nudge the
+// whole card slightly smaller without disturbing its proportions.
+const REPORT_SCALE_FACTOR = 0.9;
 // Passed as ReportSummaryCard's bottomPadding prop for this preview only —
 // ReportDetail.tsx's real screen doesn't pass it, so it keeps its default.
 const REPORT_BOTTOM_PADDING = 14;
@@ -437,7 +440,7 @@ function ScaledReportPreview({
   // to fit it, rather than shrinking the whole card).
   const scale =
     naturalHeight > 0 && availableHeight > 0
-      ? availableHeight / naturalHeight
+      ? (availableHeight / naturalHeight) * REPORT_SCALE_FACTOR
       : 0;
   const renderedWidth = Math.min(REPORT_NATURAL_WIDTH * scale, availableWidth);
 
@@ -446,9 +449,7 @@ function ScaledReportPreview({
       <View
         style={styles.reportMeasureWrap}
         pointerEvents="none"
-        onLayout={(event) =>
-          setNaturalHeight(event.nativeEvent.layout.height)
-        }
+        onLayout={(event) => setNaturalHeight(event.nativeEvent.layout.height)}
       >
         <ReportSummaryCard
           report={MOCK_REPORT}
@@ -526,6 +527,7 @@ const styles = StyleSheet.create({
   },
   feedbackGradeText: {
     fontSize: 13,
+    letterSpacing: -0.52,
     color: '#FFFFFF',
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
@@ -544,6 +546,7 @@ const styles = StyleSheet.create({
   feedbackTradeText: {
     color: '#5E5E61',
     fontSize: 13,
+    letterSpacing: -0.52,
     fontFamily: 'Pretendard-Regular',
   },
   feedbackCardBottomRow: {
@@ -555,11 +558,13 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#14151F',
     fontSize: 17,
+    letterSpacing: -0.68,
     fontFamily: 'Pretendard-SemiBold',
   },
   feedbackPriceText: {
     color: '#14151F',
     fontSize: 13,
+    letterSpacing: -0.52,
     fontFamily: 'Pretendard-Regular',
     textAlign: 'right',
     marginLeft: 10,

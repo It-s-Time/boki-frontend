@@ -1,7 +1,14 @@
 import { router, Tabs } from 'expo-router';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Alert, Pressable, View, StyleSheet } from 'react-native';
-import { type ComponentType, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  PanResponder,
+  Pressable,
+  View,
+  StyleSheet,
+} from 'react-native';
+import { type ComponentType, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -22,6 +29,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const TAB_BAR_HEIGHT = 52;
 const ICON_SIZE = 16;
+const HIGHLIGHT_WIDTH = 70;
+const HIGHLIGHT_SPRING = { damping: 16, stiffness: 180, mass: 0.6 };
 
 const getSyncErrorMessage = (error: unknown) => {
   if (axios.isAxiosError(error)) {
@@ -74,6 +83,171 @@ const RIGHT_TABS: TabIconConfig[] = [
   { name: 'mypage', Icon: MyIcon, width: ICON_SIZE, height: ICON_SIZE },
 ];
 
+// These screens live under (tabs) so the bottom bar stays visible, but
+// they're reached from mypage rather than being tabs themselves — keep
+// "마이페이지" highlighted while any of them is the active route.
+const MYPAGE_SUB_ROUTES = ['terms', 'privacy', 'api-management', 'api-deleted'];
+
+function TabPill({
+  tabs,
+  state,
+  navigation,
+}: {
+  tabs: TabIconConfig[];
+  state: BottomTabBarProps['state'];
+  navigation: BottomTabBarProps['navigation'];
+}) {
+  const highlightX = useRef(new Animated.Value(0)).current;
+  const contentRef = useRef<View>(null);
+  const contentWidth = useRef(0);
+  const contentPageX = useRef(0);
+  const activeIndex = useRef(0);
+
+  const routes = tabs
+    .map((tab) => state.routes.find((r) => r.name === tab.name))
+    .filter((route): route is (typeof state.routes)[number] => !!route);
+  const activeRouteName = state.routes[state.index]?.name;
+  const effectiveActiveName = MYPAGE_SUB_ROUTES.includes(activeRouteName ?? '')
+    ? 'mypage'
+    : activeRouteName;
+  const focusedIndexInGroup = routes.findIndex(
+    (route) => route.name === effectiveActiveName,
+  );
+  const [showHighlight, setShowHighlight] = useState(focusedIndexInGroup >= 0);
+
+  // PanResponder is created once (see below) and its handlers close over
+  // whatever these were on the first render. Route them through refs kept
+  // fresh every render so tapping/dragging after the focused tab changes
+  // still sees the current navigation state instead of a stale snapshot.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const navigationRef = useRef(navigation);
+  navigationRef.current = navigation;
+  const routesRef = useRef(routes);
+  routesRef.current = routes;
+
+  useEffect(() => {
+    setShowHighlight(focusedIndexInGroup >= 0);
+  }, [focusedIndexInGroup]);
+
+  const targetX = (index: number, width: number) => {
+    const itemWidth = width / tabs.length;
+    return itemWidth * index + itemWidth / 2 - HIGHLIGHT_WIDTH / 2;
+  };
+
+  const indexFromX = (x: number, width: number) => {
+    const itemWidth = width / tabs.length;
+    return Math.min(tabs.length - 1, Math.max(0, Math.floor(x / itemWidth)));
+  };
+
+  const navigateToIndex = (index: number) => {
+    const currentState = stateRef.current;
+    const route = routesRef.current[index];
+    if (!route) return;
+    const isFocused = currentState.routes.indexOf(route) === currentState.index;
+    const event = navigationRef.current.emit({
+      type: 'tabPress',
+      target: route.key,
+      canPreventDefault: true,
+    });
+    if (!isFocused && !event.defaultPrevented) {
+      navigationRef.current.navigate(route.name);
+    }
+  };
+
+  const springTo = (index: number) => {
+    const width = contentWidth.current;
+    if (width <= 0) return;
+    Animated.spring(highlightX, {
+      toValue: targetX(index, width),
+      useNativeDriver: true,
+      ...HIGHLIGHT_SPRING,
+    }).start();
+  };
+
+  useEffect(() => {
+    if (focusedIndexInGroup < 0 || contentWidth.current <= 0) return;
+    activeIndex.current = focusedIndexInGroup;
+    springTo(focusedIndexInGroup);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedIndexInGroup]);
+
+  const onContentLayout = () => {
+    contentRef.current?.measure((_x, _y, width, _height, pageX) => {
+      contentWidth.current = width;
+      contentPageX.current = pageX;
+      if (focusedIndexInGroup < 0) return;
+      activeIndex.current = focusedIndexInGroup;
+      highlightX.setValue(targetX(focusedIndexInGroup, width));
+    });
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        const width = contentWidth.current;
+        if (width <= 0) return;
+        const x = evt.nativeEvent.pageX - contentPageX.current;
+        const idx = indexFromX(x, width);
+        activeIndex.current = idx;
+        setShowHighlight(true);
+        springTo(idx);
+        navigateToIndex(idx);
+      },
+      onPanResponderMove: (_evt, gestureState) => {
+        const width = contentWidth.current;
+        if (width <= 0) return;
+        const x = gestureState.moveX - contentPageX.current;
+        highlightX.setValue(
+          Math.min(width - HIGHLIGHT_WIDTH, Math.max(0, x - HIGHLIGHT_WIDTH / 2)),
+        );
+        const idx = indexFromX(x, width);
+        if (idx !== activeIndex.current) {
+          activeIndex.current = idx;
+          navigateToIndex(idx);
+        }
+      },
+      onPanResponderRelease: () => springTo(activeIndex.current),
+      onPanResponderTerminate: () => springTo(activeIndex.current),
+    }),
+  ).current;
+
+  return (
+    <View style={styles.groupPill}>
+      <BlurView intensity={35} tint="light" style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        pointerEvents="none"
+        colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0)']}
+        locations={[0, 0.6]}
+        style={styles.glassSheen}
+      />
+      <View
+        ref={contentRef}
+        style={styles.groupContent}
+        onLayout={onContentLayout}
+        {...panResponder.panHandlers}
+      >
+        {showHighlight && (
+          <Animated.View
+            style={[
+              styles.itemHighlight,
+              { transform: [{ translateX: highlightX }] },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+        {tabs.map((tab) => (
+          <View key={tab.name} style={styles.groupItem} pointerEvents="none">
+            <tab.Icon width={tab.width} height={tab.height} />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function CustomTabBar({
   state,
   navigation,
@@ -87,45 +261,6 @@ function CustomTabBar({
 }) {
   const insets = useSafeAreaInsets();
 
-  const renderGroupItem = ({ name, Icon, width, height }: TabIconConfig) => {
-    const route = state.routes.find((r) => r.name === name);
-    if (!route) return null;
-    const activeRouteName = state.routes[state.index]?.name;
-    const isMyPageSubRoute =
-      name === 'mypage' &&
-      ['terms', 'privacy', 'api-management', 'api-deleted'].includes(
-        activeRouteName ?? '',
-      );
-    const isFocused =
-      state.index === state.routes.indexOf(route) || isMyPageSubRoute;
-
-    return (
-      <Pressable
-        key={route.key}
-        style={styles.groupItem}
-        onPress={() => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        }}
-      >
-        <View
-          style={[
-            styles.itemHighlight,
-            isFocused && styles.itemHighlightFocused,
-          ]}
-        >
-          <Icon width={width} height={height} />
-        </View>
-      </Pressable>
-    );
-  };
-
   return (
     <View
       style={[
@@ -137,22 +272,7 @@ function CustomTabBar({
       ]}
     >
       <View style={styles.row}>
-        <View style={styles.groupPill}>
-          <BlurView
-            intensity={35}
-            tint="light"
-            style={StyleSheet.absoluteFill}
-          />
-          <LinearGradient
-            pointerEvents="none"
-            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0)']}
-            locations={[0, 0.6]}
-            style={styles.glassSheen}
-          />
-          <View style={styles.groupContent}>
-            {LEFT_TABS.map((tab) => renderGroupItem(tab))}
-          </View>
-        </View>
+        <TabPill tabs={LEFT_TABS} state={state} navigation={navigation} />
 
         <Pressable
           style={styles.fabWrapper}
@@ -168,22 +288,7 @@ function CustomTabBar({
           </View>
         </Pressable>
 
-        <View style={styles.groupPill}>
-          <BlurView
-            intensity={35}
-            tint="light"
-            style={StyleSheet.absoluteFill}
-          />
-          <LinearGradient
-            pointerEvents="none"
-            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0)']}
-            locations={[0, 0.6]}
-            style={styles.glassSheen}
-          />
-          <View style={styles.groupContent}>
-            {RIGHT_TABS.map((tab) => renderGroupItem(tab))}
-          </View>
-        </View>
+        <TabPill tabs={RIGHT_TABS} state={state} navigation={navigation} />
       </View>
     </View>
   );
@@ -336,14 +441,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemHighlight: {
-    width: 70,
+    position: 'absolute',
+    top: 1,
+    left: 0,
+    width: HIGHLIGHT_WIDTH,
     height: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  itemHighlightFocused: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 32,
+    backgroundColor: '#FFFFFF',
   },
   fabWrapper: {
     alignItems: 'center',

@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 22,
+    letterSpacing: -0.88,
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },

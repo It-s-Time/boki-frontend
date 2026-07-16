@@ -62,22 +62,25 @@ const styles = StyleSheet.create({
   },
   coinName: {
     fontSize: 16,
+    letterSpacing: -0.64,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-SemiBold',
   },
   amount: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS.textPrimary,
     fontFamily: 'Pretendard-Regular',
   },
   tradeType: {
     fontSize: 14,
+    letterSpacing: -0.56,
     fontFamily: 'Pretendard-Medium',
   },
   info: {
     fontSize: 14,
+    letterSpacing: -0.56,
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Regular',
-    letterSpacing: -0.3,
   },
 });

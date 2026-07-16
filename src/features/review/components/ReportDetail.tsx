@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: '#14151F',
     fontSize: 23,
+    letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
   },
   scroll: {
@@ -171,6 +172,7 @@ const styles = StyleSheet.create({
   memoTitle: {
     color: '#14151F',
     fontSize: 24,
+    letterSpacing: -0.96,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
     marginTop: 16,
@@ -179,6 +181,7 @@ const styles = StyleSheet.create({
   memoText: {
     color: '#14151F',
     fontSize: 20,
+    letterSpacing: -0.8,
     lineHeight: 34,
     fontFamily: 'Pretendard-Regular',
   },

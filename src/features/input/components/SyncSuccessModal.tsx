@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import PrimaryButton from '@/shared/components/PrimaryButton';
-import FinishIcon from '../../../../assets/finish.svg';
+
+const finishImage = require('../../../../assets/finish.png');
 
 interface Props {
   visible: boolean;
@@ -29,7 +30,7 @@ export default function SyncSuccessModal({
       </View>
 
       <View style={styles.content}>
-        <FinishIcon width={180} height={180} />
+        <Image source={finishImage} style={{ width: 180, height: 180 }} />
         <Text style={styles.message}>거래 내역 가져오기 성공</Text>
       </View>
 
@@ -62,6 +63,7 @@ const styles = StyleSheet.create({
 
   message: {
     fontSize: 22,
+    letterSpacing: -0.88,
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Medium',
   },

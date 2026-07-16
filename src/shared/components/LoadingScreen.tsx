@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: 'Pretendard-Medium',
     fontSize: 20,
+    letterSpacing: -0.8,
     lineHeight: 28,
     textAlign: 'center',
   },
