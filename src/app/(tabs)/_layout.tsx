@@ -131,11 +131,24 @@ function TabPill({
   }, [focusedIndexInGroup]);
 
   const targetX = (index: number, width: number) => {
+    if (!Number.isFinite(width) || width <= 0 || tabs.length === 0) return 0;
+
     const itemWidth = width / tabs.length;
-    return itemWidth * index + itemWidth / 2 - HIGHLIGHT_WIDTH / 2;
+    const x = itemWidth * index + itemWidth / 2 - HIGHLIGHT_WIDTH / 2;
+
+    return Number.isFinite(x) ? x : 0;
   };
 
   const indexFromX = (x: number, width: number) => {
+    if (
+      !Number.isFinite(x) ||
+      !Number.isFinite(width) ||
+      width <= 0 ||
+      tabs.length === 0
+    ) {
+      return 0;
+    }
+
     const itemWidth = width / tabs.length;
     return Math.min(tabs.length - 1, Math.max(0, Math.floor(x / itemWidth)));
   };
@@ -157,7 +170,7 @@ function TabPill({
 
   const springTo = (index: number) => {
     const width = contentWidth.current;
-    if (width <= 0) return;
+    if (!Number.isFinite(width) || width <= 0) return;
     Animated.spring(highlightX, {
       toValue: targetX(index, width),
       useNativeDriver: true,
@@ -174,8 +187,10 @@ function TabPill({
 
   const onContentLayout = () => {
     contentRef.current?.measure((_x, _y, width, _height, pageX) => {
+      if (!Number.isFinite(width) || width <= 0) return;
+
       contentWidth.current = width;
-      contentPageX.current = pageX;
+      contentPageX.current = Number.isFinite(pageX) ? pageX : 0;
       if (focusedIndexInGroup < 0) return;
       activeIndex.current = focusedIndexInGroup;
       highlightX.setValue(targetX(focusedIndexInGroup, width));
@@ -188,7 +203,7 @@ function TabPill({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
         const width = contentWidth.current;
-        if (width <= 0) return;
+        if (!Number.isFinite(width) || width <= 0) return;
         const x = evt.nativeEvent.pageX - contentPageX.current;
         const idx = indexFromX(x, width);
         activeIndex.current = idx;
@@ -198,8 +213,10 @@ function TabPill({
       },
       onPanResponderMove: (_evt, gestureState) => {
         const width = contentWidth.current;
-        if (width <= 0) return;
+        if (!Number.isFinite(width) || width <= 0) return;
         const x = gestureState.moveX - contentPageX.current;
+        if (!Number.isFinite(x)) return;
+
         highlightX.setValue(
           Math.min(width - HIGHLIGHT_WIDTH, Math.max(0, x - HIGHLIGHT_WIDTH / 2)),
         );
