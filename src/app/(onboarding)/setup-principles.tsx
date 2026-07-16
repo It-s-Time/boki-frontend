@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.72,
     lineHeight: 28,
     marginTop: 32,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   footer: {
     paddingBottom: 24,

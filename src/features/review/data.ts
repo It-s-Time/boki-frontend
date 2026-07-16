@@ -1,14 +1,31 @@
-import { ComponentType } from 'react';
-import { SvgProps } from 'react-native-svg';
+import { ComponentType, createElement } from 'react';
+import { Image } from 'react-native';
 import { PrincipleSet } from './types';
 import BuyPrincipleIcon1 from '../../../assets/icons/reivew/buy-principe1.svg';
-import BuyPrincipleIcon2 from '../../../assets/icons/reivew/buy-principle2.svg';
 import BuyPrincipleIcon3 from '../../../assets/icons/reivew/buy-principle3.svg';
-import SellPrincipleIcon1 from '../../../assets/icons/reivew/sell-principle1.svg';
-import SellPrincipleIcon3 from '../../../assets/icons/reivew/sell-principle3.svg';
+
+// buy-principle2/sell-principle1/sell-principle3 were exported as SVGs that
+// just embed a giant base64 PNG (no real vector paths), which bloated the
+// Metro/Babel SVG transform. They're plain images now, wrapped to match the
+// same width/height-only component shape as the real SVG icons above.
+const buyPrincipleImage2 = require('../../../assets/icons/reivew/buy-principle2.png');
+const sellPrincipleImage1 = require('../../../assets/icons/reivew/sell-principle1.png');
+const sellPrincipleImage3 = require('../../../assets/icons/reivew/sell-principle3.png');
+
+type IllustrationProps = { width?: number; height?: number };
+
+function createRasterIcon(source: number): ComponentType<IllustrationProps> {
+  return function RasterIcon({ width, height }: IllustrationProps) {
+    return createElement(Image, { source, style: { width, height } });
+  };
+}
+
+const BuyPrincipleIcon2 = createRasterIcon(buyPrincipleImage2);
+const SellPrincipleIcon1 = createRasterIcon(sellPrincipleImage1);
+const SellPrincipleIcon3 = createRasterIcon(sellPrincipleImage3);
 
 interface PrincipleIllustration {
-  Icon: ComponentType<SvgProps>;
+  Icon: ComponentType<IllustrationProps>;
   width: number;
   height: number;
 }
