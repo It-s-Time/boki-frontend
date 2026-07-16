@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
@@ -8,18 +8,63 @@ import BackHeader from '@/shared/components/BackHeader';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import { useAuthStore } from '@/store/authStore';
 import { logoutApi } from '@/api/auth';
+import { getMyProfile, type MemberProfile } from '@/api/member';
 
 type ConfirmType = 'logout' | 'withdraw' | null;
 
 const PROFILE_IMAGE = require('../../../assets/images/profile-avatar.png');
 
+const getProfileImageUri = (profileImageUrl: string | null | undefined) => {
+  if (!profileImageUrl) return null;
+  if (/^https?:\/\//.test(profileImageUrl)) return profileImageUrl;
+
+  const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '');
+  const path = profileImageUrl.startsWith('/')
+    ? profileImageUrl
+    : `/${profileImageUrl}`;
+
+  return baseUrl ? `${baseUrl}${path}` : null;
+};
+
 export default function MyPageScreen() {
   const [confirmType, setConfirmType] = useState<ConfirmType>(null);
+  const [profile, setProfile] = useState<MemberProfile | null>(null);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const refreshToken = useAuthStore((state) => state.refreshToken);
 
   const closeModal = () => setConfirmType(null);
   const isWithdraw = confirmType === 'withdraw';
+  const nickname = profile?.nickname || '김보키';
+  const profileImageUri = getProfileImageUri(profile?.profileImageUrl);
+  const profileImageSource = profileImageUri
+    ? { uri: profileImageUri }
+    : PROFILE_IMAGE;
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadProfile = async () => {
+        try {
+          const data = await getMyProfile();
+
+          if (isActive && data.isSuccess) {
+            setProfile(data.result);
+          }
+        } catch {
+          if (isActive) {
+            setProfile(null);
+          }
+        }
+      };
+
+      void loadProfile();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   const handleConfirm = async () => {
     if (confirmType === 'logout') {
@@ -46,9 +91,9 @@ export default function MyPageScreen() {
       >
         <View style={styles.profile}>
           <View style={styles.avatarBox}>
-            <Image source={PROFILE_IMAGE} style={styles.avatar} />
+            <Image source={profileImageSource} style={styles.avatar} />
           </View>
-          <Text style={styles.name}>김보키</Text>
+          <Text style={styles.name}>{nickname}</Text>
           <Pressable style={styles.editButton} onPress={() => {}}>
             <Text style={styles.editText}>내 정보 수정</Text>
             <View style={styles.editArrowButton}>

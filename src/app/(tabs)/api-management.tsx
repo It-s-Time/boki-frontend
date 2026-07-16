@@ -24,8 +24,6 @@ import BackHeader from '@/shared/components/BackHeader';
 import { getApiErrorMessage } from '@/shared/utils/apiError';
 
 const API_IP_ADDRESS = '13.124.152.202';
-const DELETE_API_UNAVAILABLE_MESSAGE =
-  'API 삭제 기능이 서버에 아직 연결되어 있지 않습니다. 백엔드에 DELETE /api/exchange/api-key API 추가가 필요합니다.';
 
 export default function ApiManagementScreen() {
   const [accessKey, setAccessKey] = useState('');
@@ -147,14 +145,6 @@ export default function ApiManagementScreen() {
       const data = await deleteExchangeApiKey();
 
       if (!data.isSuccess) {
-        const isServerDeleteError =
-          data.code?.includes('500') || data.message?.includes('서버');
-
-        if (isServerDeleteError) {
-          setErrorMessage(DELETE_API_UNAVAILABLE_MESSAGE);
-          return;
-        }
-
         setErrorMessage(
           data.code
             ? `${data.message || 'API 삭제에 실패했습니다.'} (${data.code})`
@@ -169,15 +159,6 @@ export default function ApiManagementScreen() {
       setApiConnected(false);
       router.replace('/(tabs)/api-deleted');
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-
-        if (status === 404 || status === 405 || status === 500) {
-          setErrorMessage(DELETE_API_UNAVAILABLE_MESSAGE);
-          return;
-        }
-      }
-
       setErrorMessage(
         getApiErrorMessage(
           error,
