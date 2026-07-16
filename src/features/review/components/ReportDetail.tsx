@@ -147,12 +147,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   memoCard: {
-    minHeight: 640,
+    height: 610,
     borderRadius: 34,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 28,
+    paddingHorizontal: 20,
     paddingTop: 28,
-    paddingBottom: 26,
+    paddingBottom: 20,
   },
   memoClose: {
     position: 'absolute',
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     zIndex: 2,
-    elevation: 2,
   },
   memoTitle: {
     color: '#14151F',
@@ -182,15 +181,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 34,
     fontFamily: 'Pretendard-Regular',
-    marginBottom: 128,
   },
   memoImageRow: {
     flexDirection: 'row',
-    gap: 18,
+    gap: 20,
+    marginTop: 'auto',
   },
   memoImage: {
     flex: 1,
-    height: 164,
+    aspectRatio: 1,
     borderRadius: 16,
   },
 });

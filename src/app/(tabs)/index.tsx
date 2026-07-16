@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   recentHint: {
     fontSize: 14,
     lineHeight: 20,
-    color: COLORS_NEW.textSecondary,
+    color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 10,
   },

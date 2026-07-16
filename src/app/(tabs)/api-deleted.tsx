@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 
-const SUCCESS_IMAGE = require('../../assets/images/api-success-check.png');
+const SUCCESS_IMAGE = require('../../../assets/images/api-success-check.png');
 
 export default function ApiDeletedScreen() {
   const setApiConnected = useApiStore((s) => s.setApiConnected);
@@ -14,7 +14,7 @@ export default function ApiDeletedScreen() {
     setApiConnected(false);
 
     const timer = setTimeout(() => {
-      router.replace('/api-management');
+      router.replace('/(tabs)/api-management');
     }, 2000);
 
     return () => clearTimeout(timer);

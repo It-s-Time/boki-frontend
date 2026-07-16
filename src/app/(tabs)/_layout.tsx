@@ -90,7 +90,14 @@ function CustomTabBar({
   const renderGroupItem = ({ name, Icon, width, height }: TabIconConfig) => {
     const route = state.routes.find((r) => r.name === name);
     if (!route) return null;
-    const isFocused = state.index === state.routes.indexOf(route);
+    const activeRouteName = state.routes[state.index]?.name;
+    const isMyPageSubRoute =
+      name === 'mypage' &&
+      ['terms', 'privacy', 'api-management', 'api-deleted'].includes(
+        activeRouteName ?? '',
+      );
+    const isFocused =
+      state.index === state.routes.indexOf(route) || isMyPageSubRoute;
 
     return (
       <Pressable
@@ -265,6 +272,10 @@ export default function TabLayout() {
         <Tabs.Screen name="input" />
         <Tabs.Screen name="principles" />
         <Tabs.Screen name="mypage" />
+        <Tabs.Screen name="terms" options={{ href: null }} />
+        <Tabs.Screen name="privacy" options={{ href: null }} />
+        <Tabs.Screen name="api-management" options={{ href: null }} />
+        <Tabs.Screen name="api-deleted" options={{ href: null }} />
       </Tabs>
 
       <InputOptionsModal
