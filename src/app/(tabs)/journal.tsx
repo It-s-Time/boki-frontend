@@ -1,10 +1,17 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
-import { AiReport, TradeGrade } from '@/features/review/types';
+import { AiReport, Review, TradeGrade } from '@/features/review/types';
 import ReportDetail from '@/features/review/components/ReportDetail';
 
 type GradeFilter = '전체' | TradeGrade;
@@ -24,6 +31,8 @@ const FILTERS: GradeFilter[] = ['전체', 'S', 'A', 'B', 'C', 'F'];
 const CARD_HEIGHT = 112;
 const CARD_RADIUS = 18;
 const NOTCH_RADIUS = 10;
+const MEMO_CHART_IMAGE = require('../../../assets/icons/Rectangle 1430106783.png');
+const MEMO_COIN_IMAGE = require('../../../assets/icons/Rectangle 1430106784.png');
 
 const JOURNAL_ENTRIES: JournalEntry[] = [
   {
@@ -87,6 +96,25 @@ function buildMockAiReport(entry: JournalEntry): AiReport {
   };
 }
 
+function buildMockReview(): Review {
+  const imageUrls = [MEMO_CHART_IMAGE, MEMO_COIN_IMAGE].map(
+    (image) => Image.resolveAssetSource(image).uri,
+  );
+
+  return {
+    reviewId: 0,
+    tradeId: 0,
+    memberId: 0,
+    ruleSetId: 0,
+    content:
+      '당시 비트코인 시세가 갑작스럽게 오르자 판단이 다소 아쉬웠던 것 같다.\n\n시드도 한번에 다 넣으면 안됐는데..\n판단 미스다 😭',
+    scores: [],
+    imageUrls,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
   S: { bg: '#FFD23F', text: '#14151F' },
   A: { bg: '#636366', text: '#FFFFFF' },
@@ -118,7 +146,7 @@ export default function JournalScreen() {
     return (
       <ReportDetail
         report={buildMockAiReport(selectedEntry)}
-        review={undefined}
+        review={selectedEntry.coin === '비트코인' ? buildMockReview() : undefined}
         onBack={() => setSelectedEntry(null)}
       />
     );

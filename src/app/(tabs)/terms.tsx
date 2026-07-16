@@ -1,16 +1,41 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { type ReactNode, useCallback } from 'react';
+import {
+  BackHandler,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/shared/constants/colors';
 
 export default function TermsScreen() {
+  const goToMypage = useCallback(() => {
+    router.replace('/(tabs)/mypage');
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          goToMypage();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [goToMypage]),
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Feather name="chevron-left" size={28} color={COLORS.textPrimary} />
+        <Pressable style={styles.backButton} onPress={goToMypage}>
+          <Feather name="chevron-left" size={32} color={COLORS.textPrimary} />
         </Pressable>
         <Text style={styles.headerTitle}>서비스 이용 약관</Text>
       </View>
@@ -85,15 +110,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.box,
   },
   header: {
-    height: 112,
+    height: 116,
     justifyContent: 'center',
   },
   backButton: {
     position: 'absolute',
     left: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: '#EFEFEF',
     alignItems: 'center',
@@ -116,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   articleTitle: {
-    color: COLORS.textPrimary,
+    color: '#14151F',
     fontSize: 22,
     letterSpacing: -0.88,
     fontFamily: 'Pretendard-Bold',

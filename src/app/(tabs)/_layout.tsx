@@ -83,6 +83,11 @@ const RIGHT_TABS: TabIconConfig[] = [
   { name: 'mypage', Icon: MyIcon, width: ICON_SIZE, height: ICON_SIZE },
 ];
 
+// These screens live under (tabs) so the bottom bar stays visible, but
+// they're reached from mypage rather than being tabs themselves — keep
+// "마이페이지" highlighted while any of them is the active route.
+const MYPAGE_SUB_ROUTES = ['terms', 'privacy', 'api-management', 'api-deleted'];
+
 function TabPill({
   tabs,
   state,
@@ -101,8 +106,12 @@ function TabPill({
   const routes = tabs
     .map((tab) => state.routes.find((r) => r.name === tab.name))
     .filter((route): route is (typeof state.routes)[number] => !!route);
+  const activeRouteName = state.routes[state.index]?.name;
+  const effectiveActiveName = MYPAGE_SUB_ROUTES.includes(activeRouteName ?? '')
+    ? 'mypage'
+    : activeRouteName;
   const focusedIndexInGroup = routes.findIndex(
-    (route) => state.routes.indexOf(route) === state.index,
+    (route) => route.name === effectiveActiveName,
   );
   const [showHighlight, setShowHighlight] = useState(focusedIndexInGroup >= 0);
 
@@ -368,6 +377,10 @@ export default function TabLayout() {
         <Tabs.Screen name="input" />
         <Tabs.Screen name="principles" />
         <Tabs.Screen name="mypage" />
+        <Tabs.Screen name="terms" options={{ href: null }} />
+        <Tabs.Screen name="privacy" options={{ href: null }} />
+        <Tabs.Screen name="api-management" options={{ href: null }} />
+        <Tabs.Screen name="api-deleted" options={{ href: null }} />
       </Tabs>
 
       <InputOptionsModal
