@@ -1,4 +1,5 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { keepWordsTogether } from '@/shared/utils/text';
 import { Principle, PrincipleAnswer } from '@/features/review/types';
 import { PRINCIPLE_ILLUSTRATIONS, PRINCIPLE_SETS } from '@/features/review/data';
 import { useRuleSets } from '@/features/review/hooks/useRuleSets';
@@ -18,17 +19,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ILLUSTRATION_HEIGHT = 240;
 const ILLUSTRATION_MAX_WIDTH = 300;
-
-// RN's line breaker can split inside a single 어절 (e.g. "사기" -> "사" / "기")
-// since Hangul syllables are individually breakable by default. Joining each
-// word's characters with a zero-width word joiner blocks breaks there while
-// leaving the real spaces between words breakable.
-function keepWordsTogether(text: string) {
-  return text
-    .split(' ')
-    .map((word) => [...word].join('⁠'))
-    .join(' ');
-}
 
 export default function ReviewSessionScreen() {
   const router = useRouter();

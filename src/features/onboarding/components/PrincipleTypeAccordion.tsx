@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { keepWordsTogether } from '@/shared/utils/text';
 import ShortTermIcon from '../../../../assets/icons/onboarding/event_note.svg';
 import MidTermIcon from '../../../../assets/icons/onboarding/android_cell.svg';
 import LongTermIcon from '../../../../assets/icons/onboarding/nature.svg';
@@ -104,7 +105,12 @@ export default function PrincipleTypeAccordion() {
                     <View style={styles.detailIndexCircle}>
                       <Text style={styles.detailIndexText}>{i + 1}</Text>
                     </View>
-                    <Text style={styles.detailText}>{line}</Text>
+                    <Text
+                      style={styles.detailText}
+                      lineBreakStrategyIOS="hangul-word"
+                    >
+                      {keepWordsTogether(line)}
+                    </Text>
                   </View>
                 ))}
 
@@ -116,7 +122,12 @@ export default function PrincipleTypeAccordion() {
                     <View style={styles.detailIndexCircle}>
                       <Text style={styles.detailIndexText}>{i + 1}</Text>
                     </View>
-                    <Text style={styles.detailText}>{line}</Text>
+                    <Text
+                      style={styles.detailText}
+                      lineBreakStrategyIOS="hangul-word"
+                    >
+                      {keepWordsTogether(line)}
+                    </Text>
                   </View>
                 ))}
               </View>

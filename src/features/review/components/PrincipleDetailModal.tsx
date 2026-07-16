@@ -1,4 +1,5 @@
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { keepWordsTogether } from '@/shared/utils/text';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
 import { PrincipleSet } from '../types';
@@ -47,7 +48,12 @@ export default function PrincipleDetailModal({ set, type, onClose }: Props) {
       >
         {principles.map((p) => (
           <View key={p.id} style={styles.principleItem}>
-            <Text style={styles.principleContent}>{p.content}</Text>
+            <Text
+              style={styles.principleContent}
+              lineBreakStrategyIOS="hangul-word"
+            >
+              {keepWordsTogether(p.content)}
+            </Text>
           </View>
         ))}
       </ScrollView>

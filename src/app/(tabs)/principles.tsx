@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import { keepWordsTogether } from '@/shared/utils/text';
 import BackHeader from '@/shared/components/BackHeader';
 import { useWorstRules } from '@/features/review/hooks/useReview';
 import type { WorstRule } from '@/features/review/types';
@@ -139,7 +140,12 @@ function WeakPrinciplesTopThree({ rules }: { rules: WorstRule[] }) {
                 <View style={styles.weakNumber}>
                   <Text style={styles.weakNumberText}>{index + 1}</Text>
                 </View>
-                <Text style={styles.weakContent}>{rule.content}</Text>
+                <Text
+                  style={styles.weakContent}
+                  lineBreakStrategyIOS="hangul-word"
+                >
+                  {keepWordsTogether(rule.content)}
+                </Text>
               </View>
               <View style={styles.weakProgressRow}>
                 <View style={styles.weakProgressTrack}>

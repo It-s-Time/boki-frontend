@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   detailContent: {
     paddingHorizontal: 30,
     paddingTop: 24,
-    paddingBottom: 120,
+    paddingBottom: 40,
   },
   modalBackdrop: {
     flex: 1,

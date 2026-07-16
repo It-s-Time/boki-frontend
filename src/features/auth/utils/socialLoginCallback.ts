@@ -7,7 +7,9 @@ import { hasSeenOnboarding } from '@/features/onboarding/utils/onboardingStorage
 
 const AUTH_CALLBACK_PATH = 'auth/callback';
 
-export const AUTH_REDIRECT_URI = 'boki://auth/callback';
+// Expo Go는 app.json의 커스텀 스킴(boki://)을 직접 소유하지 못하고 exp://로만
+// 딥링크를 받기 때문에, 하드코딩된 스킴 대신 실행 환경에 맞는 URI를 동적으로 생성한다.
+export const AUTH_REDIRECT_URI = Linking.createURL(AUTH_CALLBACK_PATH);
 
 // singleTask launchMode(AndroidManifest)는 앱을 완전히 종료 후 재실행할 때
 // 이전에 처리했던 딥링크 Intent를 다시 전달하는 경우가 있다. 그 안의 1회용

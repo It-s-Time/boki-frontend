@@ -102,7 +102,7 @@ const MOCK_REPORT: AiReport = {
   tradeId: 0,
   status: 'COMPLETED',
   grade: 'A',
-  complianceRate: 0.75,
+  complianceRate: 75,
   hashtags: ['원칙준수율 A급', '이성적인', '꼼꼼한', '엄격한', '우직한'],
   goodPoints: [
     '정해둔 손실 한도를 지켜서 큰 손해를 막았어요',
@@ -125,7 +125,7 @@ const REPORT_NATURAL_WIDTH = 400;
 const REPORT_SCALE_FACTOR = 0.9;
 // Passed as ReportSummaryCard's bottomPadding prop for this preview only —
 // ReportDetail.tsx's real screen doesn't pass it, so it keeps its default.
-const REPORT_BOTTOM_PADDING = 14;
+const REPORT_BOTTOM_PADDING = 20;
 
 interface Props {
   active: boolean;

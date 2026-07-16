@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TradeCalendar from '@/features/home/components/TradeCalendar';
 import TradeCard from '@/features/home/components/TradeCard';
+import SymbolSpinner from '@/shared/components/SymbolSpinner';
 import {
   useTradeCalendar,
   useTradeList,
@@ -70,7 +71,7 @@ export default function HomeScreen() {
         >
           {isListLoading || isRecentLoading ? (
             <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>불러오는 중이에요</Text>
+              <SymbolSpinner size={40} />
             </View>
           ) : isListError || isRecentError ? (
             <Pressable
