@@ -41,3 +41,7 @@ yarn-error.*
 /android
 
 INIT.md
+
+.claude/
+zreference/
+zdesign/

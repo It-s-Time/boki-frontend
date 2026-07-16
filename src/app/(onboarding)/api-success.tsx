@@ -1,0 +1,75 @@
+import { useEffect } from 'react';
+import { router } from 'expo-router';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSyncTrades } from '@/features/trade/hooks/useTrades';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import { useApiStore } from '@/store/apiStore';
+
+const SUCCESS_IMAGE = require('../../../assets/images/api-success-check.png');
+
+export default function ApiSuccessScreen() {
+  const setApiConnected = useApiStore((s) => s.setApiConnected);
+  const syncTrades = useSyncTrades();
+
+  useEffect(() => {
+    setApiConnected(true);
+    // The center refresh button can retry sync if this attempt fails, so
+    // errors here are silently swallowed (useMutation never throws on its
+    // own — it just leaves the mutation in an error state we don't read).
+    syncTrades.mutate();
+
+    const timer = setTimeout(() => {
+      router.replace('/(tabs)/mypage');
+    }, 2000);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setApiConnected]);
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.logoSection}>
+          <Image
+            source={SUCCESS_IMAGE}
+            style={styles.successImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>API 키 등록에 성공했어요!</Text>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS_NEW.background,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+  },
+  logoSection: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    paddingBottom: 72,
+  },
+  successImage: {
+    width: 180,
+    height: 180,
+  },
+  title: {
+    color: COLORS_NEW.textSecondary,
+    fontFamily: 'Pretendard-SemiBold',
+    textAlign: 'center',
+    fontSize: 23,
+    letterSpacing: -0.92,
+    lineHeight: 32,
+  },
+});

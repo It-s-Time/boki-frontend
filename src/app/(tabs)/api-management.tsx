@@ -1,0 +1,413 @@
+import axios from 'axios';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  deleteExchangeApiKey,
+  getExchangeApiKeyStatus,
+  saveExchangeApiKey,
+} from '@/api/exchange';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import { useApiStore } from '@/store/apiStore';
+import BackHeader from '@/shared/components/BackHeader';
+import { getApiErrorMessage } from '@/shared/utils/apiError';
+
+const API_IP_ADDRESS = '13.124.152.202';
+
+export default function ApiManagementScreen() {
+  const [accessKey, setAccessKey] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+  const [focusedInput, setFocusedInput] = useState<'access' | 'secret' | null>(
+    null,
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const setApiConnected = useApiStore((s) => s.setApiConnected);
+
+  const goToMypage = useCallback(() => {
+    router.replace('/(tabs)/mypage');
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          goToMypage();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [goToMypage]),
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadApiKeyStatus = async () => {
+      try {
+        const data = await getExchangeApiKeyStatus();
+        const connected = Boolean(data.isSuccess && data.result?.connected);
+
+        if (isMounted) {
+          setIsRegistered(connected);
+          setApiConnected(connected);
+        }
+      } catch {
+        if (isMounted) {
+          setIsRegistered(false);
+          setApiConnected(false);
+        }
+      }
+    };
+
+    void loadApiKeyStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setApiConnected]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current) {
+        clearTimeout(copyResetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleRegister = async () => {
+    const trimmedAccessKey = accessKey.trim();
+    const trimmedSecretKey = secretKey.trim();
+
+    if (!trimmedAccessKey || !trimmedSecretKey) {
+      setErrorMessage('Access key와 Secret key를 모두 입력해주세요.');
+      return;
+    }
+
+    if (isSubmitting) return;
+
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const data = await saveExchangeApiKey({
+        accessKey: trimmedAccessKey,
+        secretKey: trimmedSecretKey,
+      });
+
+      if (!data.isSuccess || !data.result?.connected) {
+        setErrorMessage(
+          data.code
+            ? `${data.message || 'API 키 등록에 실패했습니다.'} (${data.code})`
+            : data.message || 'API 키 등록에 실패했습니다.',
+        );
+        return;
+      }
+
+      setApiConnected(true);
+      setIsRegistered(true);
+      router.replace('/(onboarding)/api-success');
+    } catch (error) {
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'API 키 등록에 실패했습니다. 키 정보를 다시 확인해주세요.',
+        ),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (isSubmitting) return;
+
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const data = await deleteExchangeApiKey();
+
+      if (!data.isSuccess) {
+        setErrorMessage(
+          data.code
+            ? `${data.message || 'API 삭제에 실패했습니다.'} (${data.code})`
+            : data.message || 'API 삭제에 실패했습니다.',
+        );
+        return;
+      }
+
+      setAccessKey('');
+      setSecretKey('');
+      setIsRegistered(false);
+      setApiConnected(false);
+      router.replace('/(tabs)/api-deleted');
+    } catch (error) {
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'API 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        ),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyIpAddress = async () => {
+    try {
+      const Clipboard = await import('expo-clipboard');
+      await Clipboard.setStringAsync(API_IP_ADDRESS);
+      setIsCopied(true);
+
+      if (copyResetTimerRef.current) {
+        clearTimeout(copyResetTimerRef.current);
+      }
+
+      copyResetTimerRef.current = setTimeout(() => {
+        setIsCopied(false);
+      }, 1200);
+    } catch {
+      setErrorMessage(
+        '복사 기능을 사용하려면 앱을 다시 빌드해주세요. IP 주소를 직접 복사해주세요.',
+      );
+    }
+  };
+
+  const buttonLabel = isRegistered
+    ? isSubmitting
+      ? '삭제 중...'
+      : '등록한 API 삭제하기'
+    : isSubmitting
+      ? '등록 중...'
+      : 'API 키 등록하기';
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <BackHeader title="업비트 API 관리" onBack={goToMypage} />
+        </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.ipCard}>
+            <Pressable style={styles.copyButton} onPress={handleCopyIpAddress}>
+              <Text style={styles.copyText}>
+                {isCopied ? '복사됨' : '복사'}
+              </Text>
+            </Pressable>
+            <Text style={styles.ipLabel}>사용 IP 주소</Text>
+            <Text style={styles.ipValue}>{API_IP_ADDRESS}</Text>
+          </View>
+
+          <TextInput
+            value={accessKey}
+            onChangeText={setAccessKey}
+            onFocus={() => setFocusedInput('access')}
+            onBlur={() => setFocusedInput(null)}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={focusedInput === 'access' ? '' : 'Access key 입력'}
+            placeholderTextColor={COLORS_NEW.textPrimary}
+            style={styles.input}
+            textAlign="center"
+            editable={!isRegistered && !isSubmitting}
+          />
+
+          <TextInput
+            value={secretKey}
+            onChangeText={setSecretKey}
+            onFocus={() => setFocusedInput('secret')}
+            onBlur={() => setFocusedInput(null)}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+            placeholder={focusedInput === 'secret' ? '' : 'Secret key 입력'}
+            placeholderTextColor={COLORS_NEW.textPrimary}
+            style={styles.input}
+            textAlign="center"
+            editable={!isRegistered && !isSubmitting}
+          />
+
+          <Pressable
+            style={[
+              styles.registerButton,
+              isSubmitting && styles.registerButtonDisabled,
+            ]}
+            onPress={isRegistered ? handleDelete : handleRegister}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.registerText}>{buttonLabel}</Text>
+          </Pressable>
+
+          {errorMessage !== '' && (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          )}
+
+          <View style={styles.guideSection}>
+            <Text style={styles.guideTitle}>업비트 API 연동 방법</Text>
+            <Text style={styles.guideText}>
+              1. 업비트 → 마이페이지 → Open API 관리 접속{'\n'}
+              2. IP 주소 등록: {API_IP_ADDRESS} 입력{'\n'}
+              3. API 키 발급 시 권한에서 자산조회 + 주문조회만 체크{'\n'}
+              {'   '}⚠ 주문하기 / 입출금 권한은 체크 금지{'\n'}
+              4. 발급된 Access Key, Secret Key를 BOKI 앱에 등록하기
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS_NEW.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 34,
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: 34,
+    paddingTop: 0,
+    paddingBottom: 124,
+  },
+  ipCard: {
+    height: 200,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  copyButton: {
+    position: 'absolute',
+    top: 26,
+    minWidth: 64,
+    height: 40,
+    borderWidth: 1,
+    borderColor: COLORS_NEW.lightBorder,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS_NEW.background,
+  },
+  copyText: {
+    color: COLORS_NEW.textSecondary,
+    fontSize: 18,
+    letterSpacing: -0.6,
+    lineHeight: 20,
+    fontFamily: 'Pretendard-Regular',
+  },
+  ipLabel: {
+    color: COLORS_NEW.textPrimary,
+    fontSize: 20,
+    letterSpacing: -0.8,
+    lineHeight: 28,
+    fontFamily: 'Pretendard-Regular',
+    marginTop: 64,
+    marginBottom: 6,
+  },
+  ipValue: {
+    color: COLORS_NEW.textPrimary,
+    fontSize: 28,
+    letterSpacing: -1.12,
+    lineHeight: 36,
+    fontFamily: 'Pretendard-SemiBold',
+  },
+  input: {
+    height: 64,
+    borderWidth: 0.5,
+    borderColor: '#C0C0C5',
+    borderRadius: 20,
+    backgroundColor: COLORS_NEW.lightGray,
+    color: COLORS_NEW.textPrimary,
+    fontSize: 20,
+    letterSpacing: -0.88,
+    lineHeight: 30,
+    fontFamily: 'Pretendard-Medium',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  registerButton: {
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: '#272727',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 18,
+    marginBottom: 28,
+  },
+  registerButtonDisabled: {
+    opacity: 0.55,
+  },
+  registerText: {
+    color: COLORS_NEW.background,
+    fontSize: 20,
+    letterSpacing: -0.92,
+    lineHeight: 32,
+    fontFamily: 'Pretendard-Medium',
+  },
+  errorText: {
+    color: COLORS_NEW.point,
+    fontSize: 14,
+    letterSpacing: -0.56,
+    lineHeight: 20,
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'center',
+    marginTop: -12,
+    marginBottom: 12,
+  },
+  guideSection: {
+    gap: 12,
+    marginTop: 16,
+  },
+  guideTitle: {
+    color: COLORS_NEW.textPrimary,
+    fontSize: 22,
+    letterSpacing: -0.96,
+    lineHeight: 32,
+    fontFamily: 'Pretendard-Medium',
+  },
+  guideText: {
+    color: COLORS_NEW.textSecondary,
+    fontSize: 16,
+    letterSpacing: -0.64,
+    lineHeight: 32,
+    fontFamily: 'Pretendard-Regular',
+  },
+});
