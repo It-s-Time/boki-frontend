@@ -14,13 +14,18 @@ function buildReviewFormData(data: CreateReviewInput) {
     }),
   );
 
-  data.images.forEach((uri, index) => {
-    const filename = uri.split('/').pop() ?? `image_${index}.jpg`;
+  data.images.forEach((asset, index) => {
+    const filename =
+      asset.fileName ?? asset.uri.split('/').pop() ?? `image_${index}.jpg`;
+    // Content URIs (e.g. from Google Photos) often have no file extension,
+    // so prefer the picker's own mimeType over guessing from the filename —
+    // a wrong declared type here is what made the backend reject the upload.
     const ext = (/\.(\w+)$/.exec(filename)?.[1] ?? 'jpg').toLowerCase();
+    const type = asset.mimeType ?? `image/${ext === 'jpg' ? 'jpeg' : ext}`;
     formData.append('images', {
-      uri,
+      uri: asset.uri,
       name: filename,
-      type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+      type,
     } as unknown as Blob);
   });
 

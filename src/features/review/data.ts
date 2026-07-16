@@ -16,7 +16,11 @@ type IllustrationProps = { width?: number; height?: number };
 
 function createRasterIcon(source: number): ComponentType<IllustrationProps> {
   return function RasterIcon({ width, height }: IllustrationProps) {
-    return createElement(Image, { source, style: { width, height } });
+    return createElement(Image, {
+      source,
+      style: { width, height },
+      resizeMode: 'contain',
+    });
   };
 }
 
@@ -26,6 +30,8 @@ const SellPrincipleIcon3 = createRasterIcon(sellPrincipleImage3);
 
 interface PrincipleIllustration {
   Icon: ComponentType<IllustrationProps>;
+  // Source image's native aspect ratio, so callers can scale it down to fit
+  // a target box without stretching/distorting it.
   width: number;
   height: number;
 }
@@ -36,12 +42,12 @@ export const PRINCIPLE_ILLUSTRATIONS: Record<
 > = {
   buy: {
     1: { Icon: BuyPrincipleIcon1, width: 189, height: 220 },
-    2: { Icon: BuyPrincipleIcon2, width: 200, height: 220 },
+    2: { Icon: BuyPrincipleIcon2, width: 190, height: 220 },
     3: { Icon: BuyPrincipleIcon3, width: 250, height: 195 },
   },
   sell: {
-    1: { Icon: SellPrincipleIcon1, width: 220, height: 220 },
-    2: { Icon: BuyPrincipleIcon2, width: 200, height: 220 },
+    1: { Icon: SellPrincipleIcon1, width: 207, height: 220 },
+    2: { Icon: BuyPrincipleIcon2, width: 190, height: 220 },
     3: { Icon: SellPrincipleIcon3, width: 220, height: 142 },
   },
 };

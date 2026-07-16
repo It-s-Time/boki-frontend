@@ -64,12 +64,18 @@ export interface Review {
   updatedAt: string;
 }
 
+export interface ReviewImageAsset {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string;
+}
+
 export interface CreateReviewInput {
   ruleSetId: number;
   scores: ReviewScoreInput[];
   content: string;
   replaceImages: boolean;
-  images: string[];
+  images: ReviewImageAsset[];
 }
 
 export interface WorstRule {
