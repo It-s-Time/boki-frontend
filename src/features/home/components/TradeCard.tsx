@@ -29,28 +29,36 @@ export default function TradeCard({ trade }: Props) {
   const [detailVisible, setDetailVisible] = useState(false);
 
   const isReviewed = trade.reviewStatus === 'COMPLETED';
+  const isReportDone = trade.grade !== null;
   const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
   const time = formatTime(trade.tradedAt);
 
   const handleReview = () => {
-    if (isReviewed) {
+    if (!isReviewed) {
       router.push({
-        pathname: '/review/ai-report',
+        pathname: '/review/select-principle-set',
+        params: {
+          tradeId: trade.tradeId,
+          coinName,
+          symbol: trade.coinType,
+          amount: trade.quantity,
+          tradeType: trade.tradeType === 'BUY' ? 'buy' : 'sell',
+          time,
+          price: trade.price,
+        },
+      });
+      return;
+    }
+    if (!isReportDone) {
+      router.push({
+        pathname: '/review/confirm',
         params: { tradeId: trade.tradeId },
       });
       return;
     }
     router.push({
-      pathname: '/review/select-principle-set',
-      params: {
-        tradeId: trade.tradeId,
-        coinName,
-        symbol: trade.coinType,
-        amount: trade.quantity,
-        tradeType: trade.tradeType === 'BUY' ? 'buy' : 'sell',
-        time,
-        price: trade.price,
-      },
+      pathname: '/review/ai-report',
+      params: { tradeId: trade.tradeId },
     });
   };
 
@@ -100,10 +108,13 @@ export default function TradeCard({ trade }: Props) {
       </Pressable>
 
       <Pressable
-        style={[styles.reviewButton, isReviewed && styles.reviewButtonDone]}
+        style={[
+          styles.reviewButton,
+          isReviewed && isReportDone && styles.reviewButtonDone,
+        ]}
         onPress={handleReview}
       >
-        {isReviewed ? (
+        {isReviewed && isReportDone ? (
           <AntDesign name="check" size={20} color={COLORS_NEW.background} />
         ) : (
           <Entypo

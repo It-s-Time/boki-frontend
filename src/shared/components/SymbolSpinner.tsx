@@ -1,11 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { Animated } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { COLORS_NEW } from '@/shared/constants/colors';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const DARK = '#252930';
-const ORANGE = '#EE7A60';
+// Not in COLORS_NEW — unique to this spinner's dark/orange flicker, shared
+// with SymbolIntro.tsx.
+export const SYMBOL_DARK = '#252930';
+const ORANGE = COLORS_NEW.reviewed;
 
 // symbol.svg의 8개 다리를 시계방향(N, NE, E, SE, S, SW, W, NW) 순서로 나열
 const LEGS = [
@@ -64,7 +67,7 @@ export default function SymbolSpinner({ size = 60 }: Props) {
           d={d}
           fill={values[i].interpolate({
             inputRange: [0, 1],
-            outputRange: [DARK, ORANGE],
+            outputRange: [SYMBOL_DARK, ORANGE],
           })}
         />
       ))}

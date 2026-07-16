@@ -1,33 +1,34 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import { SYMBOL_DARK } from './SymbolSpinner';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const DARK = '#252930';
-const ORANGE = '#EE7A60';
+const ORANGE = COLORS_NEW.reviewed;
 
 // 1단계: N, NE, E(dark) + S, SW, W(orange) 6개가 먼저 나타나고
 // 2단계: SE, NW(dark) 2개가 뒤이어 나타나 8개 다리가 완성됨
 const LEGS = [
   {
     d: 'M31.4994 -0.000152588H25.7694V31.4998H31.4994V-0.000152588Z',
-    color: DARK,
+    color: SYMBOL_DARK,
     stage: 0,
   }, // N
   {
     d: 'M57.2826 4.06182L53.2308 0.0101013L26.6295 26.6115L30.6812 30.6632L57.2826 4.06182Z',
-    color: DARK,
+    color: SYMBOL_DARK,
     stage: 0,
   }, // NE
   {
     d: 'M57.2401 31.4994V25.7694L25.7401 25.7694V31.4994H57.2401Z',
-    color: DARK,
+    color: SYMBOL_DARK,
     stage: 0,
   }, // E
   {
     d: 'M53.2001 57.2825L57.2518 53.2308L39.2418 35.2208L35.1901 39.2725L53.2001 57.2825Z',
-    color: DARK,
+    color: SYMBOL_DARK,
     stage: 1,
   }, // SE
   {
@@ -47,7 +48,7 @@ const LEGS = [
   }, // W
   {
     d: 'M18.0277 22.0706L22.0795 18.0189L4.06946 0.00888146L0.0177367 4.0606L18.0277 22.0706Z',
-    color: DARK,
+    color: SYMBOL_DARK,
     stage: 1,
   }, // NW
 ];

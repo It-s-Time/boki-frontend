@@ -1,32 +1,18 @@
 import { useMemo, useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, FeDropShadow, Filter, Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
-import { AiReport, Review, TradeGrade } from '@/features/review/types';
-import ReportDetail from '@/features/review/components/ReportDetail';
+import { TradeGrade } from '@/features/review/types';
+import { useTradeList } from '@/features/trade/hooks/useTrades';
+import { COIN_NAMES } from '@/features/trade/constants';
+import type { Trade } from '@/features/trade/types';
 
 type GradeFilter = '전체' | TradeGrade;
-type TradeType = '매수' | '매도';
-
-type JournalEntry = {
-  id: string;
-  date: string;
-  grade: TradeGrade;
-  type: TradeType;
-  coin: string;
-  amount: string;
-  price: string;
-};
+type GradedTrade = Trade & { grade: TradeGrade };
 
 const FILTERS: GradeFilter[] = ['전체', 'S', 'A', 'B', 'C', 'F'];
 const CARD_HEIGHT = 112;
@@ -36,88 +22,12 @@ const NOTCH_RADIUS = 10;
 // filter (which extends past the path's own bounds) doesn't get clipped at
 // the card's edges.
 const SHADOW_MARGIN = 24;
-const MEMO_CHART_IMAGE = require('../../../assets/icons/Rectangle 1430106783.png');
-const MEMO_COIN_IMAGE = require('../../../assets/icons/Rectangle 1430106784.png');
 
-const JOURNAL_ENTRIES: JournalEntry[] = [
-  {
-    id: 'btc-20260730',
-    date: '2026년 07월 30일',
-    grade: 'S',
-    type: '매수',
-    coin: '비트코인',
-    amount: '1BTC',
-    price: '103,403,000원',
-  },
-  {
-    id: 'xrp-20260730',
-    date: '2026년 07월 30일',
-    grade: 'A',
-    type: '매도',
-    coin: '리플',
-    amount: '4XRP',
-    price: '103,403원',
-  },
-  {
-    id: 'btc-20260728',
-    date: '2026년 07월 28일',
-    grade: 'C',
-    type: '매수',
-    coin: '비트코인',
-    amount: '1BTC',
-    price: '103,403,000원',
-  },
-  {
-    id: 'xrp-20260728',
-    date: '2026년 07월 28일',
-    grade: 'A',
-    type: '매도',
-    coin: '리플',
-    amount: '4XRP',
-    price: '103,403원',
-  },
-];
-
-function buildMockAiReport(entry: JournalEntry): AiReport {
-  return {
-    aiReportId: 0,
-    tradeId: 0,
-    status: 'COMPLETED',
-    grade: entry.grade,
-    complianceRate: 0.75,
-    hashtags: ['원칙준수율 A급', '이성적인', '꼼꼼한', '우아한', '우직한'],
-    goodPoints: [
-      '정해둔 손실 한도를 지켜서 큰 손해를 막았어요',
-      '구매 시점을 아주 잘 잡았어요',
-    ],
-    badPoints: [
-      '돈을 나누어 투자하지 않아 위험 부담이 커요',
-      '너무 자주 사고팔아서 수수료가 많이 나왔어요',
-    ],
-    recommendedRule: {
-      type: '분할 매수',
-      content: '한 번에 몰빵하지 않고 정해둔 금액만큼 나눠서 매수해보세요.',
-    },
-  };
-}
-
-function buildMockReview(): Review {
-  const imageUrls = [MEMO_CHART_IMAGE, MEMO_COIN_IMAGE].map(
-    (image) => Image.resolveAssetSource(image).uri,
-  );
-
-  return {
-    reviewId: 0,
-    tradeId: 0,
-    memberId: 0,
-    ruleSetId: 0,
-    content:
-      '당시 비트코인 시세가 갑작스럽게 오르자 판단이 다소 아쉬웠던 것 같다.\n\n시드도 한번에 다 넣으면 안됐는데..\n판단 미스다 😭',
-    scores: [],
-    imageUrls,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+function formatDate(tradedAt: string) {
+  const date = new Date(tradedAt);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}년 ${month}월 ${day}일`;
 }
 
 const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
@@ -129,35 +39,40 @@ const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
 };
 
 export default function JournalScreen() {
+  const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<GradeFilter>('전체');
-  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+
+  const {
+    data: trades,
+    isLoading,
+    isError,
+    refetch,
+  } = useTradeList({ reviewStatus: 'COMPLETED' });
+
+  const gradedTrades = useMemo<GradedTrade[]>(
+    () => (trades ?? []).filter((trade): trade is GradedTrade => trade.grade !== null),
+    [trades],
+  );
 
   const filteredEntries = useMemo(() => {
-    if (selectedFilter === '전체') return JOURNAL_ENTRIES;
-    return JOURNAL_ENTRIES.filter((entry) => entry.grade === selectedFilter);
-  }, [selectedFilter]);
+    if (selectedFilter === '전체') return gradedTrades;
+    return gradedTrades.filter((trade) => trade.grade === selectedFilter);
+  }, [gradedTrades, selectedFilter]);
 
   const groupedEntries = useMemo(() => {
-    return filteredEntries.reduce<Record<string, JournalEntry[]>>(
-      (groups, entry) => {
-        groups[entry.date] = [...(groups[entry.date] ?? []), entry];
+    return filteredEntries.reduce<Record<string, GradedTrade[]>>(
+      (groups, trade) => {
+        const date = formatDate(trade.tradedAt);
+        groups[date] = [...(groups[date] ?? []), trade];
         return groups;
       },
       {},
     );
   }, [filteredEntries]);
 
-  if (selectedEntry) {
-    return (
-      <ReportDetail
-        report={buildMockAiReport(selectedEntry)}
-        review={
-          selectedEntry.coin === '비트코인' ? buildMockReview() : undefined
-        }
-        onBack={() => setSelectedEntry(null)}
-      />
-    );
-  }
+  const openReport = (tradeId: number) => {
+    router.push({ pathname: '/review/ai-report', params: { tradeId } });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -194,31 +109,49 @@ export default function JournalScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
-        {Object.entries(groupedEntries).map(([date, entries]) => (
-          <View key={date} style={styles.dateSection}>
-            <Text style={styles.dateTitle}>{date}</Text>
-            {entries.map((entry) => (
-              <JournalCard
-                key={entry.id}
-                entry={entry}
-                onPress={() => setSelectedEntry(entry)}
-              />
-            ))}
-          </View>
-        ))}
+        {isLoading ? (
+          <Text style={styles.stateText}>불러오는 중이에요</Text>
+        ) : isError ? (
+          <Pressable onPress={() => refetch()}>
+            <Text style={styles.stateText}>
+              불러오지 못했어요, 다시 시도해주세요
+            </Text>
+          </Pressable>
+        ) : Object.keys(groupedEntries).length === 0 ? (
+          <Text style={styles.stateText}>
+            {selectedFilter === '전체'
+              ? '아직 복기를 완료한 거래가 없어요'
+              : '해당 등급의 거래가 없어요'}
+          </Text>
+        ) : (
+          Object.entries(groupedEntries).map(([date, trades]) => (
+            <View key={date} style={styles.dateSection}>
+              <Text style={styles.dateTitle}>{date}</Text>
+              {trades.map((trade) => (
+                <JournalCard
+                  key={trade.tradeId}
+                  trade={trade}
+                  onPress={() => openReport(trade.tradeId)}
+                />
+              ))}
+            </View>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 function JournalCard({
-  entry,
+  trade,
   onPress,
 }: {
-  entry: JournalEntry;
+  trade: GradedTrade;
   onPress: () => void;
 }) {
   const [cardWidth, setCardWidth] = useState(0);
+  const coinName = COIN_NAMES[trade.coinType] ?? trade.coinType;
+  const typeText = trade.tradeType === 'BUY' ? '매수' : '매도';
 
   return (
     <Pressable
@@ -228,16 +161,17 @@ function JournalCard({
     >
       {cardWidth > 0 && <TicketCardBackground width={cardWidth} />}
       <View style={styles.cardTopRow}>
-        <GradeBadge grade={entry.grade} />
+        <GradeBadge grade={trade.grade} />
         <View style={styles.tradeBadge}>
-          <Text style={styles.tradeText}>{entry.type}</Text>
+          <Text style={styles.tradeText}>{typeText}</Text>
         </View>
       </View>
       <View style={styles.cardBottomRow}>
         <Text style={styles.coinText}>
-          {entry.coin} · {entry.amount}
+          {coinName} · {trade.quantity}
+          {trade.coinType}
         </Text>
-        <Text style={styles.priceText}>{entry.price}</Text>
+        <Text style={styles.priceText}>{trade.price.toLocaleString()}원</Text>
       </View>
     </Pressable>
   );
@@ -291,9 +225,9 @@ function TicketCardBackground({ width }: { width: number }) {
           <FeDropShadow
             dx={0}
             dy={0}
-            stdDeviation={8}
+            stdDeviation={7}
             floodColor="#000000"
-            floodOpacity={0.07}
+            floodOpacity={0.055}
           />
         </Filter>
       </Defs>
@@ -385,6 +319,14 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 30,
     paddingBottom: 120,
+  },
+  stateText: {
+    color: COLORS_NEW.textSecondary,
+    fontSize: 16,
+    letterSpacing: -0.64,
+    fontFamily: 'Pretendard-Regular',
+    textAlign: 'center',
+    marginTop: 40,
   },
   dateSection: {
     marginBottom: 22,

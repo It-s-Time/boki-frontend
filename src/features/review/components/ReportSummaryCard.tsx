@@ -149,9 +149,9 @@ function TicketDetailBackground({
           <FeDropShadow
             dx={0}
             dy={0}
-            stdDeviation={10}
+            stdDeviation={9}
             floodColor="#000000"
-            floodOpacity={0.06}
+            floodOpacity={0.045}
           />
         </Filter>
       </Defs>

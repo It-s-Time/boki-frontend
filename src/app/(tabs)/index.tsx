@@ -50,23 +50,24 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 130 }}
-      >
-        <TradeCalendar
-          currentDate={currentDate}
-          selectedDate={selectedDate}
-          tradeMarks={tradeMarks}
-          onMonthChange={setCurrentDate}
-          onDateSelect={setSelectedDate}
-        />
+      <TradeCalendar
+        currentDate={currentDate}
+        selectedDate={selectedDate}
+        tradeMarks={tradeMarks}
+        onMonthChange={setCurrentDate}
+        onDateSelect={setSelectedDate}
+      />
 
-        <View style={styles.tradeSection}>
-          <Text style={styles.tradeTitle}>
-            {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래를 복기해보세요`}
-          </Text>
+      <View style={styles.tradeSection}>
+        <Text style={styles.tradeTitle}>
+          {`${parseInt(selectedDate.slice(5, 7))}월 ${parseInt(selectedDate.slice(8, 10))}일 거래를 복기해보세요`}
+        </Text>
 
+        <ScrollView
+          style={styles.tradeScroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.tradeScrollContent}
+        >
           {isListLoading || isRecentLoading ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyText}>불러오는 중이에요</Text>
@@ -103,8 +104,8 @@ export default function HomeScreen() {
               </Text>
             </View>
           )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -118,6 +119,7 @@ const styles = StyleSheet.create({
   },
 
   tradeSection: {
+    flex: 1,
     marginTop: 20,
   },
 
@@ -127,6 +129,14 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Regular',
     marginBottom: 16,
+  },
+
+  tradeScroll: {
+    flex: 1,
+  },
+
+  tradeScrollContent: {
+    paddingBottom: 130,
   },
 
   emptyCard: {

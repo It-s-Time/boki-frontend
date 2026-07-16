@@ -35,6 +35,7 @@ export const COLORS_NEW = {
 
   border: '#5E5E61', // 선 / 연한 글자 / 아이콘
   lightGray: '#F2F2F5', // 연한 회색 (박스, 버튼, fab 글씨)
+  lightPurpleGray: '#F4F3F8', // 옅은 보라 회색 (카드/버튼 배경)
 
   point: '#F79474', // 포인트색 / 상승
   down: '#78D1D3', // 하강

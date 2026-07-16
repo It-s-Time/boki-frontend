@@ -1,24 +1,16 @@
 import { router, Tabs } from 'expo-router';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import {
-  Alert,
-  Animated,
-  PanResponder,
-  Pressable,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { Animated, PanResponder, Pressable, View, StyleSheet } from 'react-native';
 import { type ComponentType, useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useQueryClient } from '@tanstack/react-query';
 import { COLORS_NEW } from '@/shared/constants/colors';
-import { syncExchangeTrades } from '@/api/exchange';
+import ConfirmModal from '@/shared/components/ConfirmModal';
+import { getApiErrorMessage } from '@/shared/utils/apiError';
 import InputOptionsModal from '@/features/input/components/InputOptionsModal';
 import SyncSuccessModal from '@/features/input/components/SyncSuccessModal';
-import { tradeKeys } from '@/features/trade/hooks/useTrades';
+import { useSyncTrades } from '@/features/trade/hooks/useTrades';
 import { useApiStore } from '@/store/apiStore';
 import HomeIcon from '../../../assets/icons/home.svg';
 import LogIcon from '../../../assets/icons/log2.svg';
@@ -31,35 +23,6 @@ const TAB_BAR_HEIGHT = 52;
 const ICON_SIZE = 16;
 const HIGHLIGHT_WIDTH = 70;
 const HIGHLIGHT_SPRING = { damping: 16, stiffness: 180, mass: 0.6 };
-
-const getSyncErrorMessage = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    const responseData = error.response?.data as
-      | { message?: string; code?: string; error?: string }
-      | undefined;
-    const serverMessage = responseData?.message || responseData?.error;
-
-    if (serverMessage) {
-      return responseData?.code
-        ? `${serverMessage} (${responseData.code})`
-        : serverMessage;
-    }
-
-    if (error.response?.status === 401) {
-      return '로그인이 만료되었습니다. 다시 로그인해주세요.';
-    }
-
-    if (error.response?.status) {
-      return `서버 요청에 실패했습니다. (${error.response.status})`;
-    }
-
-    if (error.code === 'ECONNABORTED') {
-      return '서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.';
-    }
-  }
-
-  return '잠시 후 다시 시도해주세요.';
-};
 
 interface TabIconConfig {
   name: string;
@@ -296,66 +259,62 @@ function CustomTabBar({
 
 export default function TabLayout() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccessVisible, setSyncSuccessVisible] = useState(false);
+  const [syncAlert, setSyncAlert] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
   const isApiConnected = useApiStore((s) => s.isApiConnected);
+  const syncTrades = useSyncTrades();
 
-  const handleFabPress = async () => {
+  const handleFabPress = () => {
     if (!isApiConnected) {
       setModalVisible(true);
       return;
     }
-    if (isSyncing) return;
+    if (syncTrades.isPending) return;
 
-    setIsSyncing(true);
-    try {
-      const data = await syncExchangeTrades();
+    syncTrades.mutate(undefined, {
+      onSuccess: (data) => {
+        if (!data.isSuccess) {
+          setSyncAlert({ title: '거래 내역 가져오기 실패', message: data.message });
+          return;
+        }
 
-      if (!data.isSuccess) {
-        Alert.alert('거래 내역 가져오기 실패', data.message);
-        return;
-      }
+        const syncResult = data.result;
+        const syncedTrades = syncResult?.trades ?? [];
+        router.replace('/(tabs)');
+        const syncedCount = syncResult?.syncedCount ?? syncedTrades.length;
+        const skippedCount = syncResult?.skippedCount ?? 0;
+        const hasSyncedTrades = syncedCount > 0 || syncedTrades.length > 0;
 
-      const syncResult = data.result;
-      const syncedTrades = syncResult?.trades ?? [];
-      await queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+        if (!hasSyncedTrades && skippedCount > 0) {
+          setSyncAlert({
+            title: '새로 가져온 거래 내역이 없어요',
+            message: `이미 가져온 거래 ${skippedCount}건은 중복으로 건너뛰었어요.`,
+          });
+          return;
+        }
 
-      if (syncedTrades.length > 0) {
-        queryClient.setQueryData(tradeKeys.list(), syncedTrades);
-      }
+        if (!hasSyncedTrades) {
+          setSyncAlert({
+            title: '가져온 거래 내역이 없어요',
+            message:
+              '업비트에서 조회된 완료 거래가 없어요. API 키 계정, 주문조회 권한, 실제 체결 내역을 확인해주세요.',
+          });
+          return;
+        }
 
-      router.replace('/(tabs)');
-      const syncedCount = syncResult?.syncedCount ?? syncedTrades.length;
-      const skippedCount = syncResult?.skippedCount ?? 0;
-      const hasSyncedTrades = syncedCount > 0 || syncedTrades.length > 0;
-
-      if (!hasSyncedTrades && skippedCount > 0) {
-        Alert.alert(
-          '새로 가져온 거래 내역이 없어요',
-          `이미 가져온 거래 ${skippedCount}건은 중복으로 건너뛰었어요.`,
-        );
-        return;
-      }
-
-      if (!hasSyncedTrades) {
-        Alert.alert(
-          '가져온 거래 내역이 없어요',
-          '업비트에서 조회된 완료 거래가 없어요. API 키 계정, 주문조회 권한, 실제 체결 내역을 확인해주세요.',
-        );
-        return;
-      }
-
-      setSyncSuccessVisible(true);
-    } catch (error) {
-      Alert.alert(
-        '거래 내역 가져오기 실패',
-        getSyncErrorMessage(error),
-      );
-    } finally {
-      setIsSyncing(false);
-    }
+        setSyncSuccessVisible(true);
+      },
+      onError: (error) => {
+        setSyncAlert({
+          title: '거래 내역 가져오기 실패',
+          message: getApiErrorMessage(error, '잠시 후 다시 시도해주세요.'),
+        });
+      },
+    });
   };
 
   return (
@@ -368,7 +327,7 @@ export default function TabLayout() {
             {...props}
             onFabPress={handleFabPress}
             isApiConnected={isApiConnected}
-            isSyncing={isSyncing}
+            isSyncing={syncTrades.isPending}
           />
         )}
       >
@@ -393,6 +352,14 @@ export default function TabLayout() {
         visible={syncSuccessVisible}
         onClose={() => setSyncSuccessVisible(false)}
         bottomInset={insets.bottom}
+      />
+
+      <ConfirmModal
+        visible={syncAlert !== null}
+        title={syncAlert?.title ?? ''}
+        message={syncAlert?.message}
+        confirmLabel="확인"
+        onConfirm={() => setSyncAlert(null)}
       />
     </>
   );

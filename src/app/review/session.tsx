@@ -99,7 +99,6 @@ export default function ReviewSessionScreen() {
   const handleMemoSubmit = (memo: ReviewMemo) => {
     setShowMemoModal(false);
     setIsSubmitting(true);
-    const usingBackendRuleSets = Boolean(data && data.length > 0);
     const reviewData = {
       ruleSetId: Number(principleSetId),
       scores: principles.map((p, i) => ({
@@ -110,12 +109,6 @@ export default function ReviewSessionScreen() {
       replaceImages: false,
       images: memo.photos,
     };
-    console.log('[Review] submitting', {
-      usingBackendRuleSets,
-      principleSetId,
-      ruleSetId: reviewData.ruleSetId,
-      scores: reviewData.scores,
-    });
     createReview.mutate(
       {
         tradeId: Number(tradeId),

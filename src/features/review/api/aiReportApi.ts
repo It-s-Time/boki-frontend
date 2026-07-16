@@ -12,32 +12,10 @@ export const aiReportApi = {
       .post<ApiResponse<AiReport>>(`/api/ai-reports/${tradeId}`, undefined, {
         timeout: AI_REPORT_CREATE_TIMEOUT_MS,
       })
-      .then((res) => {
-        console.log('[AI Report] create response envelope', {
-          isSuccess: res.data.isSuccess,
-          code: res.data.code,
-          message: res.data.message,
-        });
-        return res.data.result;
-      }),
+      .then((res) => res.data.result),
 
   get: (tradeId: number) =>
     apiClient
       .get<ApiResponse<AiReport>>(`/api/ai-reports/${tradeId}`)
-      .then((res) => {
-        // status can be FAILED even though isSuccess/code/message look fine —
-        // the envelope's code/message is what carries the backend's actual
-        // failure reason, and result alone doesn't show it.
-        console.log('[AI Report] get response envelope', {
-          isSuccess: res.data.isSuccess,
-          code: res.data.code,
-          message: res.data.message,
-          result: res.data.result,
-        });
-        return res.data.result;
-      })
-      .catch((err) => {
-        console.error('[AI Report] get failed', tradeId, err);
-        throw err;
-      }),
+      .then((res) => res.data.result),
 };

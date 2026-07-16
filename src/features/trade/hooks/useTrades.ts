@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tradeApi } from '../api/tradeApi';
+import { syncExchangeTrades } from '@/api/exchange';
 import type { TradeListParams, UpdateManualTradeInput } from '../types';
 
 export const tradeKeys = {
@@ -55,6 +56,23 @@ export function useDeleteTrade() {
     mutationFn: (tradeId: number) => tradeApi.remove(tradeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+    },
+  });
+}
+
+// Shared by the FAB sync button and the post-API-key-registration auto-sync
+// screen — both call this then need the same cache refresh on success.
+export function useSyncTrades() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: syncExchangeTrades,
+    onSuccess: (data) => {
+      if (!data.isSuccess) return;
+      const syncedTrades = data.result?.trades ?? [];
+      queryClient.invalidateQueries({ queryKey: tradeKeys.all });
+      if (syncedTrades.length > 0) {
+        queryClient.setQueryData(tradeKeys.list(), syncedTrades);
+      }
     },
   });
 }

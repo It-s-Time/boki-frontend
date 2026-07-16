@@ -21,6 +21,7 @@ import {
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 import BackHeader from '@/shared/components/BackHeader';
+import { getApiErrorMessage } from '@/shared/utils/apiError';
 
 const API_IP_ADDRESS = '13.124.152.202';
 const DELETE_API_UNAVAILABLE_MESSAGE =
@@ -92,40 +93,6 @@ export default function ApiManagementScreen() {
     };
   }, []);
 
-  const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
-    if (axios.isAxiosError(error)) {
-      const responseData = error.response?.data as
-        | { message?: string; code?: string; error?: string }
-        | undefined;
-
-      const serverMessage = responseData?.message || responseData?.error;
-
-      if (serverMessage) {
-        return responseData.code
-          ? `${serverMessage} (${responseData.code})`
-          : serverMessage;
-      }
-
-      if (error.response?.status === 401) {
-        return '로그인이 만료되었습니다. 다시 로그인한 뒤 등록해주세요.';
-      }
-
-      if (error.response?.status) {
-        return `${fallbackMessage} (${error.response.status})`;
-      }
-
-      if (error.code === 'ECONNABORTED') {
-        return '서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.';
-      }
-
-      return `서버에 연결할 수 없습니다. (${error.message})`;
-    }
-
-    return error instanceof Error
-      ? `${fallbackMessage} (${error.message})`
-      : fallbackMessage;
-  };
-
   const handleRegister = async () => {
     const trimmedAccessKey = accessKey.trim();
     const trimmedSecretKey = secretKey.trim();
@@ -157,7 +124,7 @@ export default function ApiManagementScreen() {
 
       setApiConnected(true);
       setIsRegistered(true);
-      router.replace('/api-success');
+      router.replace('/(onboarding)/api-success');
     } catch (error) {
       setErrorMessage(
         getApiErrorMessage(
@@ -268,7 +235,9 @@ export default function ApiManagementScreen() {
         >
           <View style={styles.ipCard}>
             <Pressable style={styles.copyButton} onPress={handleCopyIpAddress}>
-              <Text style={styles.copyText}>{isCopied ? '복사됨' : '복사'}</Text>
+              <Text style={styles.copyText}>
+                {isCopied ? '복사됨' : '복사'}
+              </Text>
             </Pressable>
             <Text style={styles.ipLabel}>사용 IP 주소</Text>
             <Text style={styles.ipValue}>{API_IP_ADDRESS}</Text>
@@ -356,29 +325,29 @@ const styles = StyleSheet.create({
     paddingBottom: 124,
   },
   ipCard: {
-    height: 210,
+    height: 200,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
-    borderRadius: 28,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   copyButton: {
     position: 'absolute',
-    top: 19,
-    minWidth: 72,
-    height: 44,
+    top: 26,
+    minWidth: 64,
+    height: 40,
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
-    borderRadius: 19,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS_NEW.background,
   },
   copyText: {
     color: COLORS_NEW.textSecondary,
-    fontSize: 15,
+    fontSize: 18,
     letterSpacing: -0.6,
     lineHeight: 20,
     fontFamily: 'Pretendard-Regular',
@@ -388,8 +357,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 28,
-    fontFamily: 'Pretendard-SemiBold',
-    marginTop: 34,
+    fontFamily: 'Pretendard-Regular',
+    marginTop: 64,
     marginBottom: 6,
   },
   ipValue: {
@@ -400,22 +369,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
   },
   input: {
-    height: 66,
-    borderWidth: 1,
-    borderColor: COLORS_NEW.lightBorder,
-    borderRadius: 25,
-    backgroundColor: '#F4F3F8',
+    height: 64,
+    borderWidth: 0.5,
+    borderColor: '#C0C0C5',
+    borderRadius: 20,
+    backgroundColor: COLORS_NEW.lightGray,
     color: COLORS_NEW.textPrimary,
-    fontSize: 22,
+    fontSize: 20,
     letterSpacing: -0.88,
     lineHeight: 30,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     paddingHorizontal: 20,
     marginBottom: 16,
   },
   registerButton: {
-    height: 72,
-    borderRadius: 30,
+    height: 64,
+    borderRadius: 20,
     backgroundColor: '#272727',
     alignItems: 'center',
     justifyContent: 'center',
@@ -427,10 +396,10 @@ const styles = StyleSheet.create({
   },
   registerText: {
     color: COLORS_NEW.background,
-    fontSize: 23,
+    fontSize: 20,
     letterSpacing: -0.92,
     lineHeight: 32,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
   errorText: {
     color: COLORS_NEW.point,
@@ -448,10 +417,10 @@ const styles = StyleSheet.create({
   },
   guideTitle: {
     color: COLORS_NEW.textPrimary,
-    fontSize: 24,
+    fontSize: 22,
     letterSpacing: -0.96,
     lineHeight: 32,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
   guideText: {
     color: COLORS_NEW.textSecondary,

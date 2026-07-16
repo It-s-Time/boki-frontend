@@ -17,18 +17,10 @@ export default function ReviewConfirmScreen() {
   const createAiReport = useCreateAiReport();
 
   const handleViewReport = () => {
-    if (numericTradeId === undefined) {
-      console.error('[AI Report] tradeId param missing, skipping create call');
-      return;
-    }
-    console.log('[AI Report] requesting create for tradeId', numericTradeId);
+    if (numericTradeId === undefined) return;
     createAiReport.mutate(numericTradeId, {
-      onSuccess: (result) => {
-        console.log('[AI Report] create succeeded', result);
+      onSuccess: () => {
         router.replace({ pathname: '/review/ai-report', params: { tradeId } });
-      },
-      onError: (err) => {
-        console.error('[AI Report] create failed', err);
       },
     });
   };

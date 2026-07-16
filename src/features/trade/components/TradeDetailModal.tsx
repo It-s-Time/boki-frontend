@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Alert,
   LayoutChangeEvent,
   Modal,
   Pressable,
@@ -12,6 +11,7 @@ import {
 import Feather from '@expo/vector-icons/Feather';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
+import ConfirmModal from '@/shared/components/ConfirmModal';
 import DateWheelPicker from '@/shared/components/DateWheelPicker';
 import { COIN_NAMES } from '@/features/trade/constants';
 import {
@@ -55,6 +55,7 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
   );
   const [price, setPrice] = useState(String(trade.price));
   const [totalAmount, setTotalAmount] = useState(String(trade.totalAmount));
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
 
   const updateTrade = useUpdateTrade();
   const deleteTrade = useDeleteTrade();
@@ -111,16 +112,11 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
     );
   };
 
-  const handleDelete = () => {
-    Alert.alert('거래 내역을 삭제할까요?', '삭제하면 되돌릴 수 없어요.', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () =>
-          deleteTrade.mutate(trade.tradeId, { onSuccess: handleClose }),
-      },
-    ]);
+  const handleDelete = () => setDeleteConfirmVisible(true);
+
+  const confirmDelete = () => {
+    setDeleteConfirmVisible(false);
+    deleteTrade.mutate(trade.tradeId, { onSuccess: handleClose });
   };
 
   const handleSheetLayout = (e: LayoutChangeEvent) => {
@@ -363,6 +359,16 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <ConfirmModal
+        visible={deleteConfirmVisible}
+        title="거래 내역을 삭제할까요?"
+        message="삭제하면 되돌릴 수 없어요."
+        cancelLabel="취소"
+        onCancel={() => setDeleteConfirmVisible(false)}
+        confirmLabel="삭제"
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

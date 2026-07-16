@@ -1,18 +1,11 @@
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
-import {
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
+import ConfirmModal from '@/shared/components/ConfirmModal';
 import { useAuthStore } from '@/store/authStore';
 import { logoutApi } from '@/api/auth';
 
@@ -93,41 +86,14 @@ export default function MyPageScreen() {
         />
       </ScrollView>
 
-      <Modal visible={confirmType !== null} transparent animationType="fade">
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-              {isWithdraw ? '정말 탈퇴하겠습니까?' : '정말 로그아웃 하겠습니까?'}
-            </Text>
-            <View style={styles.modalActions}>
-              <Pressable
-                style={isWithdraw ? styles.confirmButton : styles.cancelButton}
-                onPress={isWithdraw ? handleConfirm : closeModal}
-              >
-                <Text
-                  style={
-                    isWithdraw ? styles.confirmButtonText : styles.cancelButtonText
-                  }
-                >
-                  {isWithdraw ? '떠날래요' : '취소'}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={isWithdraw ? styles.cancelButton : styles.confirmButton}
-                onPress={isWithdraw ? closeModal : handleConfirm}
-              >
-                <Text
-                  style={
-                    isWithdraw ? styles.cancelButtonText : styles.confirmButtonText
-                  }
-                >
-                  {isWithdraw ? '더 써볼래요' : '로그아웃'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <ConfirmModal
+        visible={confirmType !== null}
+        title={isWithdraw ? '정말 탈퇴하겠습니까?' : '정말 로그아웃 하겠습니까?'}
+        cancelLabel={isWithdraw ? '더 써볼래요' : '취소'}
+        onCancel={closeModal}
+        confirmLabel={isWithdraw ? '떠날래요' : '로그아웃'}
+        onConfirm={handleConfirm}
+      />
     </SafeAreaView>
   );
 }
@@ -203,7 +169,7 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     paddingRight: 6,
     borderRadius: 19,
-    backgroundColor: '#F4F3F8',
+    backgroundColor: COLORS_NEW.lightPurpleGray,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -233,7 +199,7 @@ const styles = StyleSheet.create({
   menuItem: {
     height: 60,
     borderRadius: 16,
-    backgroundColor: '#F4F3F8',
+    backgroundColor: COLORS_NEW.lightPurpleGray,
     paddingLeft: 20,
     paddingRight: 8,
     marginBottom: 20,
@@ -253,62 +219,6 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
-    fontFamily: 'Pretendard-SemiBold',
-  },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.36)',
-  },
-  modalCard: {
-    borderRadius: 28,
-    backgroundColor: COLORS_NEW.background,
-    paddingHorizontal: 22,
-    paddingTop: 56,
-    paddingBottom: 22,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    color: COLORS_NEW.textPrimary,
-    fontSize: 20,
-    letterSpacing: -0.8,
-    lineHeight: 29,
-    fontFamily: 'Pretendard-SemiBold',
-    textAlign: 'center',
-  },
-  modalActions: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 44,
-  },
-  cancelButton: {
-    flex: 1,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#F4F3F8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  confirmButton: {
-    flex: 1,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: COLORS_NEW.textPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButtonText: {
-    color: COLORS_NEW.textPrimary,
-    fontSize: 17,
-    letterSpacing: -0.68,
-    fontFamily: 'Pretendard-SemiBold',
-  },
-  confirmButtonText: {
-    color: COLORS_NEW.background,
-    fontSize: 17,
-    letterSpacing: -0.68,
     fontFamily: 'Pretendard-SemiBold',
   },
 });

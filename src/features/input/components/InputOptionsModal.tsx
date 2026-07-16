@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import Feather from '@expo/vector-icons/Feather';
 import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import PrimaryButton from '@/shared/components/PrimaryButton';
@@ -30,9 +29,6 @@ export default function InputOptionsModal({
     >
       <View style={styles.header}>
         <Text style={styles.title}>어떻게 거래내역을 추가할까요?</Text>
-        {/* <View style={styles.headerIcon}>
-          <Feather name="calendar" size={20} color={COLORS_NEW.border} />
-        </View> */}
       </View>
 
       <View style={styles.optionGroup}>
@@ -91,16 +87,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 22,
     letterSpacing: -0.88,
-  },
-
-  headerIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: COLORS_NEW.lightBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   optionGroup: {

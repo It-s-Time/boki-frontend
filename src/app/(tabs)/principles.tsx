@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
+import { useWorstRules } from '@/features/review/hooks/useReview';
+import type { WorstRule } from '@/features/review/types';
 
 type PrincipleKey = 'short' | 'middle' | 'long';
 
@@ -24,33 +26,9 @@ type PrincipleGroup = {
   sell: string[];
 };
 
-type WeakPrinciple = {
-  id: string;
-  content: string;
-  complianceRate: number;
-};
-
 const SHORT_ICON = require('../../../assets/images/principle-short.png');
 const MIDDLE_ICON = require('../../../assets/images/principle-middle.png');
 const LONG_ICON = require('../../../assets/images/principle-long.png');
-
-const WEAK_PRINCIPLES: WeakPrinciple[] = [
-  {
-    id: 'chase-news',
-    content: '급등 뉴스나 이슈 터진 직후 추격 매수 안 하기',
-    complianceRate: 26,
-  },
-  {
-    id: 'asset-ratio',
-    content: '전체 자산의 일정 비율 이상은 코인에 안 넣기',
-    complianceRate: 40,
-  },
-  {
-    id: 'watch-surged',
-    content: '최근 급등한 코인은 일단 지켜보고 매수 보류하기',
-    complianceRate: 60,
-  },
-];
 
 const PRINCIPLE_GROUPS: PrincipleGroup[] = [
   {
@@ -105,6 +83,7 @@ const PRINCIPLE_GROUPS: PrincipleGroup[] = [
 
 export default function PrinciplesScreen() {
   const [expandedKey, setExpandedKey] = useState<PrincipleKey | null>(null);
+  const { data: worstRules } = useWorstRules();
 
   const toggleGroup = (key: PrincipleKey) => {
     setExpandedKey((current) => (current === key ? null : key));
@@ -121,7 +100,9 @@ export default function PrinciplesScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <WeakPrinciplesTopThree />
+        {worstRules && worstRules.length > 0 && (
+          <WeakPrinciplesTopThree rules={worstRules} />
+        )}
 
         {PRINCIPLE_GROUPS.map((group) => {
           const expanded = expandedKey === group.key;
@@ -144,34 +125,33 @@ export default function PrinciplesScreen() {
   );
 }
 
-function WeakPrinciplesTopThree() {
+function WeakPrinciplesTopThree({ rules }: { rules: WorstRule[] }) {
   return (
     <View style={styles.weakSection}>
       <Text style={styles.weakTitle}>못 지킨 Top 3를 신경 써주세요!</Text>
       <View style={styles.weakList}>
-        {WEAK_PRINCIPLES.map((principle, index) => (
-          <View key={principle.id} style={styles.weakItem}>
-            <View style={styles.weakHeaderRow}>
-              <View style={styles.weakNumber}>
-                <Text style={styles.weakNumberText}>{index + 1}</Text>
+        {rules.map((rule, index) => {
+          const percent = Math.round(rule.complianceRate);
+
+          return (
+            <View key={rule.content} style={styles.weakItem}>
+              <View style={styles.weakHeaderRow}>
+                <View style={styles.weakNumber}>
+                  <Text style={styles.weakNumberText}>{index + 1}</Text>
+                </View>
+                <Text style={styles.weakContent}>{rule.content}</Text>
               </View>
-              <Text style={styles.weakContent}>{principle.content}</Text>
-            </View>
-            <View style={styles.weakProgressRow}>
-              <View style={styles.weakProgressTrack}>
-                <View
-                  style={[
-                    styles.weakProgressFill,
-                    { width: `${principle.complianceRate}%` },
-                  ]}
-                />
+              <View style={styles.weakProgressRow}>
+                <View style={styles.weakProgressTrack}>
+                  <View
+                    style={[styles.weakProgressFill, { width: `${percent}%` }]}
+                  />
+                </View>
+                <Text style={styles.weakRate}>준수율 {percent}%</Text>
               </View>
-              <Text style={styles.weakRate}>
-                준수율 {principle.complianceRate}%
-              </Text>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
@@ -217,6 +197,7 @@ function PrincipleDetail({ group }: { group: PrincipleGroup }) {
   return (
     <View style={styles.detailCard}>
       <RuleSection title="매수" rules={group.buy} />
+      <View style={{ height: 30 }} />
       <RuleSection title="매도" rules={group.sell} />
     </View>
   );
@@ -224,7 +205,7 @@ function PrincipleDetail({ group }: { group: PrincipleGroup }) {
 
 function RuleSection({ title, rules }: { title: string; rules: string[] }) {
   return (
-    <View style={styles.ruleSection}>
+    <View>
       <Text style={styles.ruleSectionTitle}>{title}</Text>
       <View style={styles.ruleList}>
         {rules.map((rule, index) => (
@@ -263,17 +244,17 @@ const styles = StyleSheet.create({
   },
   weakTitle: {
     color: COLORS_NEW.textPrimary,
-    fontSize: 24,
+    fontSize: 22,
     letterSpacing: -0.96,
     lineHeight: 32,
-    fontFamily: 'Pretendard-SemiBold',
-    marginBottom: 19,
+    fontFamily: 'Pretendard-Medium',
+    marginBottom: 20,
   },
   weakList: {
-    gap: 26,
+    gap: 20,
   },
   weakItem: {
-    gap: 10,
+    gap: 8,
   },
   weakHeaderRow: {
     flexDirection: 'row',
@@ -315,7 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: COLORS_NEW.lightGray,
     overflow: 'hidden',
-    marginRight: 16,
+    marginRight: 8,
   },
   weakProgressFill: {
     height: '100%',
@@ -334,7 +315,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     minHeight: 94,
     borderRadius: 24,
-    backgroundColor: '#F4F3F8',
+    backgroundColor: COLORS_NEW.lightPurpleGray,
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginBottom: 20,
@@ -386,7 +367,7 @@ const styles = StyleSheet.create({
   },
   detailCard: {
     borderRadius: 24,
-    backgroundColor: '#F4F3F8',
+    backgroundColor: COLORS_NEW.lightPurpleGray,
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 24,

@@ -13,7 +13,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS_NEW } from '@/shared/constants/colors';
-import AddImage from '@/assets/icons/review/image-plus.svg';
 import type { ReviewImageAsset } from '../types';
 
 const MAX_PHOTOS = 3;
@@ -43,17 +42,6 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
       quality: 0.7,
     });
     if (!result.canceled) {
-      console.log(
-        '[ReviewMemo] picked photos',
-        result.assets.map((a) => ({
-          fileName: a.fileName,
-          mimeType: a.mimeType,
-          fileSize: a.fileSize,
-          width: a.width,
-          height: a.height,
-          uri: a.uri,
-        })),
-      );
       setPhotos((prev) =>
         [
           ...prev,
