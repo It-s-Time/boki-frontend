@@ -1,4 +1,3 @@
-import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -19,8 +18,9 @@ import {
   getExchangeApiKeyStatus,
   saveExchangeApiKey,
 } from '@/api/exchange';
-import { COLORS, COLORS_NEW } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
+import BackHeader from '@/shared/components/BackHeader';
 
 const API_IP_ADDRESS = '13.124.152.202';
 const DELETE_API_UNAVAILABLE_MESSAGE =
@@ -34,7 +34,7 @@ export default function ApiManagementScreen() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setApiConnected = useApiStore((s) => s.setApiConnected);
@@ -257,10 +257,7 @@ export default function ApiManagementScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={goToMypage}>
-            <Feather name="chevron-left" size={32} color={COLORS.textPrimary} />
-          </Pressable>
-          <Text style={styles.headerTitle}>업비트 API 관리</Text>
+          <BackHeader title="업비트 API 관리" onBack={goToMypage} />
         </View>
 
         <ScrollView
@@ -285,7 +282,7 @@ export default function ApiManagementScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             placeholder={focusedInput === 'access' ? '' : 'Access key 입력'}
-            placeholderTextColor={COLORS.textPrimary}
+            placeholderTextColor={COLORS_NEW.textPrimary}
             style={styles.input}
             textAlign="center"
             editable={!isRegistered && !isSubmitting}
@@ -300,7 +297,7 @@ export default function ApiManagementScreen() {
             autoCorrect={false}
             secureTextEntry
             placeholder={focusedInput === 'secret' ? '' : 'Secret key 입력'}
-            placeholderTextColor={COLORS.textPrimary}
+            placeholderTextColor={COLORS_NEW.textPrimary}
             style={styles.input}
             textAlign="center"
             editable={!isRegistered && !isSubmitting}
@@ -316,6 +313,10 @@ export default function ApiManagementScreen() {
           >
             <Text style={styles.registerText}>{buttonLabel}</Text>
           </Pressable>
+
+          {errorMessage !== '' && (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          )}
 
           <View style={styles.guideSection}>
             <Text style={styles.guideTitle}>업비트 API 연동 방법</Text>
@@ -336,33 +337,15 @@ export default function ApiManagementScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   flex: {
     flex: 1,
   },
   header: {
-    height: 94,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: COLORS_NEW.lightBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.box,
-  },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 22,
-    letterSpacing: -0.88,
-    fontFamily: 'Pretendard-Regular',
-    textAlign: 'center',
+    paddingHorizontal: 34,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   scroll: {
     flex: 1,
@@ -391,17 +374,17 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   copyText: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 15,
     letterSpacing: -0.6,
     lineHeight: 20,
     fontFamily: 'Pretendard-Regular',
   },
   ipLabel: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 28,
@@ -410,7 +393,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   ipValue: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 28,
     letterSpacing: -1.12,
     lineHeight: 36,
@@ -419,10 +402,10 @@ const styles = StyleSheet.create({
   input: {
     height: 66,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS_NEW.lightBorder,
     borderRadius: 25,
     backgroundColor: '#F4F3F8',
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 22,
     letterSpacing: -0.88,
     lineHeight: 30,
@@ -443,25 +426,35 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   registerText: {
-    color: COLORS.box,
+    color: COLORS_NEW.background,
     fontSize: 23,
     letterSpacing: -0.92,
     lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
+  },
+  errorText: {
+    color: COLORS_NEW.point,
+    fontSize: 14,
+    letterSpacing: -0.56,
+    lineHeight: 20,
+    fontFamily: 'Pretendard-Medium',
+    textAlign: 'center',
+    marginTop: -12,
+    marginBottom: 12,
   },
   guideSection: {
     gap: 12,
     marginTop: 16,
   },
   guideTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
     lineHeight: 32,
     fontFamily: 'Pretendard-SemiBold',
   },
   guideText: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 16,
     letterSpacing: -0.64,
     lineHeight: 32,

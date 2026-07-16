@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { router } from 'expo-router';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { BackHandler, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 
 const SUCCESS_IMAGE = require('../../../assets/images/api-success-check.png');
@@ -10,18 +10,34 @@ const SUCCESS_IMAGE = require('../../../assets/images/api-success-check.png');
 export default function ApiDeletedScreen() {
   const setApiConnected = useApiStore((s) => s.setApiConnected);
 
+  const goToApiManagement = useCallback(() => {
+    router.replace('/(tabs)/api-management');
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          goToApiManagement();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [goToApiManagement]),
+  );
+
   useEffect(() => {
     setApiConnected(false);
 
-    const timer = setTimeout(() => {
-      router.replace('/(tabs)/api-management');
-    }, 2000);
+    const timer = setTimeout(goToApiManagement, 2000);
 
     return () => clearTimeout(timer);
-  }, [setApiConnected]);
+  }, [setApiConnected, goToApiManagement]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
         <Image
           source={SUCCESS_IMAGE}
@@ -37,7 +53,7 @@ export default function ApiDeletedScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   container: {
     flex: 1,
@@ -51,7 +67,7 @@ const styles = StyleSheet.create({
     height: 180,
   },
   title: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
     fontSize: 23,

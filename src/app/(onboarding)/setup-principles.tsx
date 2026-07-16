@@ -11,6 +11,7 @@ import PrincipleTypeAccordion from '@/features/onboarding/components/PrincipleTy
 import PrincipleSetPreviewList from '@/features/onboarding/components/PrincipleSetPreviewList';
 import PrincipleReviewCarousel from '@/features/onboarding/components/PrincipleReviewCarousel';
 import FeedbackPreviewBox from '@/features/onboarding/components/FeedbackPreviewBox';
+import { markOnboardingSeen } from '@/features/onboarding/utils/onboardingStorage';
 
 const TOTAL_STEPS = 4;
 const SCREEN_HORIZONTAL_PADDING = 24;
@@ -26,11 +27,11 @@ export default function SetupPrinciplesScreen() {
       return;
     }
     setNavigating(true);
-    setTimeout(() => {
-      // TODO: point at '/(tabs)' once this flow runs after real login —
-      // for now there's no session yet, so it can't drop into the service.
-      router.replace('/(auth)/signup');
-    }, 3000);
+    markOnboardingSeen().then(() => {
+      setTimeout(() => {
+        router.replace('/(auth)/signup');
+      }, 3000);
+    });
   };
 
   const handleBack = () => {

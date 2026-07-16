@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackwardIcon from 'assets/icons/backward.svg';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { AiReport, Review } from '../types';
 import ReportSummaryCard from './ReportSummaryCard';
 
@@ -78,7 +79,7 @@ function MemoModal({
       <View style={styles.modalBackdrop}>
         <View style={styles.memoCard}>
           <Pressable style={styles.memoClose} onPress={onClose}>
-            <Feather name="x" size={30} color="#14151F" />
+            <Feather name="x" size={30} color={COLORS_NEW.textPrimary} />
           </Pressable>
           <Text style={styles.memoTitle}>메모</Text>
           <Text style={styles.memoText}>
@@ -105,10 +106,10 @@ function MemoModal({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS_NEW.background,
   },
   headerTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 23,
     letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
@@ -117,21 +118,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailHeader: {
-    height: 116,
+    height: 84,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 30,
   },
   headerCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: '#E9E9EC',
+    width: 52,
+    height: 52,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: COLORS_NEW.lightGray,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS_NEW.background,
   },
   memoHeaderIcon: {
     width: 16,
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
   },
   detailContent: {
     paddingHorizontal: 30,
+    paddingTop: 24,
     paddingBottom: 120,
   },
   modalBackdrop: {
@@ -150,7 +152,7 @@ const styles = StyleSheet.create({
   memoCard: {
     height: 610,
     borderRadius: 34,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS_NEW.background,
     paddingHorizontal: 20,
     paddingTop: 28,
     paddingBottom: 20,
@@ -159,18 +161,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 28,
     top: 28,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: '#E9E9EC',
+    width: 52,
+    height: 52,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: COLORS_NEW.lightGray,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS_NEW.background,
     zIndex: 2,
   },
   memoTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
     fontFamily: 'Pretendard-SemiBold',
@@ -179,7 +181,7 @@ const styles = StyleSheet.create({
     marginBottom: 46,
   },
   memoText: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 34,

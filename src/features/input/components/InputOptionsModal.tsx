@@ -59,7 +59,7 @@ export default function InputOptionsModal({
           disabled={isApiConnected}
           onPress={() => {
             onClose();
-            router.push('/api-key');
+            router.push('/(tabs)/api-management');
           }}
         >
           <View style={styles.iconWrapper}>

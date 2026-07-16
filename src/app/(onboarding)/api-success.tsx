@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { syncExchangeTrades } from '@/api/exchange';
 import { tradeKeys } from '@/features/trade/hooks/useTrades';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
 import { useApiStore } from '@/store/apiStore';
 
 const SUCCESS_IMAGE = require('../../../assets/images/api-success-check.png');
@@ -61,7 +61,7 @@ export default function ApiSuccessScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   container: {
     flex: 1,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     height: 180,
   },
   title: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontFamily: 'Pretendard-SemiBold',
     textAlign: 'center',
     fontSize: 23,

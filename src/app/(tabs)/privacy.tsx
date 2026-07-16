@@ -1,16 +1,9 @@
 import { router, useFocusEffect } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
 import { type ReactNode, useCallback } from 'react';
-import {
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
 
 export default function PrivacyScreen() {
   const goToMypage = useCallback(() => {
@@ -32,19 +25,16 @@ export default function PrivacyScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={goToMypage}>
-          <Feather name="chevron-left" size={32} color={COLORS.textPrimary} />
-        </Pressable>
-        <Text style={styles.headerTitle}>개인 정보 처리 방침</Text>
+        <BackHeader title="개인 정보 처리 방침" onBack={goToMypage} />
       </View>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.paragraph}>
-          잇심동체(이하 "회사")는 정보주체의 자유와 권리 보호를 위해
+          BOKI(이하 "회사")는 정보주체의 자유와 권리 보호를 위해
           개인정보 보호법 및 관계 법령이 정한 바를 준수하며, 적법하게
           개인정보를 처리하고 안전하게 관리하고 있습니다. 이에 개인정보 보호법
           제30조에 따라 정보주체에게 개인정보 처리에 관한 절차 및 기준을
@@ -104,30 +94,11 @@ function Paragraph({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   header: {
-    height: 116,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: '#EFEFEF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.box,
-  },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 23,
-    letterSpacing: -0.92,
-    fontFamily: 'Pretendard-Regular',
-    textAlign: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   content: {
     paddingHorizontal: 20,
@@ -139,14 +110,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   articleTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 22,
     letterSpacing: -0.88,
     fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   paragraph: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 18,
     letterSpacing: -0.72,
     lineHeight: 29,

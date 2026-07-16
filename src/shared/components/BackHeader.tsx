@@ -8,22 +8,34 @@ interface Props {
   title?: string;
   icon?: ReactNode;
   onBack?: () => void;
+  // Tab-root screens (일지/원칙/마이페이지) have nothing to go back to, but
+  // still want their title sitting at the exact same position as pushed
+  // screens' BackHeader — render this component without the button rather
+  // than re-implementing the same height/spacing elsewhere.
+  hideBackButton?: boolean;
 }
 
-export default function BackHeader({ title, icon, onBack }: Props) {
+export default function BackHeader({
+  title,
+  icon,
+  onBack,
+  hideBackButton,
+}: Props) {
   const router = useRouter();
 
   return (
     <View style={styles.header}>
-      <Pressable
-        onPress={onBack ?? (() => router.back())}
-        style={styles.backButton}
-        hitSlop={12}
-      >
-        {icon ?? (
-          <Ionicons name="chevron-back" size={24} color={COLORS_NEW.border} />
-        )}
-      </Pressable>
+      {!hideBackButton && (
+        <Pressable
+          onPress={onBack ?? (() => router.back())}
+          style={styles.backButton}
+          hitSlop={12}
+        >
+          {icon ?? (
+            <Ionicons name="chevron-back" size={24} color={COLORS_NEW.border} />
+          )}
+        </Pressable>
+      )}
       {title && <Text style={styles.title}>{title}</Text>}
     </View>
   );

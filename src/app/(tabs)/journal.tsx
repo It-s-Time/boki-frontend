@@ -8,9 +8,10 @@ import {
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, FeDropShadow, Filter, Path } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
 import { AiReport, Review, TradeGrade } from '@/features/review/types';
 import ReportDetail from '@/features/review/components/ReportDetail';
 
@@ -31,6 +32,10 @@ const FILTERS: GradeFilter[] = ['전체', 'S', 'A', 'B', 'C', 'F'];
 const CARD_HEIGHT = 112;
 const CARD_RADIUS = 18;
 const NOTCH_RADIUS = 10;
+// The SVG canvas needs extra room around the card shape so the drop-shadow
+// filter (which extends past the path's own bounds) doesn't get clipped at
+// the card's edges.
+const SHADOW_MARGIN = 24;
 const MEMO_CHART_IMAGE = require('../../../assets/icons/Rectangle 1430106783.png');
 const MEMO_COIN_IMAGE = require('../../../assets/icons/Rectangle 1430106784.png');
 
@@ -116,11 +121,11 @@ function buildMockReview(): Review {
 }
 
 const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
-  S: { bg: '#FFD23F', text: '#14151F' },
-  A: { bg: '#636366', text: '#FFFFFF' },
-  B: { bg: '#636366', text: '#FFFFFF' },
-  C: { bg: '#636366', text: '#FFFFFF' },
-  F: { bg: '#636366', text: '#FFFFFF' },
+  S: { bg: '#FFD23F', text: COLORS_NEW.textPrimary },
+  A: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
+  B: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
+  C: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
+  F: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
 };
 
 export default function JournalScreen() {
@@ -146,7 +151,9 @@ export default function JournalScreen() {
     return (
       <ReportDetail
         report={buildMockAiReport(selectedEntry)}
-        review={selectedEntry.coin === '비트코인' ? buildMockReview() : undefined}
+        review={
+          selectedEntry.coin === '비트코인' ? buildMockReview() : undefined
+        }
         onBack={() => setSelectedEntry(null)}
       />
     );
@@ -155,7 +162,7 @@ export default function JournalScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>일지</Text>
+        <BackHeader title="일지" hideBackButton />
       </View>
 
       <View style={styles.filterRow}>
@@ -173,10 +180,7 @@ export default function JournalScreen() {
               onPress={() => setSelectedFilter(filter)}
             >
               <Text
-                style={[
-                  styles.filterText,
-                  active && styles.filterTextActive,
-                ]}
+                style={[styles.filterText, active && styles.filterTextActive]}
               >
                 {filter}
               </Text>
@@ -255,9 +259,7 @@ function TicketCardBackground({ width }: { width: number }) {
     } ${notchCenterY - notchControl} ${width - notchRadius} ${notchCenterY}`,
     `C ${width - notchRadius} ${notchCenterY + notchControl} ${
       width - notchControl
-    } ${notchCenterY + notchRadius} ${width} ${
-      notchCenterY + notchRadius
-    }`,
+    } ${notchCenterY + notchRadius} ${width} ${notchCenterY + notchRadius}`,
     `V ${height - radius}`,
     `Q ${width} ${height} ${width - radius} ${height}`,
     `H ${radius}`,
@@ -277,11 +279,32 @@ function TicketCardBackground({ width }: { width: number }) {
   return (
     <Svg
       pointerEvents="none"
-      width={width}
-      height={height}
-      style={styles.cardBackground}
+      width={width + SHADOW_MARGIN * 2}
+      height={height + SHADOW_MARGIN * 2}
+      style={[
+        styles.cardBackground,
+        { left: -SHADOW_MARGIN, top: -SHADOW_MARGIN },
+      ]}
     >
-      <Path d={path} fill="#FFFFFF" stroke="#EFEFEF" strokeWidth={1} />
+      <Defs>
+        <Filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <FeDropShadow
+            dx={0}
+            dy={0}
+            stdDeviation={8}
+            floodColor="#000000"
+            floodOpacity={0.07}
+          />
+        </Filter>
+      </Defs>
+      <Path
+        d={path}
+        fill={COLORS_NEW.background}
+        stroke={COLORS_NEW.lightBorder}
+        strokeWidth={1}
+        filter="url(#cardShadow)"
+        transform={`translate(${SHADOW_MARGIN}, ${SHADOW_MARGIN})`}
+      />
     </Svg>
   );
 }
@@ -315,19 +338,12 @@ function GradeBadge({ grade }: { grade: TradeGrade }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS_NEW.background,
   },
   header: {
-    height: 98,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 26,
-  },
-  headerTitle: {
-    color: '#14151F',
-    fontSize: 23,
-    letterSpacing: -0.92,
-    fontFamily: 'Pretendard-Regular',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   filterRow: {
     flexDirection: 'row',
@@ -339,7 +355,7 @@ const styles = StyleSheet.create({
     minWidth: 54,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F2F2F5',
+    backgroundColor: COLORS_NEW.lightGray,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -350,10 +366,10 @@ const styles = StyleSheet.create({
     minWidth: 66,
   },
   filterChipActive: {
-    backgroundColor: '#272727',
+    backgroundColor: COLORS_NEW.fab,
   },
   filterText: {
-    color: '#5E5E61',
+    color: COLORS_NEW.textSecondary,
     fontSize: 16,
     letterSpacing: -0.64,
     lineHeight: 24,
@@ -361,7 +377,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filterTextActive: {
-    color: '#F2F2F5',
+    color: COLORS_NEW.lightGray,
   },
   scroll: {
     flex: 1,
@@ -374,7 +390,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   dateTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 30,
@@ -390,11 +406,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
   cardBackground: {
     position: 'absolute',
@@ -426,23 +437,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   gradeTextDark: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
   },
   tradeBadge: {
     height: 34,
     borderRadius: 17,
-    backgroundColor: '#F2F2F5',
+    backgroundColor: COLORS_NEW.lightGray,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
     paddingVertical: 0,
   },
   tradeText: {
-    color: '#5E5E61',
-    fontSize: 17,
+    color: COLORS_NEW.textSecondary,
+    fontSize: 16,
     letterSpacing: -0.68,
     lineHeight: 24,
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
   },
   cardBottomRow: {
     flexDirection: 'row',
@@ -452,14 +463,14 @@ const styles = StyleSheet.create({
   },
   coinText: {
     flex: 1,
-    color: '#14151F',
-    fontSize: 23,
+    color: COLORS_NEW.textPrimary,
+    fontSize: 20,
     letterSpacing: -0.92,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
   priceText: {
-    color: '#14151F',
-    fontSize: 17,
+    color: COLORS_NEW.textPrimary,
+    fontSize: 16,
     letterSpacing: -0.68,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',

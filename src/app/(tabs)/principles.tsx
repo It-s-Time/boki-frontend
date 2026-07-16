@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
 
 type PrincipleKey = 'short' | 'middle' | 'long';
 
@@ -112,7 +113,7 @@ export default function PrinciplesScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>원칙</Text>
+        <BackHeader title="원칙" hideBackButton />
       </View>
 
       <ScrollView
@@ -205,7 +206,7 @@ function PrincipleSummary({
         <Feather
           name={expanded ? 'chevron-down' : 'chevron-right'}
           size={28}
-          color={COLORS.textSecondary}
+          color={COLORS_NEW.textSecondary}
         />
       </View>
     </Pressable>
@@ -242,20 +243,11 @@ function RuleSection({ title, rules }: { title: string; rules: string[] }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   header: {
-    height: 92,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 24,
-  },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 23,
-    letterSpacing: -0.92,
-    fontFamily: 'Pretendard-Regular',
-    textAlign: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   scroll: {
     flex: 1,
@@ -270,7 +262,7 @@ const styles = StyleSheet.create({
     marginTop: -5,
   },
   weakTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
     lineHeight: 32,
@@ -291,13 +283,13 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: COLORS.textSecondary,
+    backgroundColor: COLORS_NEW.textSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
   },
   weakNumberText: {
-    color: COLORS.box,
+    color: COLORS_NEW.background,
     fontSize: 14,
     letterSpacing: -0.56,
     lineHeight: 21,
@@ -306,7 +298,7 @@ const styles = StyleSheet.create({
   },
   weakContent: {
     flex: 1,
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
     lineHeight: 26,
@@ -321,18 +313,18 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 13,
     borderRadius: 7,
-    backgroundColor: '#F2F2F5',
+    backgroundColor: COLORS_NEW.lightGray,
     overflow: 'hidden',
     marginRight: 16,
   },
   weakProgressFill: {
     height: '100%',
     borderRadius: 7,
-    backgroundColor: '#F79474',
+    backgroundColor: COLORS_NEW.point,
   },
   weakRate: {
     width: 86,
-    color: '#F79474',
+    color: COLORS_NEW.point,
     fontSize: 16,
     letterSpacing: -0.64,
     lineHeight: 24,
@@ -356,7 +348,7 @@ const styles = StyleSheet.create({
     width: 71,
     height: 71,
     borderRadius: 20,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -370,7 +362,7 @@ const styles = StyleSheet.create({
     marginLeft: 18,
   },
   summaryTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
@@ -378,7 +370,7 @@ const styles = StyleSheet.create({
   },
   summaryPeriod: {
     marginTop: 6,
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 16,
     letterSpacing: -0.64,
     fontFamily: 'Pretendard-Regular',
@@ -388,7 +380,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -404,7 +396,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   ruleSectionTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
@@ -423,20 +415,20 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: COLORS.textSecondary,
+    backgroundColor: COLORS_NEW.textSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
   },
   ruleNumberText: {
-    color: COLORS.box,
+    color: COLORS_NEW.background,
     fontSize: 12,
     letterSpacing: -0.48,
     fontFamily: 'Pretendard-SemiBold',
   },
   ruleText: {
     flex: 1,
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 17,
     letterSpacing: -0.68,
     fontFamily: 'Pretendard-Regular',

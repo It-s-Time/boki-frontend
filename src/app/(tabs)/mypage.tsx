@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
 import { useAuthStore } from '@/store/authStore';
 import { logoutApi } from '@/api/auth';
 
@@ -42,7 +43,7 @@ export default function MyPageScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>마이페이지</Text>
+        <BackHeader title="마이페이지" hideBackButton />
       </View>
 
       <ScrollView
@@ -61,7 +62,7 @@ export default function MyPageScreen() {
               <Feather
                 name="chevron-right"
                 size={16}
-                color={COLORS.textSecondary}
+                color={COLORS_NEW.textSecondary}
               />
             </View>
           </Pressable>
@@ -87,7 +88,7 @@ export default function MyPageScreen() {
         <MenuItem title="로그아웃" onPress={() => setConfirmType('logout')} />
         <MenuItem
           title="회원 탈퇴"
-          titleColor="#EE7A60"
+          titleColor={COLORS_NEW.reviewed}
           onPress={() => setConfirmType('withdraw')}
         />
       </ScrollView>
@@ -100,18 +101,26 @@ export default function MyPageScreen() {
             </Text>
             <View style={styles.modalActions}>
               <Pressable
-                style={styles.cancelButton}
+                style={isWithdraw ? styles.confirmButton : styles.cancelButton}
                 onPress={isWithdraw ? handleConfirm : closeModal}
               >
-                <Text style={styles.cancelButtonText}>
+                <Text
+                  style={
+                    isWithdraw ? styles.confirmButtonText : styles.cancelButtonText
+                  }
+                >
                   {isWithdraw ? '떠날래요' : '취소'}
                 </Text>
               </Pressable>
               <Pressable
-                style={styles.confirmButton}
+                style={isWithdraw ? styles.cancelButton : styles.confirmButton}
                 onPress={isWithdraw ? closeModal : handleConfirm}
               >
-                <Text style={styles.confirmButtonText}>
+                <Text
+                  style={
+                    isWithdraw ? styles.cancelButtonText : styles.confirmButtonText
+                  }
+                >
                   {isWithdraw ? '더 써볼래요' : '로그아웃'}
                 </Text>
               </Pressable>
@@ -129,7 +138,7 @@ function SectionTitle({ title }: { title: string }) {
 
 function MenuItem({
   title,
-  titleColor = COLORS.textPrimary,
+  titleColor = COLORS_NEW.textPrimary,
   onPress,
 }: {
   title: string;
@@ -140,7 +149,7 @@ function MenuItem({
     <Pressable style={styles.menuItem} onPress={onPress}>
       <Text style={[styles.menuTitle, { color: titleColor }]}>{title}</Text>
       <View style={styles.arrowButton}>
-        <Feather name="chevron-right" size={28} color={COLORS.textSecondary} />
+        <Feather name="chevron-right" size={28} color={COLORS_NEW.textSecondary} />
       </View>
     </Pressable>
   );
@@ -149,34 +158,11 @@ function MenuItem({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   header: {
-    height: 76,
     paddingHorizontal: 24,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 24,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.box,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 20,
-    letterSpacing: -0.8,
-    fontFamily: 'Pretendard-SemiBold',
-    textAlign: 'center',
+    paddingTop: 16,
   },
   scroll: {
     flex: 1,
@@ -195,7 +181,7 @@ const styles = StyleSheet.create({
     width: 136,
     height: 136,
     borderRadius: 24,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -206,7 +192,7 @@ const styles = StyleSheet.create({
     height: 136,
   },
   name: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     fontFamily: 'Pretendard-SemiBold',
@@ -226,12 +212,12 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   editText: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 14,
     letterSpacing: -0.56,
     fontFamily: 'Pretendard-Medium',
@@ -239,7 +225,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: 0,
     marginBottom: 14,
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
     fontFamily: 'Pretendard-Medium',
@@ -259,12 +245,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   menuTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
     fontFamily: 'Pretendard-SemiBold',
@@ -277,14 +263,14 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     borderRadius: 28,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
     paddingHorizontal: 22,
     paddingTop: 56,
     paddingBottom: 22,
     alignItems: 'center',
   },
   modalTitle: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 29,
@@ -309,18 +295,18 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 58,
     borderRadius: 29,
-    backgroundColor: COLORS.textPrimary,
+    backgroundColor: COLORS_NEW.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelButtonText: {
-    color: COLORS.textPrimary,
+    color: COLORS_NEW.textPrimary,
     fontSize: 17,
     letterSpacing: -0.68,
     fontFamily: 'Pretendard-SemiBold',
   },
   confirmButtonText: {
-    color: COLORS.box,
+    color: COLORS_NEW.background,
     fontSize: 17,
     letterSpacing: -0.68,
     fontFamily: 'Pretendard-SemiBold',

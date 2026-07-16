@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/store/authStore';
+import { hasSeenOnboarding } from '@/features/onboarding/utils/onboardingStorage';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import SymbolIntro from '@/shared/components/SymbolIntro';
 import Symbol from '../../assets/symbol.svg';
@@ -20,6 +21,7 @@ export default function Index() {
   const [isReady, setIsReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [animDone, setAnimDone] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const loadAuth = useAuthStore((state) => state.loadAuth);
   const accessToken = useAuthStore((state) => state.accessToken);
 
@@ -27,15 +29,23 @@ export default function Index() {
   const logoTextOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    loadAuth().then(() => setIsReady(true));
+    Promise.all([loadAuth(), hasSeenOnboarding()]).then(([, seen]) => {
+      setNeedsOnboarding(!seen);
+      setIsReady(true);
+    });
   }, []);
 
   // 스플래시(인트로 + 전환 애니메이션)는 인증 체크 결과와 무관하게 항상 재생하고,
   // 애니메이션과 인증 체크가 둘 다 끝난 뒤에만 목적지로 이동한다.
+  // 이 기기에서 온보딩을 아직 본 적이 없으면 로그인 여부와 무관하게 온보딩부터 보여준다.
   useEffect(() => {
     if (!animDone || !isReady) return;
+    if (needsOnboarding) {
+      router.replace('/(onboarding)/setup-principles');
+      return;
+    }
     router.replace(accessToken ? '/(tabs)' : '/(auth)/signup');
-  }, [animDone, isReady, accessToken]);
+  }, [animDone, isReady, needsOnboarding, accessToken]);
 
   useEffect(() => {
     if (!introDone) return;

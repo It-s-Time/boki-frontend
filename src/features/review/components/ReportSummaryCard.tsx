@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, FeDropShadow, Filter, Path } from 'react-native-svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { AiReport } from '../types';
 
@@ -8,6 +8,9 @@ const SCORE_HORIZONTAL = require('../../../../assets/icons/Frame 550.png');
 const SCORE_VERTICAL = require('../../../../assets/icons/Frame 549.png');
 const DETAIL_CARD_RADIUS = 24;
 const DETAIL_NOTCH_RADIUS = 14;
+// Extra canvas room so the drop-shadow filter isn't clipped at the card's
+// own edges — same trick as journal.tsx's TicketCardBackground.
+const DETAIL_SHADOW_MARGIN = 24;
 
 interface Props {
   report: AiReport;
@@ -134,11 +137,32 @@ function TicketDetailBackground({
   return (
     <Svg
       pointerEvents="none"
-      width={width}
-      height={height}
-      style={styles.detailCardBackground}
+      width={width + DETAIL_SHADOW_MARGIN * 2}
+      height={height + DETAIL_SHADOW_MARGIN * 2}
+      style={[
+        styles.detailCardBackground,
+        { left: -DETAIL_SHADOW_MARGIN, top: -DETAIL_SHADOW_MARGIN },
+      ]}
     >
-      <Path d={path} fill="#FFFFFF" stroke="#E9E9EC" strokeWidth={1} />
+      <Defs>
+        <Filter id="detailCardShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <FeDropShadow
+            dx={0}
+            dy={0}
+            stdDeviation={10}
+            floodColor="#000000"
+            floodOpacity={0.06}
+          />
+        </Filter>
+      </Defs>
+      <Path
+        d={path}
+        fill={COLORS_NEW.background}
+        stroke={COLORS_NEW.lightBorder}
+        strokeWidth={1}
+        filter="url(#detailCardShadow)"
+        transform={`translate(${DETAIL_SHADOW_MARGIN}, ${DETAIL_SHADOW_MARGIN})`}
+      />
     </Svg>
   );
 }
@@ -197,11 +221,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingHorizontal: 24,
     paddingBottom: 26,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
   },
   detailCardBackground: {
     position: 'absolute',
@@ -250,7 +269,7 @@ const styles = StyleSheet.create({
   scorePercent: {
     width: 45,
     height: 45,
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 35,
     letterSpacing: -1.4,
     lineHeight: 45,
@@ -258,7 +277,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   scoreUnit: {
-    color: '#5E5E61',
+    color: COLORS_NEW.textSecondary,
     fontSize: 17,
     letterSpacing: -0.68,
     fontFamily: 'Pretendard-Regular',
@@ -266,7 +285,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   rankText: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
     fontFamily: 'Pretendard-SemiBold',
@@ -289,9 +308,9 @@ const styles = StyleSheet.create({
   },
   tag: {
     borderWidth: 1,
-    borderColor: '#efefef',
+    borderColor: COLORS_NEW.lightBorder,
     borderRadius: 15,
-    backgroundColor: '#f2f2f5',
+    backgroundColor: COLORS_NEW.lightGray,
     paddingHorizontal: 15,
     paddingVertical: 3,
     alignItems: 'center',
@@ -302,7 +321,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.64,
     lineHeight: 24,
     fontFamily: 'Pretendard-Regular',
-    color: '#5e5e61',
+    color: COLORS_NEW.textSecondary,
     textAlign: 'center',
   },
   dashedLine: {
@@ -315,7 +334,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   reviewTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 21,
     letterSpacing: -0.84,
     fontFamily: 'Pretendard-SemiBold',
@@ -330,14 +349,14 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#636366',
+    backgroundColor: COLORS_NEW.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
     marginTop: 1,
   },
   reviewNumberText: {
-    color: '#F2F2F5',
+    color: COLORS_NEW.background,
     fontSize: 14,
     letterSpacing: -0.56,
     lineHeight: 21,
@@ -346,7 +365,7 @@ const styles = StyleSheet.create({
   },
   reviewText: {
     flex: 1,
-    color: '#5E5E61',
+    color: COLORS_NEW.textSecondary,
     fontSize: 17,
     letterSpacing: -0.68,
     lineHeight: 25,

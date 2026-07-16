@@ -1,16 +1,9 @@
 import { router, useFocusEffect } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
 import { type ReactNode, useCallback } from 'react';
-import {
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '@/shared/constants/colors';
+import { COLORS_NEW } from '@/shared/constants/colors';
+import BackHeader from '@/shared/components/BackHeader';
 
 export default function TermsScreen() {
   const goToMypage = useCallback(() => {
@@ -32,19 +25,16 @@ export default function TermsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={goToMypage}>
-          <Feather name="chevron-left" size={32} color={COLORS.textPrimary} />
-        </Pressable>
-        <Text style={styles.headerTitle}>서비스 이용 약관</Text>
+        <BackHeader title="서비스 이용 약관" onBack={goToMypage} />
       </View>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <Article title="제 1조 (목적)">
-          본 약관은 잇심동체(이하 "서비스")의 이용과 관련하여 회사와 회원
+          본 약관은 BOKI(이하 "서비스")의 이용과 관련하여 회사와 회원
           간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로
           합니다.
         </Article>
@@ -53,7 +43,7 @@ export default function TermsScreen() {
         </Article>
         <Paragraph>
           "서비스"란 구현 가능한 모든 단말기(PC, TV, 휴대형단말기 등)의 각종
-          유무선 장치를 포함)를 통하여 회원이 이용할 수 있는 잇심동체 관련 제반
+          유무선 장치를 포함)를 통하여 회원이 이용할 수 있는 BOKI 관련 제반
           서비스를 의미합니다.
         </Paragraph>
         <Paragraph>
@@ -107,30 +97,11 @@ function Paragraph({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.box,
+    backgroundColor: COLORS_NEW.background,
   },
   header: {
-    height: 116,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: '#EFEFEF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.box,
-  },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 23,
-    letterSpacing: -0.92,
-    fontFamily: 'Pretendard-Regular',
-    textAlign: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   content: {
     paddingHorizontal: 20,
@@ -141,14 +112,14 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   articleTitle: {
-    color: '#14151F',
+    color: COLORS_NEW.textPrimary,
     fontSize: 22,
     letterSpacing: -0.88,
     fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   paragraph: {
-    color: COLORS.textSecondary,
+    color: COLORS_NEW.textSecondary,
     fontSize: 18,
     letterSpacing: -0.72,
     lineHeight: 29,
