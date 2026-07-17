@@ -18,6 +18,15 @@ const SCORE_RAY_UNFILLED = '#252930';
 const SCORE_RAY_RADIUS = 72;
 const DETAIL_CARD_RADIUS = 24;
 const DETAIL_NOTCH_RADIUS = 14;
+type ReportGrade = NonNullable<AiReport['grade']>;
+
+const GRADE_PERCENT: Record<ReportGrade, number> = {
+  S: 100,
+  A: 80,
+  B: 60,
+  C: 40,
+  F: 10,
+};
 // Extra canvas room so the drop-shadow filter isn't clipped at the card's
 // own edges — same trick as journal.tsx's TicketCardBackground.
 const DETAIL_SHADOW_MARGIN = 24;
@@ -42,7 +51,8 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
   const [detailCardSize, setDetailCardSize] = useState({ width: 0, height: 0 });
   const [dividerY, setDividerY] = useState<number | null>(null);
 
-  const percent = Math.round(report.complianceRate ?? 0);
+  const grade = getReportGrade(report);
+  const percent = getReportPercent(report, grade);
   const hashtags = report.hashtags ?? [];
   const tagRows =
     hashtags.length === 0
@@ -75,7 +85,7 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
         )}
       <ScoreBurst percent={percent} />
       <Text style={styles.rankText}>
-        Rank <Text style={styles.rankGrade}>{report.grade ?? '-'}</Text>
+        Rank <Text style={styles.rankGrade}>{grade ?? '-'}</Text>
       </Text>
 
       <View style={styles.tagWrap}>
@@ -99,6 +109,38 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
       <ReviewSection title="아쉬운 점" items={badPoints} isLast />
     </View>
   );
+}
+
+function getReportGrade(report: AiReport): ReportGrade | null {
+  const directGrade = normalizeGrade(report.grade);
+
+  if (directGrade) {
+    return directGrade;
+  }
+
+  const gradeTag = report.hashtags?.find((tag) =>
+    /원칙|준수|랭크|등급|급|rank/i.test(tag),
+  );
+
+  return normalizeGrade(gradeTag);
+}
+
+function getReportPercent(report: AiReport, grade: ReportGrade | null) {
+  if (grade) {
+    return GRADE_PERCENT[grade];
+  }
+
+  return Math.round(report.complianceRate ?? 0);
+}
+
+function normalizeGrade(value: string | null | undefined): ReportGrade | null {
+  const grade = value?.trim().toUpperCase().match(/[SABCF]/)?.[0];
+
+  if (!grade || !(grade in GRADE_PERCENT)) {
+    return null;
+  }
+
+  return grade as ReportGrade;
 }
 
 function TicketDetailBackground({
@@ -286,7 +328,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   scorePercent: {
-    width: 45,
+    minWidth: 45,
     height: 45,
     color: COLORS_NEW.textPrimary,
     fontSize: 36,

@@ -11,7 +11,7 @@ export default function ApiDeletedScreen() {
   const setApiConnected = useApiStore((s) => s.setApiConnected);
 
   const goToApiManagement = useCallback(() => {
-    router.replace('/(tabs)/api-management');
+    router.replace('/(tabs)/mypage');
   }, []);
 
   useFocusEffect(
