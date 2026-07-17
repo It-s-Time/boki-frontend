@@ -20,7 +20,10 @@ export default function ReviewConfirmScreen() {
     if (numericTradeId === undefined) return;
     createAiReport.mutate(numericTradeId, {
       onSuccess: () => {
-        router.replace({ pathname: '/review/ai-report', params: { tradeId } });
+        router.replace({
+          pathname: '/review/ai-report',
+          params: { tradeId, origin: 'confirm' },
+        });
       },
     });
   };

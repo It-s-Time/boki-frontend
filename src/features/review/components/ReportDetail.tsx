@@ -1,21 +1,33 @@
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Image,
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import BackwardIcon from 'assets/icons/backward.svg';
+import MemoIcon from 'assets/icons/log2.svg';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { AiReport, Review } from '../types';
 import ReportSummaryCard from './ReportSummaryCard';
 
-const MEMO_ICON = require('../../../../assets/icons/_레이어_1.png');
+const HEADER_HEIGHT = 84;
+const CONTENT_HORIZONTAL_PADDING = 30;
+const CONTENT_TOP_PADDING = 12;
+const CONTENT_BOTTOM_PADDING = 24;
+// Floor so the shrink-to-fit never renders text illegibly small on a report
+// with an unusually long good/bad-points list.
+const MIN_CARD_SCALE = 0.6;
+const CARD_POP_SPRING = { bounciness: 12, speed: 14 };
 
 interface Props {
   report: AiReport;
@@ -25,6 +37,26 @@ interface Props {
 
 export default function ReportDetail({ report, review, onBack }: Props) {
   const [memoVisible, setMemoVisible] = useState(false);
+  const [naturalHeight, setNaturalHeight] = useState(0);
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+
+  const cardWidth = windowWidth - CONTENT_HORIZONTAL_PADDING * 2;
+  const availableHeight = Math.max(
+    windowHeight -
+      insets.top -
+      insets.bottom -
+      HEADER_HEIGHT -
+      CONTENT_TOP_PADDING -
+      CONTENT_BOTTOM_PADDING,
+    0,
+  );
+  // Only ever shrinks (capped at 1) — a report short enough to already fit
+  // renders at its natural size instead of being stretched up to fill space.
+  const scale =
+    naturalHeight > 0 && availableHeight > 0
+      ? Math.max(Math.min(availableHeight / naturalHeight, 1), MIN_CARD_SCALE)
+      : 0;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -37,17 +69,42 @@ export default function ReportDetail({ report, review, onBack }: Props) {
           style={styles.headerCircle}
           onPress={() => setMemoVisible(true)}
         >
-          <Image source={MEMO_ICON} style={styles.memoHeaderIcon} />
+          <MemoIcon width={16} height={22} />
         </Pressable>
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.detailContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <ReportSummaryCard report={report} />
-      </ScrollView>
+      <View style={styles.detailContent}>
+        {/* Off-screen copy purely to measure the card's natural height. */}
+        <View
+          style={[styles.measureWrap, { width: cardWidth }]}
+          pointerEvents="none"
+          onLayout={(event) =>
+            setNaturalHeight(event.nativeEvent.layout.height)
+          }
+        >
+          <ReportSummaryCard report={report} />
+        </View>
+
+        {scale > 0 && (
+          <View
+            style={{
+              width: cardWidth,
+              height: naturalHeight * scale,
+              alignItems: 'center',
+            }}
+          >
+            <View
+              style={{
+                width: cardWidth,
+                height: naturalHeight,
+                transform: [{ scale }],
+              }}
+            >
+              <ReportSummaryCard report={report} />
+            </View>
+          </View>
+        )}
+      </View>
 
       <MemoModal
         visible={memoVisible}
@@ -68,6 +125,18 @@ function MemoModal({
   onClose: () => void;
 }) {
   const imageUrls = review?.imageUrls ?? [];
+  const cardScale = useRef(new Animated.Value(0.85)).current;
+
+  useEffect(() => {
+    if (visible) {
+      cardScale.setValue(0.85);
+      Animated.spring(cardScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        ...CARD_POP_SPRING,
+      }).start();
+    }
+  }, [visible, cardScale]);
 
   return (
     <Modal
@@ -77,11 +146,16 @@ function MemoModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalBackdrop}>
-        <View style={styles.memoCard}>
-          <Pressable style={styles.memoClose} onPress={onClose}>
-            <Feather name="x" size={30} color={COLORS_NEW.textPrimary} />
-          </Pressable>
-          <Text style={styles.memoTitle}>메모</Text>
+        <Animated.View
+          style={[styles.memoCard, { transform: [{ scale: cardScale }] }]}
+        >
+          <View style={styles.memoHeader}>
+            <Pressable style={styles.memoClose} onPress={onClose}>
+              <Feather name="x" size={20} color={COLORS_NEW.textPrimary} />
+            </Pressable>
+            <Text style={styles.memoTitle}>메모</Text>
+            <View style={styles.memoHeaderSpacer} />
+          </View>
           <Text style={styles.memoText}>
             {review?.content || '작성된 메모가 없어요'}
           </Text>
@@ -97,7 +171,7 @@ function MemoModal({
               ))}
             </View>
           )}
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -114,11 +188,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.92,
     fontFamily: 'Pretendard-Regular',
   },
-  scroll: {
-    flex: 1,
-  },
   detailHeader: {
-    height: 84,
+    height: HEADER_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -134,14 +205,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS_NEW.background,
   },
-  memoHeaderIcon: {
-    width: 16,
-    height: 22,
-  },
   detailContent: {
-    paddingHorizontal: 30,
-    paddingTop: 24,
-    paddingBottom: 40,
+    flex: 1,
+    paddingHorizontal: CONTENT_HORIZONTAL_PADDING,
+    paddingTop: CONTENT_TOP_PADDING,
+    paddingBottom: CONTENT_BOTTOM_PADDING,
+    justifyContent: 'flex-start',
+  },
+  // Rendered off-screen at the real card width purely to measure its
+  // natural (unscaled) height via onLayout.
+  measureWrap: {
+    position: 'absolute',
+    left: -9999,
+    top: 0,
+    opacity: 0,
   },
   modalBackdrop: {
     flex: 1,
@@ -157,10 +234,13 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingBottom: 20,
   },
+  memoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 46,
+  },
   memoClose: {
-    position: 'absolute',
-    left: 28,
-    top: 28,
     width: 52,
     height: 52,
     borderRadius: 999,
@@ -169,16 +249,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS_NEW.background,
-    zIndex: 2,
   },
   memoTitle: {
     color: COLORS_NEW.textPrimary,
     fontSize: 24,
     letterSpacing: -0.96,
     fontFamily: 'Pretendard-SemiBold',
-    textAlign: 'center',
-    marginTop: 16,
-    marginBottom: 46,
+  },
+  memoHeaderSpacer: {
+    width: 52,
   },
   memoText: {
     color: COLORS_NEW.textPrimary,

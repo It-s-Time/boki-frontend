@@ -46,6 +46,9 @@ export const COLORS_NEW = {
   lightRed: '#FFE0DD', // 연한 빨강 (상승)
   lightBlue: '#D7E8FC', // 연한 파랑 (하강)
 
+  lightRedSoft: '#FFF0EE', // lightRed보다 더 연하게 (뱃지 배경용)
+  lightBlueSoft: '#EBF4FE', // lightBlue보다 더 연하게 (뱃지 배경용)
+
   buy: '#FF6E3F', // 매수
   sell: '#6580E4', // 매도
 

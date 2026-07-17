@@ -9,10 +9,21 @@ import { COIN_NAMES, getCoinSymbol } from '@/features/trade/constants';
 import TradeDetailModal from '@/features/trade/components/TradeDetailModal';
 import BitcoinIcon from '../../../../assets/icons/main/bitcoin.svg';
 import RippleIcon from '../../../../assets/icons/main/ripple.svg';
+import SolanaIcon from '../../../../assets/icons/main/solana.svg';
+import EthereumIcon from '../../../../assets/icons/main/ethereum.svg';
 
-const COIN_ICONS: Record<string, typeof BitcoinIcon> = {
-  BTC: BitcoinIcon,
-  XRP: RippleIcon,
+// bitcoin.svg/ripple.svg are cropped horizontal wordmark exports (48x10~13),
+// so they share one flat box. solana.svg/ethereum.svg are normal square-ish
+// logo marks and need their own size to avoid looking tiny/off-center inside
+// that shared box.
+const COIN_ICONS: Record<
+  string,
+  { Icon: typeof BitcoinIcon; width: number; height: number }
+> = {
+  BTC: { Icon: BitcoinIcon, width: 40, height: 16 },
+  XRP: { Icon: RippleIcon, width: 40, height: 16 },
+  SOL: { Icon: SolanaIcon, width: 62, height: 38 },
+  ETH: { Icon: EthereumIcon, width: 48, height: 33 },
 };
 
 type Props = {
@@ -65,7 +76,7 @@ export default function TradeCard({ trade }: Props) {
     });
   };
 
-  const Icon = COIN_ICONS[coinSymbol];
+  const coinIcon = COIN_ICONS[coinSymbol];
 
   return (
     <View style={styles.tradeCard}>
@@ -74,8 +85,8 @@ export default function TradeCard({ trade }: Props) {
         onPress={() => setDetailVisible(true)}
       >
         <View style={styles.iconBadge}>
-          {Icon ? (
-            <Icon width={40} height={16} />
+          {coinIcon ? (
+            <coinIcon.Icon width={coinIcon.width} height={coinIcon.height} />
           ) : (
             <Text style={styles.iconFallbackText}>{coinSymbol}</Text>
           )}

@@ -1,5 +1,5 @@
-import { ReactNode, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ReactNode, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import { keepWordsTogether } from '@/shared/utils/text';
@@ -69,19 +69,54 @@ const PRINCIPLE_GROUPS: PrincipleGroup[] = [
   },
 ];
 
+const EXPAND_DURATION = 260;
+const EXPAND_EASING = Easing.out(Easing.cubic);
+
 export default function PrincipleTypeAccordion() {
   const [expandedKey, setExpandedKey] = useState<PrincipleKey | null>(null);
+  const [naturalHeights, setNaturalHeights] = useState<
+    Partial<Record<PrincipleKey, number>>
+  >({});
+  const animatedHeights = useRef<Record<PrincipleKey, Animated.Value>>({
+    short: new Animated.Value(0),
+    middle: new Animated.Value(0),
+    long: new Animated.Value(0),
+  }).current;
+
+  const toggle = (key: PrincipleKey, targetHeight: number) => {
+    const willExpand = expandedKey !== key;
+
+    if (expandedKey && expandedKey !== key) {
+      Animated.timing(animatedHeights[expandedKey], {
+        toValue: 0,
+        duration: EXPAND_DURATION,
+        easing: EXPAND_EASING,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    Animated.timing(animatedHeights[key], {
+      toValue: willExpand ? targetHeight : 0,
+      duration: EXPAND_DURATION,
+      easing: EXPAND_EASING,
+      useNativeDriver: false,
+    }).start();
+
+    setExpandedKey(willExpand ? key : null);
+  };
 
   return (
     <>
       {PRINCIPLE_GROUPS.map((group) => {
         const isExpanded = expandedKey === group.key;
+        const dimmed = expandedKey !== null && !isExpanded;
+        const naturalHeight = naturalHeights[group.key] ?? 0;
 
         return (
           <View key={group.key}>
             <Pressable
-              style={styles.card}
-              onPress={() => setExpandedKey(isExpanded ? null : group.key)}
+              style={[styles.card, dimmed && styles.dimmedCard]}
+              onPress={() => toggle(group.key, naturalHeight)}
             >
               <View style={styles.iconCircle}>{group.icon}</View>
               <View style={styles.cardTextWrap}>
@@ -97,45 +132,73 @@ export default function PrincipleTypeAccordion() {
               </View>
             </Pressable>
 
-            {isExpanded && (
-              <View style={styles.detail}>
-                <Text style={styles.detailSectionTitle}>매수</Text>
-                {group.buy.map((line, i) => (
-                  <View key={i} style={styles.detailRow}>
-                    <View style={styles.detailIndexCircle}>
-                      <Text style={styles.detailIndexText}>{i + 1}</Text>
-                    </View>
-                    <Text
-                      style={styles.detailText}
-                      lineBreakStrategyIOS="hangul-word"
-                    >
-                      {keepWordsTogether(line)}
-                    </Text>
-                  </View>
-                ))}
+            {/* Off-screen copy purely to measure the detail's natural height. */}
+            <View
+              style={styles.measureWrap}
+              pointerEvents="none"
+              onLayout={(event) => {
+                const height = event.nativeEvent.layout.height;
+                setNaturalHeights((prev) =>
+                  prev[group.key] === height
+                    ? prev
+                    : { ...prev, [group.key]: height },
+                );
+              }}
+            >
+              <PrincipleDetail group={group} />
+            </View>
 
-                <View style={{ height: 16 }} />
-
-                <Text style={styles.detailSectionTitle}>매도</Text>
-                {group.sell.map((line, i) => (
-                  <View key={i} style={styles.detailRow}>
-                    <View style={styles.detailIndexCircle}>
-                      <Text style={styles.detailIndexText}>{i + 1}</Text>
-                    </View>
-                    <Text
-                      style={styles.detailText}
-                      lineBreakStrategyIOS="hangul-word"
-                    >
-                      {keepWordsTogether(line)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
+            <Animated.View
+              style={[
+                styles.detailClip,
+                {
+                  height: animatedHeights[group.key],
+                  marginBottom: animatedHeights[group.key].interpolate({
+                    inputRange: [0, Math.max(naturalHeight, 1)],
+                    outputRange: [0, 16],
+                    extrapolate: 'clamp',
+                  }),
+                },
+              ]}
+            >
+              <PrincipleDetail group={group} />
+            </Animated.View>
           </View>
         );
       })}
     </>
+  );
+}
+
+function PrincipleDetail({ group }: { group: PrincipleGroup }) {
+  return (
+    <View style={styles.detail}>
+      <Text style={styles.detailSectionTitle}>매수</Text>
+      {group.buy.map((line, i) => (
+        <View key={i} style={styles.detailRow}>
+          <View style={styles.detailIndexCircle}>
+            <Text style={styles.detailIndexText}>{i + 1}</Text>
+          </View>
+          <Text style={styles.detailText} lineBreakStrategyIOS="hangul-word">
+            {keepWordsTogether(line)}
+          </Text>
+        </View>
+      ))}
+
+      <View style={{ height: 16 }} />
+
+      <Text style={styles.detailSectionTitle}>매도</Text>
+      {group.sell.map((line, i) => (
+        <View key={i} style={styles.detailRow}>
+          <View style={styles.detailIndexCircle}>
+            <Text style={styles.detailIndexText}>{i + 1}</Text>
+          </View>
+          <Text style={styles.detailText} lineBreakStrategyIOS="hangul-word">
+            {keepWordsTogether(line)}
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -146,8 +209,11 @@ const styles = StyleSheet.create({
     gap: 16,
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
-    padding: 12,
+    padding: 10,
     marginBottom: 16,
+  },
+  dimmedCard: {
+    opacity: 0.42,
   },
   iconCircle: {
     width: 60,
@@ -171,21 +237,30 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: COLORS_NEW.textPrimary,
     fontFamily: 'Pretendard-Medium',
-    fontSize: 20,
+    fontSize: 18,
     letterSpacing: -0.8,
     marginBottom: 4,
   },
   cardSubtitle: {
     color: COLORS_NEW.border,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 16,
+    fontSize: 14,
     letterSpacing: -0.64,
+  },
+  measureWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    opacity: 0,
+  },
+  detailClip: {
+    overflow: 'hidden',
   },
   detail: {
     backgroundColor: COLORS_NEW.lightGray,
     borderRadius: 20,
     padding: 18,
-    marginBottom: 16,
   },
   detailSectionTitle: {
     color: COLORS_NEW.textPrimary,

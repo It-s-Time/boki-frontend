@@ -2,9 +2,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { LogBox, Text, TextInput } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // 개발 중 화면에 뜨는 빨간/노란 에러·경고 오버레이를 끈다.
-LogBox.ignoreAllLogs(true);
+// LogBox.ignoreAllLogs(true);
 
 // 기기의 시스템 글자 크기(접근성) 설정이 커도 고정 padding/height로 짜인
 // 레이아웃이 깨지지 않도록, 폰트 확대는 허용하되 배율 상한을 둔다.
@@ -33,20 +34,22 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack
-        screenOptions={{ headerShown: false }}
-        initialRouteName="index"
-      >
-        <Stack.Screen
-          name="(auth)/signup"
-          options={{ animation: 'fade', animationDuration: 500 }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{ animation: 'fade', animationDuration: 500 }}
-        />
-      </Stack>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <Stack
+          screenOptions={{ headerShown: false }}
+          initialRouteName="index"
+        >
+          <Stack.Screen
+            name="(auth)/signup"
+            options={{ animation: 'fade', animationDuration: 500 }}
+          />
+          <Stack.Screen
+            name="(tabs)"
+            options={{ animation: 'fade', animationDuration: 500 }}
+          />
+        </Stack>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

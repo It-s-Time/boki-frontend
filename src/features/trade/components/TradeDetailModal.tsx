@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BottomSheetModal from '@/shared/components/BottomSheetModal';
@@ -45,6 +46,7 @@ function formatDate(tradedAt: string) {
 }
 
 export default function TradeDetailModal({ visible, trade, onClose }: Props) {
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('view');
   const [sheetHeight, setSheetHeight] = useState(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -126,7 +128,11 @@ export default function TradeDetailModal({ visible, trade, onClose }: Props) {
 
   return (
     <>
-      <BottomSheetModal visible={visible} onClose={handleClose}>
+      <BottomSheetModal
+        visible={visible}
+        onClose={handleClose}
+        sheetStyle={{ paddingBottom: bottomInset + 24 }}
+      >
         <View onLayout={handleSheetLayout}>
           <View style={styles.header}>
             <Text style={styles.coinName}>{coinName}</Text>
@@ -407,7 +413,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Medium',
   },
   content: {
-    paddingBottom: 32,
     gap: 4,
   },
   detailRow: {

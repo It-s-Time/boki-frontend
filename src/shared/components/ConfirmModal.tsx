@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     letterSpacing: -0.8,
     lineHeight: 29,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
   },
   message: {
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     height: 58,
-    borderRadius: 29,
+    borderRadius: 20,
     backgroundColor: COLORS_NEW.lightPurpleGray,
     alignItems: 'center',
     justifyContent: 'center',
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   confirmButton: {
     flex: 1,
     height: 58,
-    borderRadius: 29,
+    borderRadius: 20,
     backgroundColor: COLORS_NEW.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontSize: 17,
     letterSpacing: -0.68,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
   confirmButtonText: {
     color: COLORS_NEW.background,
     fontSize: 17,
     letterSpacing: -0.68,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
 });

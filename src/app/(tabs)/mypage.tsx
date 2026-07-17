@@ -1,7 +1,14 @@
 import { router, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS_NEW } from '@/shared/constants/colors';
 import BackHeader from '@/shared/components/BackHeader';
@@ -133,7 +140,9 @@ export default function MyPageScreen() {
 
       <ConfirmModal
         visible={confirmType !== null}
-        title={isWithdraw ? '정말 탈퇴하겠습니까?' : '정말 로그아웃 하겠습니까?'}
+        title={
+          isWithdraw ? '정말 탈퇴하겠습니까?' : '정말 로그아웃 하겠습니까?'
+        }
         cancelLabel={isWithdraw ? '떠날래요' : '취소'}
         onCancel={isWithdraw ? handleConfirm : closeModal}
         confirmLabel={isWithdraw ? '더 써볼래요' : '로그아웃'}
@@ -160,7 +169,11 @@ function MenuItem({
     <Pressable style={styles.menuItem} onPress={onPress}>
       <Text style={[styles.menuTitle, { color: titleColor }]}>{title}</Text>
       <View style={styles.arrowButton}>
-        <Feather name="chevron-right" size={28} color={COLORS_NEW.textSecondary} />
+        <Feather
+          name="chevron-right"
+          size={26}
+          color={COLORS_NEW.textSecondary}
+        />
       </View>
     </Pressable>
   );
@@ -181,17 +194,17 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 4,
     paddingHorizontal: 24,
-    paddingBottom: 130,
+    paddingBottom: 140,
   },
   profile: {
     alignItems: 'center',
     paddingTop: 4,
-    paddingBottom: 36,
+    paddingBottom: 30,
   },
   avatarBox: {
-    width: 136,
-    height: 136,
-    borderRadius: 24,
+    width: 124,
+    height: 124,
+    borderRadius: 23,
     backgroundColor: COLORS_NEW.background,
     overflow: 'hidden',
     alignItems: 'center',
@@ -199,8 +212,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   avatar: {
-    width: 136,
-    height: 136,
+    width: 124,
+    height: 124,
   },
   name: {
     color: COLORS_NEW.textPrimary,
@@ -209,19 +222,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
   },
   editButton: {
-    marginTop: 14,
-    minHeight: 38,
+    marginTop: 12,
+    minHeight: 37,
     paddingLeft: 18,
     paddingRight: 6,
-    borderRadius: 19,
+    borderRadius: 18,
     backgroundColor: COLORS_NEW.lightPurpleGray,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
   editArrowButton: {
-    width: 26,
-    height: 26,
+    width: 25,
+    height: 25,
     borderRadius: 13,
     backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
@@ -235,27 +248,27 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginTop: 0,
-    marginBottom: 14,
+    marginBottom: 12,
     color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
     fontFamily: 'Pretendard-Medium',
   },
   menuItem: {
-    height: 60,
+    height: 56,
     borderRadius: 16,
     backgroundColor: COLORS_NEW.lightPurpleGray,
     paddingLeft: 20,
     paddingRight: 8,
-    marginBottom: 20,
+    marginBottom: 17,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   arrowButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 38,
+    height: 38,
+    borderRadius: 20,
     backgroundColor: COLORS_NEW.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -264,6 +277,6 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
     fontSize: 18,
     letterSpacing: -0.72,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
 });

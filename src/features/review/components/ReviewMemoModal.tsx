@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Image,
   Modal,
   Pressable,
@@ -16,6 +17,8 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 import type { ReviewImageAsset } from '../types';
 
 const MAX_PHOTOS = 3;
+const CARD_POP_SPRING = { bounciness: 12, speed: 14 };
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export interface ReviewMemo {
   content: string;
@@ -32,6 +35,18 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
   const [content, setContent] = useState('');
   const [photos, setPhotos] = useState<ReviewImageAsset[]>([]);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const cardScale = useRef(new Animated.Value(0.85)).current;
+
+  useEffect(() => {
+    if (visible) {
+      cardScale.setValue(0.85);
+      Animated.spring(cardScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        ...CARD_POP_SPRING,
+      }).start();
+    }
+  }, [visible, cardScale]);
 
   const handleAddPhoto = async () => {
     if (photos.length >= MAX_PHOTOS) return;
@@ -73,7 +88,10 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
       onRequestClose={onClose}
     >
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.card} onPress={() => {}}>
+        <AnimatedPressable
+          style={[styles.card, { transform: [{ scale: cardScale }] }]}
+          onPress={() => {}}
+        >
           <View style={styles.header}>
             <Pressable style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color={COLORS_NEW.border} />
@@ -138,7 +156,7 @@ export default function ReviewMemoModal({ visible, onClose, onSubmit }: Props) {
               </View>
             ))}
           </View>
-        </Pressable>
+        </AnimatedPressable>
       </Pressable>
 
       <Modal

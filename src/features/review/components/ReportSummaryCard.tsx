@@ -54,12 +54,6 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
   const grade = getReportGrade(report);
   const percent = getReportPercent(report, grade);
   const hashtags = report.hashtags ?? [];
-  const tagRows =
-    hashtags.length === 0
-      ? []
-      : hashtags.length > 3
-        ? [hashtags.slice(0, hashtags.length - 3), hashtags.slice(-3)]
-        : [hashtags];
   const goodPoints = report.goodPoints ?? [];
   const badPoints = report.badPoints ?? [];
 
@@ -89,13 +83,11 @@ export default function ReportSummaryCard({ report, bottomPadding }: Props) {
       </Text>
 
       <View style={styles.tagWrap}>
-        {tagRows.map((row, rowIndex) => (
-          <View key={`tag-row-${rowIndex}`} style={styles.tagRow}>
-            {row.map((tag) => (
-              <View key={tag} style={styles.tag}>
-                <Text style={styles.tagText}># {tag}</Text>
-              </View>
-            ))}
+        {hashtags.map((tag) => (
+          <View key={tag} style={styles.tag}>
+            <Text style={styles.tagText} numberOfLines={1} ellipsizeMode="tail">
+              # {tag}
+            </Text>
           </View>
         ))}
       </View>
@@ -126,11 +118,15 @@ function getReportGrade(report: AiReport): ReportGrade | null {
 }
 
 function getReportPercent(report: AiReport, grade: ReportGrade | null) {
+  if (report.complianceRate != null) {
+    return Math.round(report.complianceRate);
+  }
+
   if (grade) {
     return GRADE_PERCENT[grade];
   }
 
-  return Math.round(report.complianceRate ?? 0);
+  return 0;
 }
 
 function normalizeGrade(value: string | null | undefined): ReportGrade | null {
@@ -360,17 +356,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-Bold',
   },
   tagWrap: {
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 34,
-  },
-  tagRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
+    rowGap: 6,
     columnGap: 14,
+    marginBottom: 34,
   },
   tag: {
+    maxWidth: '100%',
     borderWidth: 1,
     borderColor: COLORS_NEW.lightBorder,
     borderRadius: 15,
@@ -381,6 +376,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tagText: {
+    flexShrink: 1,
     fontSize: 16,
     letterSpacing: -0.64,
     lineHeight: 24,

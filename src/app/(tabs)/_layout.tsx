@@ -1,6 +1,12 @@
 import { router, Tabs } from 'expo-router';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Animated, PanResponder, Pressable, View, StyleSheet } from 'react-native';
+import {
+  Animated,
+  PanResponder,
+  Pressable,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { type ComponentType, useEffect, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -33,7 +39,12 @@ interface TabIconConfig {
 
 const LEFT_TABS: TabIconConfig[] = [
   { name: 'index', Icon: HomeIcon, width: ICON_SIZE, height: ICON_SIZE },
-  { name: 'journal', Icon: LogIcon, width: ICON_SIZE * 0.75, height: ICON_SIZE },
+  {
+    name: 'journal',
+    Icon: LogIcon,
+    width: ICON_SIZE * 0.75,
+    height: ICON_SIZE,
+  },
 ];
 
 const RIGHT_TABS: TabIconConfig[] = [
@@ -181,7 +192,10 @@ function TabPill({
         if (!Number.isFinite(x)) return;
 
         highlightX.setValue(
-          Math.min(width - HIGHLIGHT_WIDTH, Math.max(0, x - HIGHLIGHT_WIDTH / 2)),
+          Math.min(
+            width - HIGHLIGHT_WIDTH,
+            Math.max(0, x - HIGHLIGHT_WIDTH / 2),
+          ),
         );
         const idx = indexFromX(x, width);
         if (idx !== activeIndex.current) {
@@ -263,7 +277,7 @@ function CustomTabBar({
             {isApiConnected ? (
               <MaterialIcons name="refresh" size={24} color="#FFFFFF" />
             ) : (
-              <AddIcon width={18} height={18} color="#FFFFFF" />
+              <AddIcon width={18} height={18} />
             )}
           </View>
         </Pressable>
@@ -295,7 +309,10 @@ export default function TabLayout() {
     syncTrades.mutate(undefined, {
       onSuccess: (data) => {
         if (!data.isSuccess) {
-          setSyncAlert({ title: '거래 내역 가져오기 실패', message: data.message });
+          setSyncAlert({
+            title: '거래 내역 가져오기 실패',
+            message: data.message,
+          });
           return;
         }
 

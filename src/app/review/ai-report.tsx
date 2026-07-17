@@ -9,8 +9,22 @@ import { COLORS_NEW } from '@/shared/constants/colors';
 
 export default function AiReportScreen() {
   const router = useRouter();
-  const { tradeId } = useLocalSearchParams<{ tradeId: string }>();
+  const { tradeId, origin } = useLocalSearchParams<{
+    tradeId: string;
+    origin?: string;
+  }>();
   const numericTradeId = tradeId ? Number(tradeId) : undefined;
+
+  // Reached from journal/home to view an already-graded trade — pop back so
+  // the caller's own state (e.g. journal's grade filter) is preserved.
+  // Reached from the "복기 확인" confirm screen right after finishing a
+  // review, though, that screen already replaced itself in history (see
+  // confirm.tsx), so there's nothing meaningful to pop back to — land on
+  // the journal list instead, same as confirm.tsx's own back button does.
+  const handleBack =
+    origin === 'confirm'
+      ? () => router.replace('/(tabs)/journal')
+      : () => router.back();
 
   const { data: report, isLoading, isError } = useAiReport(numericTradeId);
   const { data: review } = useReview(numericTradeId);
@@ -38,13 +52,7 @@ export default function AiReportScreen() {
     );
   }
 
-  return (
-    <ReportDetail
-      report={report}
-      review={review}
-      onBack={() => router.replace('/(tabs)/journal')}
-    />
-  );
+  return <ReportDetail report={report} review={review} onBack={handleBack} />;
 }
 
 const styles = StyleSheet.create({

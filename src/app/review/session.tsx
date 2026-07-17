@@ -13,12 +13,22 @@ import BackHeader from '@/shared/components/BackHeader';
 import PrimaryButton from '@/shared/components/PrimaryButton';
 import LoadingScreen from '@/shared/components/LoadingScreen';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  View,
+  Text,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ILLUSTRATION_HEIGHT = 240;
 const ILLUSTRATION_MAX_WIDTH = 300;
+const CONTAINER_HORIZONTAL_PADDING = 24;
+const SLIDE_OUT_DURATION = 180;
+const SLIDE_SPRING = { bounciness: 6, speed: 12 };
 
 export default function ReviewSessionScreen() {
   const router = useRouter();
@@ -53,6 +63,11 @@ export default function ReviewSessionScreen() {
 
   const createReview = useCreateReview();
 
+  const { width: windowWidth } = useWindowDimensions();
+  const slideDistance = windowWidth - CONTAINER_HORIZONTAL_PADDING * 2;
+  const contentSlideX = useRef(new Animated.Value(0)).current;
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMemoModal, setShowMemoModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,13 +92,40 @@ export default function ReviewSessionScreen() {
     );
   };
 
+  const animateTransition = (
+    direction: 1 | -1,
+    applyIndexChange: () => void,
+  ) => {
+    setIsTransitioning(true);
+    Animated.timing(contentSlideX, {
+      toValue: -direction * slideDistance,
+      duration: SLIDE_OUT_DURATION,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (!finished) {
+        setIsTransitioning(false);
+        return;
+      }
+      applyIndexChange();
+      contentSlideX.setValue(direction * slideDistance);
+      Animated.spring(contentSlideX, {
+        toValue: 0,
+        useNativeDriver: true,
+        ...SLIDE_SPRING,
+      }).start(({ finished: settled }) => {
+        if (settled) setIsTransitioning(false);
+      });
+    });
+  };
+
   const handleNext = () => {
-    if (!isNextEnabled) return;
+    if (isTransitioning || !isNextEnabled) return;
     if (isLast) {
       setShowMemoModal(true);
       return;
     }
-    setCurrentIndex((i) => i + 1);
+    animateTransition(1, () => setCurrentIndex((i) => i + 1));
   };
 
   const handleMemoSubmit = (memo: ReviewMemo) => {
@@ -119,8 +161,9 @@ export default function ReviewSessionScreen() {
   };
 
   const handleBack = () => {
+    if (isTransitioning) return;
     if (currentIndex > 0) {
-      setCurrentIndex((i) => i - 1);
+      animateTransition(-1, () => setCurrentIndex((i) => i - 1));
     } else {
       router.back();
     }
@@ -154,27 +197,36 @@ export default function ReviewSessionScreen() {
         <ProgressBar total={total} current={currentIndex} />
       </View>
 
-      <View style={styles.principleContentWrap}>
-        <Text
-          style={styles.principleContent}
-          lineBreakStrategyIOS="hangul-word"
+      <View style={styles.principleContentClip}>
+        <Animated.View
+          pointerEvents={isTransitioning ? 'none' : 'auto'}
+          style={[
+            styles.principleContentWrap,
+            { transform: [{ translateX: contentSlideX }] },
+          ]}
         >
-          {keepWordsTogether(currentPrinciple.content)}
-        </Text>
+          <Text
+            style={styles.principleContent}
+            lineBreakStrategyIOS="hangul-word"
+          >
+            {keepWordsTogether(currentPrinciple.content)}
+          </Text>
 
-        <View style={styles.illustrationArea}>
-          {illustration && (
-            <illustration.Icon
-              width={illustration.width * illustrationScale}
-              height={illustration.height * illustrationScale}
-            />
-          )}
-        </View>
+          <View style={styles.illustrationArea}>
+            {illustration && (
+              <illustration.Icon
+                width={illustration.width * illustrationScale}
+                height={illustration.height * illustrationScale}
+              />
+            )}
+          </View>
 
-        <ScoreSelector
-          value={currentAnswer.score}
-          onChange={(n) => updateAnswer({ score: n })}
-        />
+          <ScoreSelector
+            value={currentAnswer.score}
+            onChange={(n) => updateAnswer({ score: n })}
+            principleKey={currentPrinciple.id}
+          />
+        </Animated.View>
       </View>
 
       {createReview.isError && (
@@ -186,7 +238,7 @@ export default function ReviewSessionScreen() {
       <PrimaryButton
         label={isLast ? '완료' : '다음'}
         onPress={handleNext}
-        disabled={!isNextEnabled}
+        disabled={!isNextEnabled || isTransitioning}
         style={styles.button}
       />
 
@@ -210,6 +262,11 @@ const styles = StyleSheet.create({
 
   progressWrap: {
     marginTop: 20,
+  },
+
+  principleContentClip: {
+    flex: 1,
+    overflow: 'hidden',
   },
 
   principleContentWrap: {

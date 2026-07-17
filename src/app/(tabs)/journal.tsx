@@ -1,5 +1,13 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, FeDropShadow, Filter, Path } from 'react-native-svg';
@@ -31,12 +39,15 @@ function formatDate(tradedAt: string) {
   return `${date.getFullYear()}년 ${month}월 ${day}일`;
 }
 
+// S만 금색 그라데이션으로 확실히 튀게 하고, 나머지는 브랜드 팔레트 안에서
+// 좋음(point 코랄) → 무난함(회색, 옅어질수록 낮은 등급) → 안 좋음(탁한 브릭
+// 레드)으로 조용히 단계를 나눈다.
 const GRADE_COLORS: Record<TradeGrade, { bg: string; text: string }> = {
   S: { bg: '#FFD23F', text: COLORS_NEW.textPrimary },
-  A: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
-  B: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
-  C: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
-  F: { bg: COLORS_NEW.border, text: COLORS_NEW.background },
+  A: { bg: COLORS_NEW.point, text: '#fff' },
+  B: { bg: COLORS_NEW.textSecondary, text: COLORS_NEW.background },
+  C: { bg: '#D9D9DD', text: COLORS_NEW.textSecondary },
+  F: { bg: '#B5654A', text: COLORS_NEW.background },
 };
 
 export default function JournalScreen() {
@@ -51,7 +62,10 @@ export default function JournalScreen() {
   } = useTradeList({ reviewStatus: 'COMPLETED' });
 
   const gradedTrades = useMemo<GradedTrade[]>(
-    () => (trades ?? []).filter((trade): trade is GradedTrade => trade.grade !== null),
+    () =>
+      (trades ?? []).filter(
+        (trade): trade is GradedTrade => trade.grade !== null,
+      ),
     [trades],
   );
 
@@ -105,42 +119,50 @@ export default function JournalScreen() {
         })}
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {isLoading ? (
-          <View style={styles.stateContainer}>
-            <SymbolSpinner size={40} />
-          </View>
-        ) : isError ? (
-          <Pressable onPress={() => refetch()}>
-            <Text style={styles.stateText}>
-              불러오지 못했어요, 다시 시도해주세요
-            </Text>
-          </Pressable>
-        ) : Object.keys(groupedEntries).length === 0 ? (
-          <Text style={styles.stateText}>
-            {selectedFilter === '전체'
-              ? '아직 복기를 완료한 거래가 없어요'
-              : '해당 등급의 거래가 없어요'}
-          </Text>
-        ) : (
-          Object.entries(groupedEntries).map(([date, trades]) => (
-            <View key={date} style={styles.dateSection}>
-              <Text style={styles.dateTitle}>{date}</Text>
-              {trades.map((trade) => (
-                <JournalCard
-                  key={trade.tradeId}
-                  trade={trade}
-                  onPress={() => openReport(trade.tradeId)}
-                />
-              ))}
+      <View style={styles.scrollWrap}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {isLoading ? (
+            <View style={styles.stateContainer}>
+              <SymbolSpinner size={40} />
             </View>
-          ))
-        )}
-      </ScrollView>
+          ) : isError ? (
+            <Pressable onPress={() => refetch()}>
+              <Text style={styles.stateText}>
+                불러오지 못했어요, 다시 시도해주세요
+              </Text>
+            </Pressable>
+          ) : Object.keys(groupedEntries).length === 0 ? (
+            <Text style={styles.stateText}>
+              {selectedFilter === '전체'
+                ? '아직 복기를 완료한 거래가 없어요'
+                : '해당 등급의 거래가 없어요'}
+            </Text>
+          ) : (
+            Object.entries(groupedEntries).map(([date, trades]) => (
+              <View key={date} style={styles.dateSection}>
+                <Text style={styles.dateTitle}>{date}</Text>
+                {trades.map((trade) => (
+                  <JournalCard
+                    key={trade.tradeId}
+                    trade={trade}
+                    onPress={() => openReport(trade.tradeId)}
+                  />
+                ))}
+              </View>
+            ))
+          )}
+        </ScrollView>
+
+        <LinearGradient
+          pointerEvents="none"
+          colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
+          style={styles.scrollFadeTop}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -166,8 +188,30 @@ function JournalCard({
       {cardWidth > 0 && <TicketCardBackground width={cardWidth} />}
       <View style={styles.cardTopRow}>
         <GradeBadge grade={trade.grade} />
-        <View style={styles.tradeBadge}>
-          <Text style={styles.tradeText}>{typeText}</Text>
+        <View
+          style={[
+            styles.tradeBadge,
+            {
+              backgroundColor:
+                trade.tradeType === 'BUY'
+                  ? COLORS_NEW.lightRedSoft
+                  : COLORS_NEW.lightBlueSoft,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.tradeText,
+              {
+                color:
+                  trade.tradeType === 'BUY'
+                    ? COLORS_NEW.upStrong
+                    : COLORS_NEW.downStrong,
+              },
+            ]}
+          >
+            {typeText}
+          </Text>
         </View>
       </View>
       <View style={styles.cardBottomRow}>
@@ -258,6 +302,7 @@ function GradeBadge({ grade }: { grade: TradeGrade }) {
         style={styles.gradeBadge}
       >
         <Text style={[styles.gradeText, styles.gradeTextDark]}>{grade}</Text>
+        <ShineSweep />
       </LinearGradient>
     );
   }
@@ -270,6 +315,57 @@ function GradeBadge({ grade }: { grade: TradeGrade }) {
         {grade}
       </Text>
     </View>
+  );
+}
+
+const SHINE_TRAVEL = 60;
+
+// S등급 뱃지 위로 주기적으로 대각선 빛줄기가 스치듯 지나가는 반짝임 효과.
+// translateX만 움직이는 transform 애니메이션이라 native driver를 그대로 태운다.
+function ShineSweep() {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(1600),
+        Animated.timing(progress, {
+          toValue: 1,
+          duration: 750,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(progress, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [progress]);
+
+  const translateX = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-SHINE_TRAVEL, SHINE_TRAVEL],
+  });
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.shineWrap,
+        { transform: [{ translateX }, { rotate: '20deg' }] },
+      ]}
+    >
+      <LinearGradient
+        colors={['transparent', 'rgba(255,255,255,0.85)', 'transparent']}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={styles.shineBar}
+      />
+    </Animated.View>
   );
 }
 
@@ -317,11 +413,22 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: COLORS_NEW.lightGray,
   },
+  scrollWrap: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
   },
+  scrollFadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 20,
+  },
   listContent: {
     paddingHorizontal: 30,
+    paddingTop: 20,
     paddingBottom: 120,
   },
   stateContainer: {
@@ -341,7 +448,7 @@ const styles = StyleSheet.create({
   },
   dateTitle: {
     color: COLORS_NEW.textPrimary,
-    fontSize: 20,
+    fontSize: 18,
     letterSpacing: -0.8,
     lineHeight: 30,
     fontFamily: 'Pretendard-Regular',
@@ -370,19 +477,29 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   gradeBadge: {
-    minWidth: 34,
-    height: 34,
-    borderRadius: 17,
+    minWidth: 28.9,
+    height: 28.9,
+    borderRadius: 14.45,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10.2,
     paddingVertical: 0,
   },
+  shineWrap: {
+    position: 'absolute',
+    top: -20,
+    bottom: -20,
+    left: -10,
+    width: 14,
+  },
+  shineBar: {
+    flex: 1,
+  },
   gradeText: {
-    fontSize: 17,
-    letterSpacing: -0.68,
-    lineHeight: 24,
+    fontSize: 14.45,
+    letterSpacing: -0.578,
+    lineHeight: 20.4,
     fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
   },
@@ -390,19 +507,17 @@ const styles = StyleSheet.create({
     color: COLORS_NEW.textPrimary,
   },
   tradeBadge: {
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: COLORS_NEW.lightGray,
+    height: 28.9,
+    borderRadius: 14.45,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10.2,
     paddingVertical: 0,
   },
   tradeText: {
-    color: COLORS_NEW.textSecondary,
-    fontSize: 16,
-    letterSpacing: -0.68,
-    lineHeight: 24,
+    fontSize: 13.6,
+    letterSpacing: -0.578,
+    lineHeight: 20.4,
     fontFamily: 'Pretendard-Medium',
   },
   cardBottomRow: {
