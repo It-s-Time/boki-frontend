@@ -134,10 +134,10 @@ export default function MyPageScreen() {
       <ConfirmModal
         visible={confirmType !== null}
         title={isWithdraw ? '정말 탈퇴하겠습니까?' : '정말 로그아웃 하겠습니까?'}
-        cancelLabel={isWithdraw ? '더 써볼래요' : '취소'}
-        onCancel={closeModal}
-        confirmLabel={isWithdraw ? '떠날래요' : '로그아웃'}
-        onConfirm={handleConfirm}
+        cancelLabel={isWithdraw ? '떠날래요' : '취소'}
+        onCancel={isWithdraw ? handleConfirm : closeModal}
+        confirmLabel={isWithdraw ? '더 써볼래요' : '로그아웃'}
+        onConfirm={isWithdraw ? closeModal : handleConfirm}
       />
     </SafeAreaView>
   );

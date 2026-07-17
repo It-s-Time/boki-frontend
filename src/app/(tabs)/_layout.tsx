@@ -339,14 +339,22 @@ export default function TabLayout() {
       <Tabs
         initialRouteName="index"
         screenOptions={{ headerShown: false }}
-        tabBar={(props) => (
-          <CustomTabBar
-            {...props}
-            onFabPress={handleFabPress}
-            isApiConnected={isApiConnected}
-            isSyncing={syncTrades.isPending}
-          />
-        )}
+        tabBar={(props) => {
+          const activeRouteName = props.state.routes[props.state.index]?.name;
+
+          if (activeRouteName === 'api-deleted') {
+            return null;
+          }
+
+          return (
+            <CustomTabBar
+              {...props}
+              onFabPress={handleFabPress}
+              isApiConnected={isApiConnected}
+              isSyncing={syncTrades.isPending}
+            />
+          );
+        }}
       >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="journal" />
